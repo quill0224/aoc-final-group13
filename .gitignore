@@ -1,0 +1,96 @@
+# =============================================================
+# AOC Final Project (Group 13) — .gitignore
+# =============================================================
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# --- Editors / IDEs ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.history/
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+.ipynb_checkpoints/
+
+# --- Jupyter ---
+*-checkpoint.ipynb
+
+# --- Verilog / EDA / Vivado / Quartus / Verilator ---
+*.vcd
+*.fst
+*.wlf
+*.jou
+work/
+xsim.dir/
+.Xil/
+transcript
+*.bak
+*.qws
+db/
+incremental_db/
+output_files/
+simulation/
+*.qpf.bak
+*.qsf.bak
+.Xil/
+xvlog.pb
+xelab.pb
+xsim.pb
+
+# --- Build / Sim outputs ---
+build/
+out/
+dist/
+*.o
+*.a
+*.so
+*.exe
+*.elf
+*.bin
+
+# --- Logs / temporary trace files ---
+*.log
+*.dump
+*.trace
+log/
+logs/
+
+# --- Large datasets / model weights (whitelist via Git LFS or external link) ---
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.onnx
+data/raw/
+data/processed/
+
+# --- Docker / Container leftovers ---
+.docker_volumes/
+
+# --- Course / Lab simulation artifacts ---
+lab_outputs/
+*.dump
+*.trace
