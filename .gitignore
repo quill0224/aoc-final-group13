@@ -98,3 +98,5 @@ lab_outputs/
 # --- Analysis results (timestamped, regenerated each run) ---
 analysis/results/*/
 !analysis/results/.gitkeep
+# Allow committed snapshots (canonical reference runs)
+!analysis/results/baseline/
