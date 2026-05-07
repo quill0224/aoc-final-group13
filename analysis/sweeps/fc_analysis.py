@@ -64,16 +64,21 @@ VGG8_FC_LAYERS = [
 def tiles_required(layer: FCLayer, glb_bytes: int, dtype_bytes: int = 1) -> dict:
     """Estimate weight-streaming cost for one inference of `layer`.
 
-    Strategy: output-stationary, weight streaming.
-    A tile = one chunk of weights that fits in GLB along with input + output
-    activations.
+    Strategy: output-stationary, weight streaming. One tile = one chunk of
+    weights co-resident in GLB with the (single) input activation vector,
+    bias, and partial-sum buffer.
 
-    Simple model (overhead-free): if the entire weight matrix fits in GLB
-    after reserving room for input + bias + output, no streaming is needed
-    (1 tile). Otherwise approximate tiles = ceil(weight_bytes / glb_avail).
+    GLB budget (INT8 weights + activations, INT32 accumulators):
+        ifmap (INT8)  : in_features  * 1 byte
+        bias  (INT32) : out_features * 4 bytes
+        psum  (INT32) : out_features * 4 bytes  (accumulator)
+        weights tile  : remaining
     """
-    # Reserve space for input vector + bias + output vector (small for FC)
-    activation_bytes = (layer.in_features + 2 * layer.out_features) * 4  # FP32 psum
+    activation_bytes = (
+        layer.in_features              # ifmap, INT8
+        + 4 * layer.out_features       # bias, INT32
+        + 4 * layer.out_features       # psum, INT32
+    )
     glb_avail = max(glb_bytes - activation_bytes, 1)  # bytes left for weights
 
     weight_total = layer.n_weights * dtype_bytes
