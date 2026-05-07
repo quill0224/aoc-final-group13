@@ -134,13 +134,13 @@
 
 | 優先級 | 修正項目 | 估時 |
 |--------|----------|------|
-| P0 | GLB 容量拉回 ≥ 64 KiB | 修文字 1 hr |
-| P0 | NoC topology 圖 + 路由說明 | 設計 + 畫圖 1 day |
-| P0 | FC layer tiling 策略 | 設計 + 寫文字 1 day |
-| P1 | PE sweep 實驗 + 結論 | 跑 model 1 day |
-| P1 | Quantization 方案具體化 | 0.5 day |
-| P2 | MVP / stretch goal 切分 | 0.5 day |
-| P2 | Baseline 比較設定 | 0.5 day |
+| P0 | GLB 容量拉回 ≥ 64 KiB | ✅ done — 改採 128 KiB（見 [proposal-v2-patch.md](proposal-v2-patch.md) §4.2 GLB） |
+| P0 | NoC topology 圖 + 路由說明 | 仍待 RTL phase（[v2-patch §6.1](proposal-v2-patch.md#§61-noc-architecture仍待補)）|
+| P0 | FC layer tiling 策略 | ✅ done — host fallback for FC6（見 [v2-patch §4-NEW](proposal-v2-patch.md#§4-new-fully-connected-layer-處理策略新增章節)）|
+| P1 | PE sweep 實驗 + 結論 | ✅ done — sweep 5 種配置 + ROI 分析（見 [v2-patch §4.2 PE](proposal-v2-patch.md#§42-pe-array-sizing改寫)）|
+| P1 | Quantization 方案具體化 | TBD — 已有 power-of-2 INT8 PTQ baseline，待團隊敲定 bit-width 變化方案 |
+| P2 | MVP / stretch goal 切分 | TBD |
+| P2 | Baseline 比較設定 | TBD |
 
 ---
 
