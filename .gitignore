@@ -94,3 +94,7 @@ data/processed/
 lab_outputs/
 *.dump
 *.trace
+
+# --- Analysis results (timestamped, regenerated each run) ---
+analysis/results/*/
+!analysis/results/.gitkeep
