@@ -16,6 +16,12 @@ analysis/
 │   ├── mapper.py               EyerissMapper (DSE over m,n,e,p,q,r,t)
 │   ├── network_parser.py       parse_pytorch / parse_onnx
 │   └── roofline.py             roofline plotting
+├── sweeps/                     Final_project-specific experiments (proposal review)
+│   ├── _common.py              FixedHardwareMapper + VGG-8 layer specs
+│   ├── pe_sweep.py             PE-array size sweep (concern #1)
+│   ├── glb_sweep.py            GLB-size sweep (concern #2 indirect)
+│   ├── fc_analysis.py          FC-layer memory analysis (concern #2 direct)
+│   └── run_all.py              run all 3 in one shot
 ├── results/                    output dir (gitignored, created at runtime)
 └── README.md                   this file
 ```
@@ -72,8 +78,22 @@ results = mapper.run(conv2d_shape, maxpool_shape, num_solutions=5)
 # results 是 list of dict，每個 dict 含 latency/energy/glb_*/dram_*/intensity 等
 ```
 
+## Sweep 實驗（回應 proposal review 三大疑慮）
+
+```bash
+# 跑全部 3 個 sweep
+python -m analysis.sweeps.run_all
+
+# 或單獨跑
+python -m analysis.sweeps.pe_sweep    # PE 6×8 / 16×16 / 32×16 ... 比較
+python -m analysis.sweeps.glb_sweep   # GLB 16/32/64/128/256/512 KiB 對 DRAM access 的影響
+python -m analysis.sweeps.fc_analysis # FC layer (FC6=1 MiB INT8) 在不同 GLB 下需幾個 tile
+```
+
+每個 sweep 會在 `analysis/results/<sweep>_<ts>/` 產出 `output.csv` + `output.md` + 對應 plot。
+sweep 結果直接對應 `docs/proposal-review.md` § 1 / § 2 的「建議行動」清單。
+
 ## 與 Final_project 其他模組的關係
 
 - 直接 `from quantization.model import VGG` 拿 PR 2 寫的模型，**不要重新定義** VGG
-- 後續 PR 4 會在 `analysis/sweeps/` 加上 PE-array sweep / GLB sweep / FC-layer 分析，回應提案 review 的三大疑慮（見 `docs/proposal-review.md`）
 - 輸出的 CSV 會被 RTL 端的 testbench 用來產生 reference data
