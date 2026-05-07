@@ -26,8 +26,8 @@
 - **沒有實驗證據說明小尺度仍能保留 TrIP 的優勢**
 
 ### 建議行動（誰做、何時做）
-- [ ] **analysis/pe_sweep.py**：在 Lab 2 analytical model 上跑 `{8×8, 16×16, 32×32, 64×64}` 四種 PE 配置
-- [ ] 量測指標：utilization、cycle count、estimated area
+- [x] **analysis/sweeps/pe_sweep.py** — 已實作；包含 `(6,8) / (12,8) / (16,16) / (8,8) / (32,16)` 五組
+- [ ] 跑 `python -m analysis.sweeps.pe_sweep` 並把 CSV / latency.png 貼進 proposal v2
 - [ ] 結論寫進 proposal v2 §4.2 作為設計選擇依據
 - 主責：TBD（建議由負責 analysis 的人做）
 - Deadline：Week 2 結束前
@@ -55,11 +55,12 @@
 3. Roofline 估出 ridge point ≈ 2 OP/Byte → 多數 layer 是 memory-bound，**FC 會是最大瓶頸**
 
 ### 建議行動
-- [ ] **analysis/mem_hierarchy.py**：估算不同 GLB 大小（16, 32, 64, 128, 256 KiB）下 FC layer 的 DRAM access 次數
-- [ ] **analysis/fc_tiling.md**：設計 FC tiling 策略（output stationary + weight streaming），寫成 pseudo-code
-- [ ] **proposal v2 §4 加一段「FC layer 處理策略」**，至少包含：
+- [x] **analysis/sweeps/glb_sweep.py** — 已實作；含 GLB 16/32/64/128/256/512 KiB 對 conv DRAM access 的影響
+- [x] **analysis/sweeps/fc_analysis.py** — 已實作；計算 FC6/FC7/FC8 在不同 GLB 下需要的 tile 數
+- [ ] 跑 `python -m analysis.sweeps.run_all` 收集數據
+- [ ] 把結果寫進 **proposal v2 §4「FC layer 處理策略」**：
   - GLB 拉回 ≥ 64 KiB（與課程 baseline 同等或更大）
-  - Tiling 公式
+  - Tiling 公式（依 fc_analysis.py 的 output stationary + weight streaming）
   - Worst-case bandwidth 估算
 - [ ] **討論：FC layer 是否要走 host CPU fallback？**（accelerator 只負責 conv 部分）
 - 主責：TBD
