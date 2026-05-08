@@ -86,6 +86,7 @@ logs/
 *.onnx
 data/raw/
 data/processed/
+data/cifar10/
 
 # --- Docker / Container leftovers ---
 .docker_volumes/
