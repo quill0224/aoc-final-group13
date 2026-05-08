@@ -5,8 +5,6 @@ from __future__ import annotations
 import copy
 import os
 
-import matplotlib.pyplot as plt
-import seaborn as sns
 import torch
 import torch.ao.quantization as tq
 
@@ -66,6 +64,7 @@ def load_model(model, filename: str, qconfig=None, fuse: bool = False, verbose: 
 
 
 def plot_loss_accuracy(train_loss, train_acc, val_loss, val_acc, filename: str = "loss_accuracy.png") -> None:
+    import matplotlib.pyplot as plt  # lazy: only needed when actually plotting
     fig, (ax1, ax2) = plt.subplots(1, 2)
     ax1.plot(train_loss, color="tab:blue")
     ax1.plot(val_loss, color="tab:red")
@@ -87,6 +86,8 @@ CIFAR10_CLASSES = ("airplane", "automobile", "bird", "cat", "deer",
 
 
 def plot_confusion_matrix(conf_matrix, filename: str = "confusion_matrix.png") -> None:
+    import matplotlib.pyplot as plt  # lazy
+    import seaborn as sns             # lazy: only confusion_matrix needs it
     plt.figure(figsize=(10, 8))
     sns.heatmap(
         conf_matrix, annot=True, fmt="d", cmap="Blues",
