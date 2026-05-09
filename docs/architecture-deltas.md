@@ -12,9 +12,9 @@
 
 | | 論文 (Fig 6) | 修正後現況 |
 |---|---|---|
-| **mul array** | 在 PE row 內 | ✅ 在 pe_row 內 (16 個 mac_unit) |
-| **merge-reduction tree** | 在 PE row 內 | ✅ 在 pe_row 內 (新檔 `rtl/pe/merge_tree_radix16.v`) |
-| **accumulator** | 在 PE row 內 | ✅ 在 pe_row 內 (1 個 INT32 acc register) |
+| **mul array** | 在 PE row 內 | ✅ 在 pe_row 內 (16 個 mac_unit,黃妍心) |
+| **merge-reduction tree** | 在 PE row 內 | ✅ 在 pe_row 內 instantiate (per-row;module body 在 `rtl/dist/merge_tree_radix16.v`,owner 施柏安) |
+| **accumulator** | 在 PE row 內 | ✅ 在 pe_row 內 (1 個 INT32 acc register,黃妍心) |
 | MFIU | 在 PE row 內 | ❌ Phase 2 才 instantiate per-row (彭俞凱) |
 | A/B Distribution Network | 在 PE row 內 | ❌ Phase 2 才 instantiate per-row (施柏安) |
 | Local Buf | 在 PE row 內 | ❌ Phase 2 才加 (Δ4) |
@@ -45,7 +45,7 @@
 
 ---
 
-## ✅ Δ3 — Merge-Reduction Tree 位置 [已修正]
+## ✅ Δ3 — Merge-Reduction Tree 位置 [已修正,owner 釐清]
 
 | | 論文 (Fig 5/6) | 修正後現況 |
 |---|---|---|
@@ -54,11 +54,18 @@
 | Dense IP 觸發 | 每 cycle reduce 16 個 partial → 1 個 dot product element | ✅ 對應 pe_row 內部 acc 累加 4 stage 之後的 tree_sum |
 
 **修正內容**:
-- 刪掉 `rtl/dist/merge_tree.v`(global tree,本來就不對)
-- 新增 `rtl/pe/merge_tree_radix16.v` per-row,4 stage 16→8→4→2→1
+- 刪掉 `rtl/dist/merge_tree.v`(舊的 global tree,本來就不對)
+- 新增 `rtl/dist/merge_tree_radix16.v` (4 stage 16→8→4→2→1)
 - 位寬正確處理:partial INT16 → s1 INT17 → s2 INT18 → s3 INT19 → sum INT32 (sign-extend)
+- pe_row 內 instantiate 此 module(per-row 16 棵,paper Fig 6 一致)
 
-**TrIP 預留**:tree 第二版要支援 sub-tree slicing (radix-2/4/8 切片產出 N 個 C 元素)。
+**Owner 釐清 (重要)**:
+- `merge_tree_radix16.v` **module body owner = 施柏安**(per proposal §6.2)
+- 黃妍心 起草 skeleton 是為了讓 pe_row 能 lint pass,**不代表她擁有此 module**
+- 施柏安 可以保留 / 重寫 / 加 test;port 不變的話 pe_row 不用動
+- `tb_merge_tree.sv` 由 施柏安 寫,黃妍心 不寫(她只寫 pe_row 整體 tb)
+
+**TrIP 預留 (施柏安)**:tree 第二版要支援 sub-tree slicing (radix-2/4/8 切片產出 N 個 C 元素)。
 目前只支援單一 16→1 模式,Phase 2 才加。
 
 ---

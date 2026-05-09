@@ -5,10 +5,11 @@
 //
 // === 跟 ISCA 2024 paper Fig 6 / Fig 7 對應 ===
 //   一條 PE row 內含:
-//     [1] mul array       — 16 個 mac_unit (這個檔負責的核心)
-//     [2] merge-reduction tree (radix-16, 4 stages,per-row,this 檔 instantiate)
-//     [3] accumulator     — 1 個 INT32 register,跨 K-tile 累加 tree 結果
-//     [4] B forwarding    — 把 b_vec 延 1 cycle 給下一條 row (Fig 7 ④)
+//     [1] mul array       — 16 個 mac_unit (黃妍心 owner,這個檔負責的核心)
+//     [2] merge-reduction tree (radix-16,per-row,this 檔 instantiate;
+//                               module body owner = 施柏安,在 rtl/dist/merge_tree_radix16.v)
+//     [3] accumulator     — 1 個 INT32 register,跨 K-tile 累加 tree 結果 (黃妍心)
+//     [4] B forwarding    — 把 b_vec 延 1 cycle 給下一條 row (Fig 7 ④,黃妍心)
 //
 //   未實作 (Phase 2 才加):
 //     [5] MFIU            — 在 mul 前面,per-row,給 TrIP 用 (彭俞凱)
@@ -104,6 +105,8 @@ module pe_row
 
     // =====================================================================
     // S3-S6: merge-reduction tree (4 stages)
+    //   merge_tree_radix16 module body owner = 施柏安 (rtl/dist/);
+    //   pe_row 只負責 instantiate + 餵 partials,不擁有 tree micro-arch。
     // =====================================================================
     wire signed [ACC_W-1:0] tree_sum;
 

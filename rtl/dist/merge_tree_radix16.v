@@ -1,8 +1,17 @@
 // =============================================================================
 // merge_tree_radix16.v — 16-input pipelined adder tree (radix-16, 4 stages)
 // =============================================================================
-// Owner: 黃妍心 (per-row,在 pe_row 內 instantiate)
-// 對應 paper Fig 6 / Fig 7 的 Merge-Reduction Tree (per-row,不是 global)
+// === 模組 OWNER: 施柏安 (per proposal §6.2: Merge-Reduction Tree) ===
+//
+// 註記 (2026-05-09 黃妍心):
+//   這份是 黃妍心 起草的「pipeline 對接用 skeleton」,目的是讓 pe_row
+//   能 lint pass 並驗 7-stage 時序。**模組 body 屬於 施柏安**,他可以:
+//     - 完全保留 (若這份功能正確,後續維護 / 第二版 TrIP slicing 由他主導)
+//     - 重寫 (照他自己的 micro-architecture,只要 port 不變)
+//     - 加 testbench (`sim/tb_merge_tree.sv` 由 施柏安 寫,黃妍心 不寫)
+//   如果 port 要改,先在群組講 + 同步到 docs/interfaces.md (黃妍心 合作)。
+//
+// 在 pe_row 內 instantiate (per-row,16 棵,對齊 paper Fig 6,不是 global)。
 //
 // 行為:
 //   16 個 INT16 partial → 4 stages → 1 個 INT32 sum
@@ -15,7 +24,7 @@
 //   stage3: s2                                → s3[0..1]  (2 × INT19)
 //   stage4: s3                                → sum       (1 × INT32, sign-ext)
 //
-// 第二版 (TrIP) TODO:
+// 第二版 (TrIP) TODO (施柏安):
 //   論文 Fig 6 提到 tree 可被切成 N 個 sub-tree (radix-2/4/8) 平行產生 N 個 C 元素,
 //   給 TrIP 動態 packing 用。第一版只支援單一 16→1 模式 (Dense IP)。
 // =============================================================================

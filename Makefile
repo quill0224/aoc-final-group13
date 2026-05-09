@@ -7,13 +7,14 @@ TB_DIR   := sim
 PKG      := $(RTL_DIR)/trapezoid_pkg.sv
 
 # 所有 RTL 檔 (top.v + 各 module)
-# 注意:merge tree 已從 rtl/dist/ 移到 rtl/pe/ (per-row,對齊 paper Fig 6)
+# 注意:merge_tree_radix16.v owner 是 施柏安 (per proposal §6.2),所以放 rtl/dist/。
+#       它在 pe_row 內 instantiate (per-row,對齊 paper Fig 6,不是 global tree)。
 RTL_SRCS := $(PKG) \
             $(RTL_DIR)/pe/mac_unit.v \
-            $(RTL_DIR)/pe/merge_tree_radix16.v \
             $(RTL_DIR)/pe/pe_row.v \
             $(RTL_DIR)/pe/pe_array.v \
             $(RTL_DIR)/mfiu/mfiu_top.v \
+            $(RTL_DIR)/dist/merge_tree_radix16.v \
             $(RTL_DIR)/dist/distribution_net.v \
             $(RTL_DIR)/mem/global_buffer.v \
             $(RTL_DIR)/ctrl/dataflow_ctrl.v \

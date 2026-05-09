@@ -34,16 +34,16 @@
 
 | 檔案 | 用途 | 狀態 |
 |---|---|---|
-| `rtl/pe/mac_unit.v` | INT8 × INT8 → INT16 multiplier (registered output)。**沒有 accumulator**。 | 新檔 |
-| `rtl/pe/merge_tree_radix16.v` | 16-input pipelined adder tree,4 stage (16→8→4→2→1),per-row 用。 | 新檔 |
-| `rtl/pe/pe_row.v` | 一條 PE row:16 個 mac_unit + 1 棵 merge tree + 1 個 INT32 accumulator + B-forward latch。 | 新檔 |
-| `rtl/pe/pe_array.v` | 16 條 pe_row,B 從 row 0 進、垂直串到 row 15。 | 新檔 |
-| `rtl/trapezoid_pkg.sv` | 全域 parameter (尺寸、位寬、tile size、ADFP SRAM 規格、pipeline stage 數)。 | 新檔 |
-| `rtl/top.v` | 系統 top-level,instantiate dataflow_ctrl + global_buffer + pe_array,DRAM port 對外。 | 新檔 |
-| `rtl/mfiu/mfiu_top.v` | MFIU 空殼 (彭俞凱 之後填)。Phase 1 不接線,占位用。 | 新檔 (stub) |
-| `rtl/dist/distribution_net.v` | Distribution net 空殼 (施柏安)。Phase 1 不接線。 | 新檔 (stub) |
-| `rtl/mem/global_buffer.v` | Cache 空殼 (陳秉弘)。Phase 1 輸出全 0。 | 新檔 (stub) |
-| `rtl/ctrl/dataflow_ctrl.v` | Dataflow FSM 空殼 (orphan,待認領)。Phase 1 永遠 idle。 | 新檔 (stub) |
+| `rtl/pe/mac_unit.v` | INT8 × INT8 → INT16 multiplier (registered output)。**沒有 accumulator**。 | 新檔 (黃妍心 owner) |
+| `rtl/pe/pe_row.v` | 一條 PE row:16 個 mac_unit + instantiate 1 棵 merge tree + 1 個 INT32 accumulator + B-forward latch。 | 新檔 (黃妍心 owner) |
+| `rtl/pe/pe_array.v` | 16 條 pe_row,B 從 row 0 進、垂直串到 row 15。 | 新檔 (黃妍心 owner) |
+| `rtl/trapezoid_pkg.sv` | 全域 parameter (尺寸、位寬、tile size、ADFP SRAM 規格、pipeline stage 數)。 | 新檔 (黃妍心 owner / SSOT) |
+| `rtl/top.v` | 系統 top-level,instantiate dataflow_ctrl + global_buffer + pe_array,DRAM port 對外。 | 新檔 (黃妍心 owner) |
+| `rtl/dist/merge_tree_radix16.v` | 16-input pipelined adder tree,4 stage (16→8→4→2→1),per-row 在 pe_row 內 instantiate。**Module body owner = 施柏安** (黃妍心 起草 skeleton 給他 review)。 | 新檔 (skeleton,owner = 施柏安) |
+| `rtl/mfiu/mfiu_top.v` | MFIU 空殼 (彭俞凱 之後填)。Phase 1 不接線,占位用。 | 新檔 (stub,owner = 彭俞凱) |
+| `rtl/dist/distribution_net.v` | Distribution net 空殼 (施柏安)。Phase 1 不接線。 | 新檔 (stub,owner = 施柏安) |
+| `rtl/mem/global_buffer.v` | Cache 空殼 (陳秉弘)。Phase 1 輸出全 0。 | 新檔 (stub,owner = 陳秉弘) |
+| `rtl/ctrl/dataflow_ctrl.v` | Dataflow FSM 空殼 (orphan,待認領)。Phase 1 永遠 idle。 | 新檔 (stub,owner = 待認領) |
 | `sim/tb_mac_unit.sv` | mac_unit 單元測試,12 個 testcase (mul-only 行為)。 | 新檔 (本機未跑通) |
 | `docs/interfaces.md` | 模組間訊號契約 §1-§6,新架構版本。 | 新檔 |
 | `docs/architecture-deltas.md` | 跟 ISCA paper 的差異紀錄,Δ1/Δ2/Δ3 已修,Δ4 deferred。 | 新檔 |
@@ -130,8 +130,7 @@ assign b_vec_top = '0;   // TODO 陳秉弘 + 黃妍心:從 bank_rdata 切片
   - 跑法:`make tb_mac` (需 iverilog)
   - **狀態:本機未跑通,需 Linux 驗證**
 
-### TODO (Phase 1 結束前要補)
-- ⏳ `tb_merge_tree.sv` — 餵已知 16 個 INT16,確認 4-stage 後 sum 對 (含正負混合、最大值不溢位、async reset 行為)
+### TODO — 黃妍心 自己要寫的 (Phase 1 結束前)
 - ⏳ `tb_pe_row.sv` — 餵 deterministic A/B vector,確認:
   - 17 cycle 對應 (S1-S7 + 10 cycle K-tile),最後 `c_out` 等於 numpy `dot(a, b)`
   - `acc_clear` → 新 dot product 從 0 開始累加
@@ -140,6 +139,12 @@ assign b_vec_top = '0;   // TODO 陳秉弘 + 黃妍心:從 bank_rdata 切片
 - ⏳ `tb_pe_array.sv` — 餵一條 B 進 row 0,確認:
   - 16 拍後 row 15 才看到 row 0 那一拍的 B (forwarding chain 累計 16 cycle 延遲)
   - 16 條 row 各自輸出獨立的 `c_out[r]`,且 `c_out[r]` 等於 numpy 的 `A[r,:] · B[:, n]`
+
+### TODO — 不該由 黃妍心 寫的 (給組員寫)
+- ⏳ `tb_merge_tree.sv` (施柏安) — 因為 module body owner 是他
+- ⏳ `tb_mfiu.sv` (彭俞凱)
+- ⏳ `tb_distribution_net.sv` (施柏安)
+- ⏳ `tb_global_buffer.sv` (陳秉弘)
 
 ### TODO (Phase 2 才加)
 - 端到端跑 32×32 矩陣乘法 → 對 numpy 黃金模型 (需 `a_grid` / `b_vec_top` 接到 cache,屬 §1)
