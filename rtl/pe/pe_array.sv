@@ -1,5 +1,5 @@
 // =============================================================================
-// pe_array.v — paper Fig 5 對齊版:16 條 PE row + B 跨 row 垂直 forwarding
+// pe_array.sv — paper Fig 5 對齊版:16 條 PE row + B 跨 row 垂直 forwarding
 // =============================================================================
 // Owner: 黃妍心
 //
@@ -22,33 +22,33 @@
 module pe_array
     import trapezoid_pkg::*;
 (
-    input  wire                                                  clk,
-    input  wire                                                  rst_n,
+    input                                                          clk,
+    input                                                          rst_n,
 
     // ── 全域控制 ─────────────────────────────────────────────
-    input  wire [1:0]                                            dataflow_sel,
-    input  wire                                                  in_valid,
-    input  wire                                                  acc_clear,
-    input  wire                                                  acc_dump,
+    input  logic [1:0]                                             dataflow_sel,
+    input                                                          in_valid,
+    input                                                          acc_clear,
+    input                                                          acc_dump,
 
     // ── A: row-stationary,16 條 row 各自 16 個 INT8 ────────
-    //     由上層 (top.v 內 register file) 提供
-    input  wire signed [N_PE_ROW-1:0][N_MUL_ROW-1:0][DATA_W-1:0] a_grid,
+    //     由上層 (top.sv 內 register file) 提供
+    input  logic signed [N_PE_ROW-1:0][N_MUL_ROW-1:0][DATA_W-1:0]  a_grid,
 
     // ── B: 從 cache 進 row 0,內部往下 forwarding ───────────
     //     第一版只有 1 條 B 進入 (Fig 4b TPU 風格);
     //     TrIP 多 fiber packing 時擴成 N_B_FIBER 條同時進入。
-    input  wire signed [N_MUL_ROW-1:0][DATA_W-1:0]               b_vec_top,
+    input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0]                b_vec_top,
 
     // ── C 輸出:per-row,每 row 1 個 INT32 dot product ──────
-    output wire [N_PE_ROW-1:0]                                   c_valid,
-    output wire signed [N_PE_ROW-1:0][ACC_W-1:0]                 c_out
+    output logic [N_PE_ROW-1:0]                                    c_valid,
+    output logic signed [N_PE_ROW-1:0][ACC_W-1:0]                  c_out
 );
 
     // ── B chain: row r 的 b 輸入 = 上一 row 的 b_vec_out ──
     //    row 0 的 b 輸入 = 外部 b_vec_top
-    wire signed [N_PE_ROW:0][N_MUL_ROW-1:0][DATA_W-1:0] b_chain;
-    wire        [N_PE_ROW:0]                            b_chain_valid;
+    logic signed [N_PE_ROW:0][N_MUL_ROW-1:0][DATA_W-1:0] b_chain;
+    logic        [N_PE_ROW:0]                            b_chain_valid;
 
     assign b_chain[0]       = b_vec_top;
     assign b_chain_valid[0] = in_valid;

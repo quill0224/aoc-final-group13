@@ -101,3 +101,4 @@ analysis/results/*/
 !analysis/results/.gitkeep
 # Allow committed snapshots (canonical reference runs)
 !analysis/results/baseline/
+*.vvp

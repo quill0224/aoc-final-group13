@@ -1,5 +1,5 @@
 // =============================================================================
-// top.v — Trapezoid-Lite 系統 Top Level (Phase 1 Dense IP MVP)
+// top.sv — Trapezoid-Lite 系統 Top Level (Phase 1 Dense IP MVP)
 // =============================================================================
 // Owner: 黃妍心
 //
@@ -22,21 +22,21 @@
 module top
     import trapezoid_pkg::*;
 (
-    input  wire                clk,
-    input  wire                rst_n,
+    input                       clk,
+    input                       rst_n,
 
     // ── 控制 (跟 Verilator wrapper 對接) ──
-    input  wire                start,
-    output wire                done,
-    input  wire [1:0]          dataflow_sel,
+    input                       start,
+    output logic                done,
+    input  logic [1:0]          dataflow_sel,
 
     // ── DRAM 介面 (簡化版,等王柏弘確認) ──
-    output wire                dram_req_valid,
-    output wire [31:0]         dram_req_addr,
-    output wire                dram_req_we,
-    output wire [63:0]         dram_req_wdata,
-    input  wire                dram_resp_valid,
-    input  wire [63:0]         dram_resp_rdata
+    output logic                dram_req_valid,
+    output logic [31:0]         dram_req_addr,
+    output logic                dram_req_we,
+    output logic [63:0]         dram_req_wdata,
+    input  logic                dram_resp_valid,
+    input  logic [63:0]         dram_resp_rdata
 );
 
     // ===========================================================
@@ -44,22 +44,22 @@ module top
     // ===========================================================
 
     // dataflow_ctrl → pe_array
-    wire pe_in_valid;
-    wire pe_acc_clear;
-    wire pe_acc_dump;
+    logic pe_in_valid;
+    logic pe_acc_clear;
+    logic pe_acc_dump;
 
     // global_buffer 對外讀 (TODO 陳秉弘:接到 a_grid / b_vec_top 餵料)
-    wire [N_BANK-1:0][BANK_W_BITS-1:0] bank_rdata;
+    logic [N_BANK-1:0][BANK_W_BITS-1:0] bank_rdata;
 
     // 第一版:a_grid / b_vec_top 都從 cache 出 (尚未接,先 0)
-    wire signed [N_PE_ROW-1:0][N_MUL_ROW-1:0][DATA_W-1:0] a_grid;
-    wire signed [N_MUL_ROW-1:0][DATA_W-1:0]               b_vec_top;
+    logic signed [N_PE_ROW-1:0][N_MUL_ROW-1:0][DATA_W-1:0] a_grid;
+    logic signed [N_MUL_ROW-1:0][DATA_W-1:0]               b_vec_top;
     assign a_grid    = '0;   // TODO 陳秉弘 + 黃妍心:從 bank_rdata 切片
     assign b_vec_top = '0;   // TODO 陳秉弘 + 黃妍心:從 bank_rdata 切片
 
     // pe_array → 寫回 cache / DRAM
-    wire [N_PE_ROW-1:0]                  c_valid;
-    wire signed [N_PE_ROW-1:0][ACC_W-1:0] c_out;
+    logic [N_PE_ROW-1:0]                  c_valid;
+    logic signed [N_PE_ROW-1:0][ACC_W-1:0] c_out;
 
     // ===========================================================
     // Dataflow Controller (待認領 — orphan FSM,Phase 1 stub)
@@ -102,7 +102,7 @@ module top
 
     // ===========================================================
     // Phase 2 預留:per-row MFIU + A/B Distribution + Local Buf
-    // 將會在 pe_row 內部 instantiate (per-row),不會在 top.v 加 module。
+    // 將會在 pe_row 內部 instantiate (per-row),不會在 top.sv 加 module。
     // 目前 rtl/mfiu/ 與 rtl/dist/ 內的 stub 是「Phase 2 接收區」,
     // 還沒在 top 接線 — 不算 lint dead code (Verilator --top-module 不會掃)。
     // ===========================================================

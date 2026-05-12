@@ -1,15 +1,13 @@
 // =============================================================================
-// merge_tree_radix16.v — 16-input pipelined adder tree (radix-16, 4 stages)
+// merge_tree_radix16.sv — 16-input pipelined adder tree (radix-16, 4 stages)
 // =============================================================================
-// === 模組 OWNER: 施柏安 (per proposal §6.2: Merge-Reduction Tree) ===
+// === 模組 OWNER: 黃妍心 + QuillQ (per 2026-05-12 重新分工) ===
 //
-// 註記 (2026-05-09 黃妍心):
-//   這份是 黃妍心 起草的「pipeline 對接用 skeleton」,目的是讓 pe_row
-//   能 lint pass 並驗 7-stage 時序。**模組 body 屬於 施柏安**,他可以:
-//     - 完全保留 (若這份功能正確,後續維護 / 第二版 TrIP slicing 由他主導)
-//     - 重寫 (照他自己的 micro-architecture,只要 port 不變)
-//     - 加 testbench (`sim/tb_merge_tree.sv` 由 施柏安 寫,黃妍心 不寫)
-//   如果 port 要改,先在群組講 + 同步到 docs/interfaces.md (黃妍心 合作)。
+// 歷史 (沿革):
+//   1. 初版由 黃妍心 起草作 pipeline 對接用 skeleton (2026-05-09)
+//   2. 原規劃 owner 為 施柏安 (proposal §6.2 Merge-Reduction Tree)
+//   3. 2026-05-12 團隊重新分工:PE array + NoC + tree 由 黃妍心 + QuillQ co-own
+//      → 此檔正式歸 黃妍心 + QuillQ
 //
 // 在 pe_row 內 instantiate (per-row,16 棵,對齊 paper Fig 6,不是 global)。
 //
@@ -24,7 +22,7 @@
 //   stage3: s2                                → s3[0..1]  (2 × INT19)
 //   stage4: s3                                → sum       (1 × INT32, sign-ext)
 //
-// 第二版 (TrIP) TODO (施柏安):
+// 第二版 (TrIP) TODO:
 //   論文 Fig 6 提到 tree 可被切成 N 個 sub-tree (radix-2/4/8) 平行產生 N 個 C 元素,
 //   給 TrIP 動態 packing 用。第一版只支援單一 16→1 模式 (Dense IP)。
 // =============================================================================
@@ -32,23 +30,23 @@
 module merge_tree_radix16
     import trapezoid_pkg::*;
 (
-    input  wire                                    clk,
-    input  wire                                    rst_n,
-    input  wire                                    en,         // 1 → 推進 pipeline
-    input  wire signed [N_MUL_ROW-1:0][PROD_W-1:0] partials,   // 16 × INT16
-    output reg  signed [ACC_W-1:0]                 sum         // INT32
+    input                                            clk,
+    input                                            rst_n,
+    input                                            en,         // 1 → 推進 pipeline
+    input  logic signed [N_MUL_ROW-1:0][PROD_W-1:0]  partials,   // 16 × INT16
+    output logic signed [ACC_W-1:0]                  sum         // INT32
 );
 
     // ── stage 1: 16 → 8 (位寬 PROD_W+1 = 17) ──
-    reg signed [PROD_W:0]   s1_0, s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7;
+    logic signed [PROD_W:0]   s1_0, s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7;
 
     // ── stage 2: 8 → 4 (位寬 PROD_W+2 = 18) ──
-    reg signed [PROD_W+1:0] s2_0, s2_1, s2_2, s2_3;
+    logic signed [PROD_W+1:0] s2_0, s2_1, s2_2, s2_3;
 
     // ── stage 3: 4 → 2 (位寬 PROD_W+3 = 19) ──
-    reg signed [PROD_W+2:0] s3_0, s3_1;
+    logic signed [PROD_W+2:0] s3_0, s3_1;
 
-    always @(posedge clk or negedge rst_n) begin
+    always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             {s1_0, s1_1, s1_2, s1_3, s1_4, s1_5, s1_6, s1_7} <= '0;
             {s2_0, s2_1, s2_2, s2_3} <= '0;

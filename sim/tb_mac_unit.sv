@@ -16,15 +16,15 @@
 `timescale 1ns/1ps
 
 module tb_mac_unit;
-    reg                 clk = 0;
-    reg                 rst_n;
-    reg                 en;
-    reg signed [7:0]    a;
-    reg signed [7:0]    b;
-    wire signed [15:0]  product;
+    logic                 clk = 0;
+    logic                 rst_n;
+    logic                 en;
+    logic signed [7:0]    a;
+    logic signed [7:0]    b;
+    logic signed [15:0]   product;
 
-    integer fails;
-    integer expected;
+    int fails;
+    int expected;
 
     // 500 MHz → period 2 ns,1 ns 半週期
     always #1 clk = ~clk;
@@ -129,15 +129,21 @@ module tb_mac_unit;
         `CHECK(product === 16'sd0, "T10 0*99=0")
 
         // T11: 連續 16 次不同 mul,確認每拍都正確更新
+        // (iverilog 不允許對表達式 bit-slice (i+1)[7:0],所以用 logic 暫存)
         begin : t11
-            integer i;
+            int i;
+            logic signed [7:0]  a_in;
+            logic signed [7:0]  b_in;
+            logic signed [15:0] expected_prod;
             for (i = 0; i < 16; i = i + 1) begin
-                drive(1, i[7:0], (i+1)[7:0]);
+                a_in          = i;            // 自動截到 8-bit
+                b_in          = i + 1;
+                expected_prod = i * (i + 1);
+                drive(1, a_in, b_in);
                 tick_and_settle;
-                expected = i * (i+1);
-                if (product !== expected[15:0]) begin
+                if (product !== expected_prod) begin
                     $display("[FAIL] T11 iter %0d: %0d*%0d = %0d, got %0d",
-                             i, i, i+1, expected, product);
+                             i, i, i+1, expected_prod, product);
                     fails = fails + 1;
                 end
             end
