@@ -23,7 +23,7 @@ RTL_SRCS := $(PKG) \
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_tree tb_pe_row tb_pe_array lint clean help
+.PHONY: all tb_mac tb_tree tb_pe_row tb_pe_array tb_dist lint clean help
 
 all: help
 
@@ -32,6 +32,7 @@ help:
 	@echo "  make tb_mac      — 跑 mac_unit 單元測試 (iverilog)"
 	@echo "  make tb_tree     — 跑 merge_tree_radix16 單元測試 (iverilog)"
 	@echo "  make tb_pe_row   — 跑 pe_row 單元測試 (iverilog)"
+	@echo "  make tb_dist     — 跑 distribution_net Phase 1 pass-through 測試 (iverilog)"
 	@echo "  make tb_pe_array — 跑 pe_array 單元測試 (TODO,等 NoC 寫好再開)"
 	@echo "  make lint        — Verilator lint 整個專案"
 	@echo "  make clean       — 清掉 build artifact"
@@ -68,6 +69,17 @@ tb_pe_row: $(PKG) \
 		$(RTL_DIR)/pe/pe_row.sv \
 		$(TB_DIR)/tb_pe_row.sv
 	vvp tb_pe_row.vvp
+
+# ── distribution_net 單元測試 (iverilog) ──
+# 依賴:trapezoid_pkg + distribution_net (純組合 0 cycle，無需其他 module)
+# Phase 1 範圍:dense identity pass-through (6 個 test cases)
+tb_dist: $(PKG) $(RTL_DIR)/dist/distribution_net.sv $(TB_DIR)/tb_distribution_net.sv
+	$(IVERILOG) -g2012 -o tb_dist.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/distribution_net.sv \
+		$(TB_DIR)/tb_distribution_net.sv
+	vvp tb_dist.vvp
 
 # ── pe_array 單元測試 (placeholder) ──
 tb_pe_array:
