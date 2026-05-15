@@ -1,7 +1,7 @@
 // =============================================================================
 // tb_merge_tree_sliced.sv — Sub-tree slicing reduction tree 單元測試
 // =============================================================================
-// 測 module: rtl/dist/merge_tree_radix16_sliced.sv
+// 測試 module: rtl/dist/merge_tree_radix16_sliced.sv
 // Owner: 黃妍心 + QuillQ
 //
 // 跑法: make tb_tree_sliced
@@ -25,6 +25,7 @@
 //       每個 subtree_sums[i] = partials[i]
 //   T7: Sign handling — 負數 partials,confirm signed math
 //   T8: 邊界值 — INT16 max,confirm no overflow at INT32
+//   T9: 中段 1 cut + INT16 max，確認切段後兩半都維持正確邊界和
 //
 // === Pipeline timing ===
 //   4-stage latency,跟舊 tree 一致
