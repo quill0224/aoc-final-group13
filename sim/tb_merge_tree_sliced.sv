@@ -14,7 +14,7 @@
 //   T3: Dense IP, partials=[1..16] → subtree_sums[15] = 136
 //   T4: 中間 1 cut (cut_after[7]=1), all-1 partials
 //       → subtree_sums[7] = 8, subtree_sums[15] = 8
-//   T5: Paper Fig 10 風格 — 3 sub-tree
+//   T5: Paper Fig 10 風格 — 4 個 contiguous sub-tree
 //       cut_after[0]=1, cut_after[2]=1, cut_after[3]=1,
 //       partials = [1,2,3,4,0,0,...,0]
 //       → subtree_sums[0] = 1   (C20)
