@@ -7,7 +7,7 @@
 // 跑法: make tb_tree_sliced
 // 看波形: gtkwave tb_merge_tree_sliced.vcd
 //
-// === 測什麼(對應 paper §III.B sub-tree slicing 完整驗證) ===
+// === 測什麼(對應 paper §III.B sub-tree slicing 基本驗證) ===
 //   T1: Reset 後輸出全 0
 //   T2: Dense IP (cut_after=0) all-1 partials → subtree_sums[15] = 16
 //       (退化驗證,確保不切時跟舊版單一 tree 結果一樣)
@@ -198,7 +198,7 @@ module tb_merge_tree_sliced;
         //
         //     Expected:
         //       subtree_sums[0]  = 1   (just partials[0],  "C20")
-        //       subtree_sums[2]  = 5   (partials[1]+[2],   "C21")
+        //       subtree_sums[2]  = 5   (partials[1] + partials[2] = 2 + 3, "C21")
         //       subtree_sums[3]  = 4   (just partials[3],  "C31")
         //       subtree_sums[15] = 0   (partials[4..15] = 0)
         // ============================================================
