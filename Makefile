@@ -15,6 +15,7 @@ RTL_SRCS := $(PKG) \
             $(RTL_DIR)/pe/pe_array.sv \
             $(RTL_DIR)/mfiu/mfiu_top.sv \
             $(RTL_DIR)/dist/merge_tree_radix16.sv \
+            $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv \
             $(RTL_DIR)/dist/distribution_net.sv \
             $(RTL_DIR)/mem/global_buffer.sv \
             $(RTL_DIR)/ctrl/dataflow_ctrl.sv \
@@ -23,18 +24,19 @@ RTL_SRCS := $(PKG) \
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_tree tb_pe_row tb_pe_array lint clean help
+.PHONY: all tb_mac tb_tree tb_tree_sliced tb_pe_row tb_pe_array lint clean help
 
 all: help
 
 help:
 	@echo "Targets:"
-	@echo "  make tb_mac      — 跑 mac_unit 單元測試 (iverilog)"
-	@echo "  make tb_tree     — 跑 merge_tree_radix16 單元測試 (iverilog)"
-	@echo "  make tb_pe_row   — 跑 pe_row 單元測試 (iverilog)"
-	@echo "  make tb_pe_array — 跑 pe_array 單元測試 (TODO,等 NoC 寫好再開)"
-	@echo "  make lint        — Verilator lint 整個專案"
-	@echo "  make clean       — 清掉 build artifact"
+	@echo "  make tb_mac          — 跑 mac_unit 單元測試 (iverilog)"
+	@echo "  make tb_tree         — 跑 merge_tree_radix16 單元測試 (single-tree mode)"
+	@echo "  make tb_tree_sliced  — 跑 merge_tree_radix16_sliced 單元測試 (TrIP sub-tree slicing)"
+	@echo "  make tb_pe_row       — 跑 pe_row 單元測試 (iverilog)"
+	@echo "  make tb_pe_array     — 跑 pe_array 單元測試 (TODO,等 NoC 寫好再開)"
+	@echo "  make lint            — Verilator lint 整個專案"
+	@echo "  make clean           — 清掉 build artifact"
 
 # ── mac_unit 單元測試 (iverilog) ──
 tb_mac: $(RTL_DIR)/pe/mac_unit.sv $(TB_DIR)/tb_mac_unit.sv
@@ -52,6 +54,16 @@ tb_tree: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16.sv $(TB_DIR)/tb_merge_tree.sv
 		$(RTL_DIR)/dist/merge_tree_radix16.sv \
 		$(TB_DIR)/tb_merge_tree.sv
 	vvp tb_tree.vvp
+
+# ── merge_tree_radix16_sliced 單元測試 (iverilog) ──
+# 測 TrIP sub-tree slicing(paper §III.B Fig 10 對應)
+tb_tree_sliced: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv $(TB_DIR)/tb_merge_tree_sliced.sv
+	$(IVERILOG) -g2012 -o tb_tree_sliced.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/merge_tree_radix16_sliced.sv \
+		$(TB_DIR)/tb_merge_tree_sliced.sv
+	vvp tb_tree_sliced.vvp
 
 # ── pe_row 單元測試 (iverilog) ──
 # 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16 + pe_row
