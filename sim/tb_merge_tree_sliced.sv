@@ -192,7 +192,7 @@ module tb_merge_tree_sliced;
         check_subtree(15, 1'b1, 32'sd8, "T4 cut@7 second half (sum=8)");
 
         // ============================================================
-        // T5: Paper Fig 10 風格 — 3 個 sub-tree (sizes 1, 2, 1)
+        // T5: Paper Fig 10 風格 — 4 個 contiguous sub-tree (sizes 1, 2, 1, 12)
         //     cut_after[0]=1, cut_after[2]=1, cut_after[3]=1
         //     partials = [1, 2, 3, 4, 0, 0, ..., 0]
         //
