@@ -1,20 +1,20 @@
 // =============================================================================
 // tb_merge_tree_sliced.sv — Sub-tree slicing reduction tree 單元測試
 // =============================================================================
-// 測 module: rtl/dist/merge_tree_radix16_sliced.sv
+// 測試 module: rtl/dist/merge_tree_radix16_sliced.sv
 // Owner: 黃妍心 + QuillQ
 //
 // 跑法: make tb_tree_sliced
 // 看波形: gtkwave tb_merge_tree_sliced.vcd
 //
-// === 測什麼(對應 paper §III.B sub-tree slicing 完整驗證) ===
+// === 測什麼(對應 paper §III.B sub-tree slicing 基本驗證) ===
 //   T1: Reset 後輸出全 0
 //   T2: Dense IP (cut_after=0) all-1 partials → subtree_sums[15] = 16
 //       (退化驗證,確保不切時跟舊版單一 tree 結果一樣)
 //   T3: Dense IP, partials=[1..16] → subtree_sums[15] = 136
 //   T4: 中間 1 cut (cut_after[7]=1), all-1 partials
 //       → subtree_sums[7] = 8, subtree_sums[15] = 8
-//   T5: Paper Fig 10 風格 — 3 sub-tree
+//   T5: Paper Fig 10 風格 — 4 個 contiguous sub-tree
 //       cut_after[0]=1, cut_after[2]=1, cut_after[3]=1,
 //       partials = [1,2,3,4,0,0,...,0]
 //       → subtree_sums[0] = 1   (C20)
@@ -25,6 +25,7 @@
 //       每個 subtree_sums[i] = partials[i]
 //   T7: Sign handling — 負數 partials,confirm signed math
 //   T8: 邊界值 — INT16 max,confirm no overflow at INT32
+//   T9: 中段 1 cut + INT16 max，確認切段後兩半都維持正確邊界和
 //
 // === Pipeline timing ===
 //   4-stage latency,跟舊 tree 一致
@@ -191,13 +192,13 @@ module tb_merge_tree_sliced;
         check_subtree(15, 1'b1, 32'sd8, "T4 cut@7 second half (sum=8)");
 
         // ============================================================
-        // T5: Paper Fig 10 風格 — 3 個 sub-tree (sizes 1, 2, 1)
+        // T5: Paper Fig 10 風格 — 4 個 contiguous sub-tree (sizes 1, 2, 1, 12)
         //     cut_after[0]=1, cut_after[2]=1, cut_after[3]=1
         //     partials = [1, 2, 3, 4, 0, 0, ..., 0]
         //
         //     Expected:
         //       subtree_sums[0]  = 1   (just partials[0],  "C20")
-        //       subtree_sums[2]  = 5   (partials[1]+[2],   "C21")
+        //       subtree_sums[2]  = 5   (partials[1] + partials[2] = 2 + 3, "C21")
         //       subtree_sums[3]  = 4   (just partials[3],  "C31")
         //       subtree_sums[15] = 0   (partials[4..15] = 0)
         // ============================================================
