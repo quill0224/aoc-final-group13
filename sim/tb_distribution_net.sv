@@ -2,7 +2,7 @@
 // tb_distribution_net.sv — Phase 1 (Dense IP) Identity Pass-Through unit test
 // =============================================================================
 // 測 module: rtl/dist/distribution_net.sv
-// Owner: QuillQ (施柏安)
+// Owner: QuillQ (王柏弘)
 //
 // 跑法: make tb_dist
 // 看波形: gtkwave tb_distribution_net.vcd
