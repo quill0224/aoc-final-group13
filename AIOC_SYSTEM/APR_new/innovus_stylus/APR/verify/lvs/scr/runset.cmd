@@ -1,0 +1,22 @@
+
+VARIABLE POWER_NAME  "VDD" "VDDPST" "AVDD" "DVDD"
+VARIABLE GROUND_NAME  "VSS"
+
+LAYOUT PRIMARY "CHIP"
+LAYOUT PATH "../../outputs/CHIP.gds"
+LAYOUT SYSTEM GDS
+
+SOURCE PRIMARY "CHIP"
+SOURCE PATH "CHIP_inc.spi"
+
+ERC RESULTS DATABASE "output/calibre_erc.db" ASCII // ASCII or GDSII
+ERC SUMMARY REPORT "output/calibre_erc.sum"
+
+LVS REPORT "output/lvs.rep"
+
+VIRTUAL CONNECT BOX NAME "?"
+
+DRC ICSTATION YES
+
+include ./scr/LVS_Calibre.modified
+

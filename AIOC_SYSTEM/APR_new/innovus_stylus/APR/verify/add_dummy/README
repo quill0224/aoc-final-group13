@@ -1,0 +1,4 @@
+To generate dummy and merge, 
+first run the 3 script: run_BE.csh run_COD.csh run_FE.csh
+then run run_merge.csh at last.
+

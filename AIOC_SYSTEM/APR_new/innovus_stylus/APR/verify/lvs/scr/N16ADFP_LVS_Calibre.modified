@@ -1,0 +1,4161 @@
+#!tvf
+
+tvf::VERBATIM {
+
+
+// xCalibre/calibre  RC/LVS command file based on the follow calibre command file//
+/////////////////////////////////////////////////////////////////////////////////
+// 
+///////////////////////////////////////////////////////////////////////// 
+//// 
+////                      TSMC CONFIDENTIAL 
+//// 
+///////////////////////////////////////////////////////////////////////// 
+//   @(#) TSMC 16nm CALIBRE LVS/CCI COMMAND FILE, 02/18/2022
+//   @(#) COMMAND FILE VERSION: v1.0a
+//   @(#) COMMAND FILE METAL SCHEME: 1P11M  
+//   @(#) COMMAND FILE DATE: 02/18/2022  
+//   @(#) EDA TOOL VERSION: Calibre 2019.2_26.18 ; 
+//////////////////////////////////////////////////////////////////////////////// 
+// DISCLAIMER 
+// 
+// This file usually contains the super set of device extraction rule at TSMC
+// processes. However, all of device in basic deck may not be offered at current
+// SPICE model. PLEASE ALWAYS REFER TO THE CORRESPONDING SPICE MODEL DOCUMENT
+// FOR ANY DEVICE YOU WOULD LIKE USE.
+// 
+// The information contained herein is provided by TSMC on an "AS IS" basis 
+// without any warranty, and TSMC has no obligation to support or otherwise 
+// maintain the information.  TSMC disclaims any representation that the 
+// information does not infringe any intellectual property rights or proprietary 
+// rights of any third parties.  There are no other warranties given by TSMC, 
+// whether express, implied or statutory, including, without limitation, implied 
+// warranties of merchantability and fitness for a particular purpose. 
+// 
+// STATEMENT OF USE 
+// 
+// This information contains confidential and proprietary information of TSMC. 
+// No part of this information may be reproduced, transmitted, transcribed, 
+// stored in a retrieval system, or translated into any human or computer 
+// language, in any form or by any means, electronic, mechanical, magnetic, 
+// optical, chemical, manual, or otherwise, without the prior written permission 
+// of TSMC.  This information was prepared for informational purpose and is for 
+// use by TSMC's customers only.  TSMC reserves the right to make changes in the 
+// information at any time and without notice. 
+// 
+//////////////////////////////////////////////////////////////////////////////// 
+// 
+// 
+//////////////////////////////////////////////////////////////////////////////// 
+// 
+//                             DEVICE FORMULA 
+//
+//   ----- ----------------------------- ---------------------------------- 
+//   NAME     DESCRIPTION                   DEVICE LAYER OPERATION 
+//   ----- ----------------------------- ---------------------------------- 
+//   M[nch_svt_mac]             Core Standard-Vt VT NMOS                          (FINMOS-PODE_GATE*(NGATE-OD18*VTS_N)-DNWDMY) 
+//   M[nch_lvt_mac]             CORE Low VT NMOS                                  (FINMOS-PODE_GATE*(NGATE-OD18*VTL_N)-DNWDMY) 
+// 
+//   M[nch_18_mac]              I/O 1.8V VT NMOS                                  (FINMOS-PODE_GATE*(NGATE*OD18)-DNWDMY) 
+//   M[nch_svt_dnw_mac]         Core Standard-Vt VT NMOS in DNW                   (FINMOS-PODE_GATE*(NGATE-OD18*VTS_N)*DNWDMY) 
+//   M[nch_lvt_dnw_mac]         CORE Low VT NMOS in DNW                           (FINMOS-PODE_GATE*(NGATE-OD18*VTL_N)*DNWDMY) 
+// 
+//   M[nch_18_dnw_mac]          I/O 1.8V VT NMOS in DNW                           (FINMOS-PODE_GATE*(NGATE*OD18)*DNWDMY) 
+//   M[pch_svt_mac]             Core Standard-Vt VT PMOS                          (FINMOS-PODE_GATE*(PGATE-OD18*VTS_P)) 
+//   M[pch_lvt_mac]             CORE Low VT PMOS                                  (FINMOS-PODE_GATE*(PGATE-OD18*VTL_P)) 
+//   M[pch_18_mac]              I/O 1.8V VT PMOS                                  (FINMOS-PODE_GATE*PGATE*OD18) 
+// 
+// 
+// 
+// 
+// 
+//    
+//   npode_svt_mac              Core Standard-Vt VT NPODE                         (FINMOS*PODE_GATE*(NGATE-OD18*VTS_N)) 
+//   npode_lvt_mac              CORE Low VT NPODE                                 (FINMOS*PODE_GATE*(NGATE-OD18*VTL_N)) 
+//   npode_18_mac               I/O 1.8V VT NPODE                                 (FINMOS*PODE_GATE*(NGATE*OD18)) 
+//   ppode_svt_mac              Core Standard-Vt VT PPODE                         (FINMOS*PODE_GATE*(PGATE-OD18*VTS_P)) 
+//   ppode_lvt_mac              CORE Low VT PPODE                                 (FINMOS*PODE_GATE*(PGATE-OD18*VTL_P)) 
+//   ppode_18_mac               I/O 1.8V VT PPODE                                 (FINMOS*PODE_GATE*PGATE*OD18) 
+// 
+//   M[nch_mpodesvt_mac]        4T N-type SVT MPODE                               (FINMOS*PODE_GATE*(NGATE-OD18*VTS_N))              
+//   M[nch_mpodelvt_mac]        4T N-type LVT MPODE                               (FINMOS*PODE_GATE*(NGATE-OD18*VTL_N)) 
+//   M[pch_mpodesvt_mac]        4T P-type SVT MPODE                               (FINMOS*PODE_GATE*(PGATE-OD18*VTS_P)) 
+//   M[pch_mpodelvt_mac]        4T P-type LVT MPODE                               (FINMOS*PODE_GATE*(PGATE-OD18*VTL_P)) 
+// 
+//   D[nwdio]                   CORE diode NW/PW                                  (FINMOS*DIODMY*OD*NW*PO)  
+//   D[dnwpsub]                 Diode DNW/PSUB                                    (DNW*PSUB) 
+//   D[pwdnw]                   Diode PW/DNW                                      (DNW-NW) 
+//   D[pnwdio]                  Parasitic NW/PW diode                             (NW-DIODMY)    
+//   ndio_mac                   0.8V N+/PW diode                                  (FINMOS*DIODMY*OD*PO*NP-OD18*PSUB) 
+//   pdio_mac                   0.8V P+/NW diode                                  (FINMOS*DIODMY*OD*PO*PP-OD18*NW) 
+//   ndio_18_mac                1.8V diode N+/PW                                  (FINMOS*DIODMY*OD*PO*NP*OD18*PSUB) 
+//   pdio_18_mac                1.8V diode P+/NW                                  (FINMOS*DIODMY*OD*PO*PP*OD18*NW) 
+// 
+//   Q[pnp2_mac]                PNP2X2 mac                                        (FINMOS*BJTDMY*OD*PO*PP*NW) 
+//   nmoscap_18                 1.8V MOSCAP Varactor                              (FINMOS-PODE_GATE*(VARGT*OD18)-RFDMY) 
+//   rhim                       High R resistor 2T                                (RPDMYi*RH_TN) 
+// 
+//   rm1w                     M1 resistor                                       (RMDMY1*M1i) 
+//   rm2w                     M2 resistor                                       (RMDMY2*M2i) 
+//   rm3w                     M3 resistor                                       (RMDMY3*M3i) 
+//   rm4w                     M4 resistor                                       (RMDMY4*M4i) 
+//   rm5w                     M5 resistor                                       (RMDMY5*M5i) 
+//   rm6w                     M6 resistor                                       (RMDMY6*M6i) 
+//   rm7w                     M7 resistor                                       (RMDMY7*M7i) 
+//   rm8w                     M8 resistor                                       (RMDMY8*M8i) 
+//   rm9w                     M9 resistor                                       (RMDMY9*M9i) 
+//   rm10w                     M10 resistor                                       (RMDMY10*M10i) 
+//   rm11w                     M11 resistor                                       (RMDMY11*M11i) 
+//   rmap                       AP resistor                                       (RMDMYAP*APi) 
+// 
+//   ----- ----------------------------- ---------------------------------- 
+//   * OD    = ODI 
+//   * PO    = POI 
+//   * p3    = p3i 
+//   * PSUB  = BULK 
+// 
+//   * DNWDMY  = DNW * LVSDMY4 
+//   * NGATE = ODI * POI * NP - NW  
+//   * PGATE = ODI * POI * PP * NW  
+//   * NGATES = ODI * POI * NP - NW 
+//   * PGATES = ODI * POI * PP * NW 
+// 
+//   * VARGT = ODI * POI * NP * NW * VARi 
+// 
+//   * OD2    = OD18 
+//   * BJTDMY = BJTDMYi 
+//   * RPDMYi = RPDMYai 
+//   * RPDMY1 = RPDMYa1 
+//   * VAR    = VARi 
+//   * DIODMY = DIODMYi 
+//   * RH_TN = RH_TNi 
+// 
+//   * M2i = M2i 
+//   * M3i = M3i 
+//   * M4i = M4i 
+//   * M5i = M5i 
+//   * M6i = M6i 
+//   * M7i = M7i 
+//   * M8i = M8i 
+//   * M9i = M9i 
+//   * M10i = M10i 
+//   * M11i = M11i 
+// 
+//////////////////////////////////////////////////////////////////////////////// 
+// 
+// USER NOTES :  
+//  
+// 1) For Calibre "EDTEXT" file, use .INCLUDE strings.txt.  
+//        LAYOUT TEXT  "text string" [x] [y]  (layer num) (cell name)  
+//  
+// 2) Input layer 'OD' is defined as thin oxide (OD) area which would   
+//    be drawn by one generic od mask or by seperated N+OD and P+OD.   
+//    Remove layers in the 'OD' entries you don't want to use at   
+//    layer definition block.  
+//  
+// 3) Default setting for property check is 0%. Users should check with  
+//    IP/Designe providers for proper tolerance.  
+//  
+// 4) It's recommended to run Calibre LVS by hierarchical mode since false  
+//    errors have been encountered by only flat mode option '-lvs'.  
+//  
+// 5) Default property resolution for ambiguity is set to 32. It could be  
+//    necessary to increase this setting to resolve serious ambiguity.  
+//    Uncomment statement 'LVS PROPERTY RESOLUTION MAXIMUM' in this deck  
+//    to reset the capability of property resolution.  
+//  
+// 6) By default, the two diodes, pwdnw and dnwpsub, are not extracted in this command   
+//     file.  Please turn on the switches, "#DEFINE extract_dnwpsub" and  
+//     "#DEFINE extract_pwdnw" to apply the extraction of these two diode.  
+// 
+// 7) By default, the nw-psub parasitic diode is not extracted. Please turn on the switch 
+//     "#DEFINE extract_pnwdio" to apply the extraction of this diode. 
+// 
+// 8) Layer number 2000 - 2050 is saved for pseudo layer purpose.  
+//     Please don't adopt these layers. 
+// 
+// 9) By default, VIRTUAL CONNECT COLON is set yes. Please set to "NO" as doing full-chip checking. 
+// 
+// 10) change default setting of option "LVS INJECT LOGIC NO". 
+//     Set for "NO" to align the default setting of Calibre version before 2008 to do backward compatible. 
+// 
+// 11) This file usually reads all datatypes (0-255) for each CAD layer defined.  
+//     User customization datatype maybe already included in the layout mapping of this deck.  
+//     PLEASE ALWAYS REVIEW THE LAYER DEFINITION AND MODIFY IT FOR USERS' PARTICULAR LAYER USAGE.      
+//lvs_gen.pl version: 1.488
+//calibre_ff.pl version: 1.619
+
+// LVS/RC switch option
+// --------------------
+#define LVS_DECK   //uncomment this line when this deck would be used as a LVS command file
+//#define CCI_DECK   //uncomment this line when this deck would be used as a CCI command file
+//#define FILTER_DGS_TIED_MOS // uncomment this line to filter MOS with D, G and S tied together (default filter MOS with all pins tied)
+#define WELL_TO_PG_CHECK 
+// Default is on. Turn on to highlight if nwell connects to ground or psub connects to power.
+//#define GATE_TO_PG_CHECK 
+// Default is off. Turn on to highlight if a mos gate directly connects to power or ground.
+//#define PATH_CHECK 
+// Default is off. Turn on to highlight if
+//(1) nodes have a path to power but no path to ground
+//(2) nodes have a path to ground but no path to power
+//(3) nodes have no path to power or ground
+//(4) nodes have no path to any label net
+#define DS_TO_PG_CHECK 
+// Default is on. Turn on to highlight if drain connects to power and source connects to ground.
+#define FLOATING_WELL_CHECK 
+// Default is on. Turn on to highlight if well does not connect to power or ground. 
+//The nwell of moscaps and nwell-resistor are excluded.
+#define LVSDMY4_CHECK   
+// Default is on. Turn on to highlight if LVSDMY4 without DNW region interact NMOS.
+
+VARIABLE PRESCALE 1.0
+
+//#define NW_RING	//uncomment this line to enable the NW ring to separate the node from BULK
+
+// POWER and GROUND name string variable setting
+//VARIABLE POWER_NAME  "AHVDD"  "AHVDDB"  "AHVDDG"  "AHVDDR"  "AHVDDWELL"  "AVDD"  "AVDDB"  "AVDDBG"  "AVDDG"  "AVDDR"  "AVDWELL"  "DHVDD"  "DVDD"  "HVDDWELL"  "TACVDD"  "TAVD33"  "TAVD33PST"  "TAVDD"  "TAVDDPST"  "TVDD"  "VD33"  "VDD"  "VDD5V"  "VDDESD"  "VDDG"  "VDDM"  "VDDPST"  "VDDSA"  "VDWELL" 
+
+//VARIABLE GROUND_NAME  "AGND"  "AHVSS"  "AHVSSB"  "AHVSSG"  "AHVSSR"  "AHVSSUB"  "AVSS"  "AVSSB"  "AVSSBG"  "AVSSG"  "AVSSR"  "AVSSUB"  "DHVSS"  "DVSS"  "GND"  "HVSSUB"  "TACVSS"  "TAVSS"  "TAVSSPST"  "TVSS"  "VS33"  "VSS"  "VSSESD"  "VSSG"  "VSSM"  "VSSPST"  "VSSUB" 
+
+//#########################################################################
+//# ENVIRONMENT SETTING                              
+//#########################################################################
+
+//  RC_BLOCKING SETTING
+//LAYOUT CELL LIST pcells 
+//LAYOUT PRESERVE CELL LIST pcells
+
+
+#define PICKUP_CHECK             // Comment this line to disable dummy pickup checking. 
+
+//#define unrecognized_device_checking // uncomment this line to do unrecognized device checking
+
+//#define WELL_TEXT             // uncomment this line to enable well pin, nxwell_text and psub_text  
+#define FILTER_PODE             // comment this line to compare pode device
+
+//#define EXTRACT_W             // uncomment this line to extract parameter "w"
+
+#IFNDEF LVS_DECK
+INCLUDE ./DFM/lod_measure.encrypt
+#ENDIF
+//#define FIN_GEN_DFM_SPEC_FILL // Control the generation method of fin_lay
+
+VARIABLE        PMOS_TOP_EXT    0
+VARIABLE        NMOS_BOT_EXT    0
+VARIABLE        MOS_LR_EXT      0
+VARIABLE        L_SHAPE_OD_GATE_LEN 0.25 // based on PO.W.3 and PO.R.12.1
+VARIABLE        VT_SHIFTED_DISTANCE 0.015
+VARIABLE        DX_P80          0.457
+VARIABLE        DY_P80          0.545
+
+//LVS HEAP DIRECTORY "/tmp"
+//#define extract_dnwpsub  // Turn on to extract parasitic dnw/psub diode
+//#define extract_pwdnw    // Turn on to extract parasitic pwell/dnw diode
+//#define extract_pnwdio   // Turn on to extract parasitic nw-psub diode
+
+//#define LVS_REDUCE_PARALLEL_MOS       // Turn on this switch to enable MOS parallel reduction
+//#define LVS_REDUCE_SPLIT_GATES        // Turn on this switch to enable MOS SPLIT GATE reduction
+
+VARIABLE  MOS_Lerr         0
+VARIABLE  MOS_NFINerr      0
+VARIABLE  DIO_Aerr         0
+VARIABLE  DIO_Lerr         0
+VARIABLE  DIO_NFINerr      0
+VARIABLE  DIOWELL_Aerr     0
+VARIABLE  BJT_Aerr         0
+VARIABLE  RES_Werr         0
+VARIABLE  RES_Lerr         0
+VARIABLE  MOSCAP_Werr      0
+VARIABLE  MOSCAP_Lerr      0
+VARIABLE  MOSCAP_NFINerr   0
+VARIABLE  DEFAULT_WP       0.072 
+VARIABLE  OSEY_LEXT        0.55
+
+VARIABLE  FIN_WIDTH        0.01
+VARIABLE  FIN_SPACE        0.038
+VARIABLE  FIN_PITCH        0.048
+VARIABLE  HALF_FIN_WIDTH   ( FIN_WIDTH / 2 )
+
+VARIABLE  MINGRID_RECT1            0.001
+VARIABLE  MINGRID_RECT2            ( MINGRID_RECT1 * 2 )
+
+VARIABLE  MINGRID_RECT4            ( MINGRID_RECT1 * 4 )
+VARIABLE  MINGRID_RECT1_UNIT       ( MINGRID_RECT1 * 1e-6 )
+VARIABLE  MINGRID_RECT1_01_UNIT    (( MINGRID_RECT1 + MINGRID_RECT1 * 0.01 ) * 1e-6)
+//It's recommended to turn on the "FLATTEN CELL" option when dummy patterns are insered.
+//======================================================================================
+//FLATTEN CELL TOP_CELL_DM TOP_CELL_DODDPO  // fill in topcell name of dummy patterns.   
+    
+//LAYOUT PRIMARY "lvs_top"
+//LAYOUT PATH "lvs_top.gds"
+//LAYOUT SYSTEM GDSII
+////LAYOUT PATH "layout.net"
+////LAYOUT SYSTEM SPICE
+
+//SOURCE PRIMARY "lvs_top"
+//SOURCE PATH "lvs_top.cdl"
+SOURCE SYSTEM SPICE
+
+DRC RESULTS DATABASE "calibre_drc.db" ASCII // ASCII or GDSII
+DRC SUMMARY REPORT "calibre_drc.sum"
+
+//ERC RESULTS DATABASE "calibre_erc.db" ASCII // ASCII or GDSII
+//ERC SUMMARY REPORT "calibre_erc.sum"
+
+//LVS REPORT "lvs.rep"
+LVS REPORT MAXIMUM 1000 // ALL
+MASK RESULTS DATABASE NONE //"mask.db"
+
+#IFDEF CCI_DECK
+  MASK SVDB DIRECTORY "svdb" QUERY CCI
+#ENDIF
+
+#IFDEF LVS_DECK
+  MASK SVDB DIRECTORY "svdb" QUERY
+#ENDIF
+
+LVS ISOLATE SHORTS YES
+LVS REPORT OPTION S
+
+SOURCE CASE YES                 // set case sensitivity for the source 
+LAYOUT CASE YES                 // set case sensitivity for the layout
+LVS COMPARE CASE NAMES TYPES SUBTYPES VALUES    // set case sensititive during LVS comparison
+
+LAYOUT PRECISION 1000
+PRECISION 10000
+LAYOUT MAGNIFY AUTO
+RESOLUTION 1
+UNIT LENGTH U
+
+TEXT DEPTH PRIMARY
+PORT DEPTH PRIMARY
+
+FLAG SKEW YES
+FLAG OFFGRID YES
+//LAYOUT ALLOW DUPLICATE CELL YES
+
+LVS INJECT LOGIC                 NO
+LVS SPICE PREFER PINS            YES
+LVS SPICE REPLICATE DEVICES      YES
+LVS ABORT ON SUPPLY ERROR        NO
+LVS ALL CAPACITOR PINS SWAPPABLE YES
+LVS RECOGNIZE GATES              NONE
+LVS IGNORE PORTS                 NO
+LVS CHECK PORT NAMES             YES
+LVS REDUCE PARALLEL BIPOLAR      NO    // NOT recommend to set YES 
+LVS REDUCE PARALLEL DIODES       NO    // NOT recommend to set YES 
+LVS REDUCE PARALLEL CAPACITORS   NO    // NOT recommend to set YES 
+LVS REDUCE PARALLEL RESISTORS    NO    // NOT recommend to set YES 
+LVS REDUCE SERIES RESISTORS      NO    // NOT recommend to set YES   
+LVS REDUCE SERIES CAPACITORS     NO    // NOT recommend to set YES  
+
+// For tied S/D together and Gate is floating
+//LVS FILTER UNUSED OPTION AC AD RC RE RG
+//LVS FILTER UNUSED OPTION B D E O
+
+//Strongly recommand to comment FILTER_DGS_TIED_MOS switch
+//AG is to filter MOS with all pins tied together, AB is to filter MOS with D,G,S tied together
+#IFNDEF FILTER_DGS_TIED_MOS
+LVS FILTER UNUSED OPTION AG RC RE RG
+#ELSE
+LVS FILTER UNUSED OPTION AB RC RE RG
+#ENDIF
+LVS FILTER D(pnwdio) OPEN LAYOUT
+LVS PROPERTY RESOLUTION MAXIMUM 65536 // ALL
+
+//User Define Device Reduce
+//====================================================================
+
+
+//LVS REDUCE nmoscap_18 PARALLEL YES
+//[ TOLERANCE lr 0 
+//  EFFECTIVE nfin, lr
+//  lr = sum(lr)/count()
+//  nfin = sum(nfin)
+//]
+
+
+
+
+LVS REDUCE rhim PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rhim SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rhim PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rhim SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm1w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm1w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm1w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm1w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm2w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm2w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm2w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm2w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm3w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm3w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm3w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm3w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm4w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm4w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm4w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm4w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm5w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm5w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm5w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm5w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm6w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm6w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm6w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm6w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm7w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm7w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm7w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm7w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm8w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm8w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm8w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm8w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm9w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm9w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm9w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm9w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm10w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm10w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm10w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm10w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rm11w PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rm11w SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rm11w PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rm11w SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE rmap PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE rmap SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE rmap PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE rmap SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE efuse_mx PARALLEL NO               // NOT recommend to set YES 
+LVS REDUCE efuse_mx SERIES PLUS MINUS NO      // NOT recommend to set YES 
+//LVS REDUCE efuse_mx PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l
+//  l = sum(l)/count()
+//  w = sum(w)
+//]
+//LVS REDUCE efuse_mx SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l
+//  w = sum(w)/count()
+//  l = sum(l)
+//]
+LVS REDUCE efuse_vx PARALLEL NO              // NOT recommend to set YES 
+LVS REDUCE efuse_vx SERIES PLUS MINUS NO     // NOT recommend to set YES 
+//LVS REDUCE efuse_vx PARALLEL YES
+//[ TOLERANCE l 0
+//  EFFECTIVE w,l,wv,lv
+//  l = sum(l)/count()
+//  w = sum(w)
+//  lv = sum(lv)/count()
+//  wv = sum(wv)/count()
+//]
+//LVS REDUCE efuse_vx SERIES PLUS MINUS YES
+//[ TOLERANCE w 0
+//  effective w,l,wv,lv
+//  w = sum(w)/count()
+//  l = sum(l)
+//  lv = sum(lv)/count()
+//  wv = sum(wv)/count()
+//]
+
+//================================================================
+// Only list layers relative with device formation, exclude wells
+LAYOUT BASE LAYER ODI POI M0_ODii M0_POi VIA0
+
+VIRTUAL CONNECT COLON YES
+
+#IFDEF CCI_DECK
+LVS PUSH DEVICES SEPARATE PROPERTIES YES
+LVS CENTER DEVICE PINS YES
+LVS CENTER DEVICE LOCATION YES
+#ENDIF
+
+DMACRO LVS_PROPERTY_INITIALIZE ELEMENT {
+    LVS PROPERTY INITIALIZE ELEMENT [
+        PROPERTY nfin, l, nf
+        in_NF=INP_NUM_VAL(nf)
+        IF ( IS_MISSING( in_NF ) ) {
+            nf = 1
+        } ELSE {
+            nf = in_NF
+        }
+        nfin = INP_NUM_VAL(nfin)
+        nfin = nfin * nf
+        l = INP_NUM_VAL(l)
+    ]
+}
+
+CMACRO LVS_PROPERTY_INITIALIZE MN
+CMACRO LVS_PROPERTY_INITIALIZE MP
+CMACRO LVS_PROPERTY_INITIALIZE LDDN
+CMACRO LVS_PROPERTY_INITIALIZE LDDP
+
+#IFDEF LVS_REDUCE_PARALLEL_MOS
+LVS REDUCE PARALLEL MOS YES [
+	TOLERANCE l 0
+	EFFECTIVE nfin, l
+	nfin = SUM( nfin )
+	l = min(l)
+]
+#ELSE
+LVS REDUCE PARALLEL MOS NO
+#ENDIF
+
+#IFDEF LVS_REDUCE_SPLIT_GATES
+LVS REDUCE SPLIT GATES YES
+[
+	TOLERANCE l 0
+	EFFECTIVE nfin, l
+	nfin = SUM(nfin)
+	l = min(l)
+]
+#ELSE
+LVS REDUCE SPLIT GATES NO
+#ENDIF
+
+LVS POWER NAME POWER_NAME 
+LVS GROUND NAME GROUND_NAME 
+//#############################################
+//# MAPPING                                   #
+//#############################################
+LAYER DNW            3000 
+LAYER MAP 1 DATATYPE 0 3000 //  Deep N-Well
+LAYER NW             3001 
+LAYER MAP 3 DATATYPE 0 3001 //  N-Well
+LAYER ODI            3002 
+LAYER MAP 6 DATATYPE 0 3002 //  Active area, thin oxide for device, or interconnection
+LAYER DOD            3003 
+LAYER MAP 6 DATATYPE 1 3003 //  Dummy OD
+LAYER SR_DOD         3004 
+LAYER MAP 6 DATATYPE 7 3004 //  For special rule dummy OD 
+LAYER VTL_N          3005 
+LAYER MAP 12 DATATYPE 0 3005 //  CORE Low VT NMOS
+LAYER VTL_P          3006 
+LAYER MAP 13 DATATYPE 0 3006 //  CORE Low VT PMOS
+LAYER OD18           3007 
+LAYER MAP 16 DATATYPE 0 3007 //  FOR 1.8V thick oxide (third gate oxide)
+LAYER POI            3008 
+LAYER MAP 17 DATATYPE 0 3008 //  Gate poly, poly Si
+LAYER DPO            3009 
+LAYER MAP 17 DATATYPE 1 3009 //  Dummy PO
+LAYER SR_DPO         3010 
+LAYER MAP 17 DATATYPE 7 3010 //  Special rule dummy PO 
+LAYER CPO            3011 
+LAYER MAP 17 DATATYPE 11 3011 //  Poly double cutting 
+LAYER DCPO           3012 
+LAYER MAP 17 DATATYPE 23 3012 //  Dummy CPO
+LAYER VTS_N          3013 
+LAYER MAP 23 DATATYPE 0 3013 //  Standard Vt N+ implant layer
+LAYER VTS_P          3014 
+LAYER MAP 24 DATATYPE 0 3014 //  Standard Vt P+ implant layer
+LAYER PP             3015 
+LAYER MAP 25 DATATYPE 0 3015 //  P+ S/D Implant
+LAYER NP             3016 
+LAYER MAP 26 DATATYPE 0 3016 //  N+ S/D Implant
+LAYER M1i            3017 
+LAYER MAP 31 DATATYPE 0 3017 //  Metal1 layer 
+LAYER DUM1           3018 3019 3020 3021 3022 3023 
+LAYER MAP 31 DATATYPE 1 3018
+LAYER MAP 31 DATATYPE 2 3019
+LAYER MAP 31 DATATYPE 3 3020
+LAYER MAP 31 DATATYPE 7 3021
+LAYER MAP 31 DATATYPE 8 3022
+LAYER MAP 31 DATATYPE 9 3023 //  Dummy Metal1
+LAYER M2i            3024 
+LAYER MAP 32 DATATYPE 70 3024 // 
+LAYER DUM2           3025 3026 3027 3028 3029 3030 
+LAYER MAP 32 DATATYPE 71 3025
+LAYER MAP 32 DATATYPE 72 3026
+LAYER MAP 32 DATATYPE 73 3027
+LAYER MAP 32 DATATYPE 77 3028
+LAYER MAP 32 DATATYPE 78 3029
+LAYER MAP 32 DATATYPE 79 3030 // 
+LAYER M3i            3031 
+LAYER MAP 33 DATATYPE 70 3031 // 
+LAYER DUM3           3032 3033 3034 3035 3036 3037 
+LAYER MAP 33 DATATYPE 71 3032
+LAYER MAP 33 DATATYPE 72 3033
+LAYER MAP 33 DATATYPE 73 3034
+LAYER MAP 33 DATATYPE 77 3035
+LAYER MAP 33 DATATYPE 78 3036
+LAYER MAP 33 DATATYPE 79 3037 // 
+LAYER M4i            3038 3039 
+LAYER MAP 34 DATATYPE 150 3038
+LAYER MAP 34 DATATYPE 155 3039 // 
+LAYER DUM4           3040 3041 3042 3043 
+LAYER MAP 34 DATATYPE 151 3040
+LAYER MAP 34 DATATYPE 156 3041
+LAYER MAP 34 DATATYPE 157 3042
+LAYER MAP 34 DATATYPE 158 3043 // 
+LAYER M5i            3044 3045 
+LAYER MAP 35 DATATYPE 240 3044
+LAYER MAP 35 DATATYPE 245 3045 // 
+LAYER DUM5           3046 3047 3048 3049 
+LAYER MAP 35 DATATYPE 241 3046
+LAYER MAP 35 DATATYPE 246 3047
+LAYER MAP 35 DATATYPE 247 3048
+LAYER MAP 35 DATATYPE 248 3049 // 
+LAYER M6i            3050 3051 
+LAYER MAP 36 DATATYPE 240 3050
+LAYER MAP 36 DATATYPE 245 3051 // 
+LAYER DUM6           3052 3053 3054 3055 
+LAYER MAP 36 DATATYPE 241 3052
+LAYER MAP 36 DATATYPE 246 3053
+LAYER MAP 36 DATATYPE 247 3054
+LAYER MAP 36 DATATYPE 248 3055 // 
+LAYER M7i            3056 3057 
+LAYER MAP 37 DATATYPE 240 3056
+LAYER MAP 37 DATATYPE 245 3057 // 
+LAYER DUM7           3058 3059 3060 3061 
+LAYER MAP 37 DATATYPE 241 3058
+LAYER MAP 37 DATATYPE 246 3059
+LAYER MAP 37 DATATYPE 247 3060
+LAYER MAP 37 DATATYPE 248 3061 // 
+LAYER M8i            3062 
+LAYER MAP 38 DATATYPE 20 3062 // 
+LAYER DUM8           3063 3064 
+LAYER MAP 38 DATATYPE 21 3063
+LAYER MAP 38 DATATYPE 27 3064 // 
+LAYER M9i            3065 
+LAYER MAP 39 DATATYPE 20 3065 // 
+LAYER DUM9           3066 3067 
+LAYER MAP 39 DATATYPE 21 3066
+LAYER MAP 39 DATATYPE 27 3067 // 
+LAYER M10i           3068 
+LAYER MAP 40 DATATYPE 80 3068 // 
+LAYER DUM10          3069 
+LAYER MAP 40 DATATYPE 81 3069 // 
+LAYER M11i           3070 
+LAYER MAP 41 DATATYPE 80 3070 // 
+LAYER DUM11          3071 
+LAYER MAP 41 DATATYPE 81 3071 // 
+LAYER VIA1i          3072 3073 
+LAYER MAP 51 DATATYPE 70 3072
+LAYER MAP 51 DATATYPE 71 3073 // 
+LAYER VIA2i          3074 3075 
+LAYER MAP 52 DATATYPE 70 3074
+LAYER MAP 52 DATATYPE 71 3075 // 
+LAYER VIA3i          3076 3077 
+LAYER MAP 53 DATATYPE 150 3076
+LAYER MAP 53 DATATYPE 151 3077 // 
+LAYER VIA4i          3078 3079 
+LAYER MAP 54 DATATYPE 240 3078
+LAYER MAP 54 DATATYPE 241 3079 // 
+LAYER VIA5i          3080 3081 
+LAYER MAP 55 DATATYPE 240 3080
+LAYER MAP 55 DATATYPE 241 3081 // 
+LAYER VIA6i          3082 3083 
+LAYER MAP 56 DATATYPE 240 3082
+LAYER MAP 56 DATATYPE 241 3083 // 
+LAYER VIA7i          3084 3085 
+LAYER MAP 57 DATATYPE 20 3084
+LAYER MAP 57 DATATYPE 21 3085 // 
+LAYER VIA8i          3086 3087 
+LAYER MAP 58 DATATYPE 20 3086
+LAYER MAP 58 DATATYPE 21 3087 // 
+LAYER VIA9i          3088 
+LAYER MAP 59 DATATYPE 80 3088 // 
+LAYER VIA10i         3089 
+LAYER MAP 60 DATATYPE 80 3089 // 
+LAYER APi            3090 
+LAYER MAP 74 DATATYPE 0 3090 //  Al RDL 
+LAYER M0_ODii        3091 
+LAYER MAP 84 DATATYPE 0 3091 //  M0_OD between OD and M1 - one step process
+LAYER DM0D           3092 
+LAYER MAP 84 DATATYPE 1 3092 //  Dummy M0_OD filling
+LAYER M0_POi         3093 
+LAYER MAP 84 DATATYPE 2 3093 //  M0_PO for PO connection under metal1
+LAYER DM0P           3094 
+LAYER MAP 84 DATATYPE 3 3094 //  Dummy M0_PO filling 
+LAYER SR_DMD         3095 
+LAYER MAP 84 DATATYPE 7 3095 //  Dummy M0_OD pattern
+LAYER CM0_OD         3096 
+LAYER MAP 84 DATATYPE 20 3096 //  Metal 0 OD cut layer
+LAYER DCM0_OD        3097 
+LAYER MAP 84 DATATYPE 21 3097 //  Dummy Metal 0 OD cut layer
+LAYER SR_DCM0_OD     3098 
+LAYER MAP 84 DATATYPE 27 3098 //  OPC Dummy Metal 0 OD cut layer
+LAYER SR_DMP         3099 
+LAYER MAP 84 DATATYPE 47 3099 //  Dummy M0_PO pattern 
+LAYER RVi            3100 
+LAYER MAP 85 DATATYPE 0 3100 //  VIA hole between APRDL and top metal
+LAYER BJTDMYi        3101 
+LAYER MAP 110 DATATYPE 0 3101 //  BJT dummy layer for LVS
+LAYER BJTEDMY        3102 
+LAYER MAP 110 DATATYPE 2 3102 //  BJT emit dummy layer 
+LAYER RPDMYai        3103 
+LAYER MAP 115 DATATYPE 0 3103 //  dummy layer to form OD/POLY 2-terminal resistor
+LAYER RPDMYa1        3104 
+LAYER MAP 115 DATATYPE 1 3104 //  dummy layer to form OD/POLY 3-terminal resistor
+LAYER RMDMY1         3105 
+LAYER MAP 116 DATATYPE 1 3105 //  dummy layer to form M1 resistor
+LAYER RMDMY2         3106 
+LAYER MAP 116 DATATYPE 2 3106 //  dummy layer to form M2 resistor
+LAYER RMDMY3         3107 
+LAYER MAP 116 DATATYPE 3 3107 //  dummy layer to form M3 resistor
+LAYER RMDMY4         3108 
+LAYER MAP 116 DATATYPE 4 3108 //  dummy layer to form M4 resistor
+LAYER RMDMY5         3109 
+LAYER MAP 116 DATATYPE 5 3109 //  dummy layer to form M5 resistor
+LAYER RMDMY6         3110 
+LAYER MAP 116 DATATYPE 6 3110 //  dummy layer to form M6 resistor
+LAYER RMDMY7         3111 
+LAYER MAP 116 DATATYPE 7 3111 //  dummy layer to form M7 resistor
+LAYER RMDMY8         3112 
+LAYER MAP 116 DATATYPE 8 3112 //  dummy layer to form M8 resistor
+LAYER RMDMY9         3113 
+LAYER MAP 116 DATATYPE 9 3113 //  dummy layer to form M9 resistor
+LAYER RMDMY10        3114 
+LAYER MAP 116 DATATYPE 10 3114 //  dummy layer to form M10 resistor
+LAYER RMDMY11        3115 
+LAYER MAP 116 DATATYPE 11 3115 //  dummy layer to form M11 resistor
+LAYER RMDMYAP        3116 
+LAYER MAP 116 DATATYPE 16 3116 //  dummy layer to form AP resistor
+LAYER RH_TNi         3117 
+LAYER MAP 117 DATATYPE 6 3117 //  layer to form HiR TiN resistor
+LAYER SR_DTN         3118 
+LAYER MAP 117 DATATYPE 7 3118 //  dummy TiN 
+LAYER DIODMYi        3119 
+LAYER MAP 119 DATATYPE 0 3119 //  dummy layer to form diode
+LAYER VARi           3120 
+LAYER MAP 143 DATATYPE 0 3120 //  layer to form Varactor
+LAYER VIA0           3121 
+LAYER MAP 159 DATATYPE 0 3121 // 
+LAYER SRAMDMY        3122 
+LAYER MAP 186 DATATYPE 0 3122 //  LVS dummy layer for SRAM
+LAYER LVSDMY4        3123 
+LAYER MAP 208 DATATYPE 4 3123 //  Dummy layer to define NMOS devices in DNW region
+LAYER PODE_GATE      3124 
+LAYER MAP 206 DATATYPE 28 3124 //  To define GATE abutting OD vertical edge for LVS recognize MOS, diode and turn-off transistor
+LAYER PODE_TrGATE    3125 
+LAYER MAP 206 DATATYPE 29 3125 //  To define the transistor (with S/D area) which gate abut PODE_GATE
+LAYER FINMOS         3126 
+LAYER MAP 250 DATATYPE 0 3126 //  FinFet layer for Logic MOS
+LAYER WD2_CORE_WO_IMP 3127 
+LAYER MAP 257 DATATYPE 24 3127 //  Dummy marker layer for SR_DOD handling.
+LAYER WD2_IO_WO_IMP  3128 
+LAYER MAP 257 DATATYPE 26 3128 //  Dummy marker layer for SR_DOD handling.
+LAYER WD4_CORE_WO_IMP 3129 
+LAYER MAP 257 DATATYPE 44 3129 //  Dummy marker layer for SR_DOD handling.
+LAYER WD4_IO_WO_IMP  3130 
+LAYER MAP 257 DATATYPE 46 3130 //  Dummy marker layer for SR_DOD handling.
+LAYER AP_text        3131
+LAYER MAP 126 TEXTTYPE 0 3131
+TEXT LAYER 3131 ATTACH 3131 AP
+PORT LAYER TEXT 3131
+LAYER M0_OD_text     3132 
+LAYER MAP 142 TEXTTYPE 69 3132
+PORT LAYER TEXT 3132
+TEXT LAYER 3132 ATTACH 3132 M0_OD_N
+TEXT LAYER 3132 ATTACH 3132 M0_OD_P
+TEXT LAYER 3132 ATTACH 3132 M0_STI
+LAYER M0_PO_text     3133 
+LAYER MAP 142 TEXTTYPE 67 3133
+PORT LAYER TEXT 3133
+TEXT LAYER 3133 ATTACH 3133 M0_PO
+TEXT LAYER 3133 ATTACH 3133 M0_PO_TiN
+LAYER M1_text        3134
+LAYER MAP 131 TEXTTYPE 0 3134
+TEXT LAYER 3134 ATTACH 3134 M1
+PORT LAYER TEXT 3134
+LAYER M10_text       3135
+LAYER MAP 140 TEXTTYPE 0 3135
+TEXT LAYER 3135 ATTACH 3135 M10
+PORT LAYER TEXT 3135
+LAYER M11_text       3136
+LAYER MAP 141 TEXTTYPE 0 3136
+TEXT LAYER 3136 ATTACH 3136 M11
+PORT LAYER TEXT 3136
+LAYER M2_text        3137
+LAYER MAP 132 TEXTTYPE 0 3137
+TEXT LAYER 3137 ATTACH 3137 M2
+PORT LAYER TEXT 3137
+LAYER M3_text        3138
+LAYER MAP 133 TEXTTYPE 0 3138
+TEXT LAYER 3138 ATTACH 3138 M3
+PORT LAYER TEXT 3138
+LAYER M4_text        3139
+LAYER MAP 134 TEXTTYPE 0 3139
+TEXT LAYER 3139 ATTACH 3139 M4
+PORT LAYER TEXT 3139
+LAYER M5_text        3140
+LAYER MAP 135 TEXTTYPE 0 3140
+TEXT LAYER 3140 ATTACH 3140 M5
+PORT LAYER TEXT 3140
+LAYER M6_text        3141
+LAYER MAP 136 TEXTTYPE 0 3141
+TEXT LAYER 3141 ATTACH 3141 M6
+PORT LAYER TEXT 3141
+LAYER M7_text        3142
+LAYER MAP 137 TEXTTYPE 0 3142
+TEXT LAYER 3142 ATTACH 3142 M7
+PORT LAYER TEXT 3142
+LAYER M8_text        3143
+LAYER MAP 138 TEXTTYPE 0 3143
+TEXT LAYER 3143 ATTACH 3143 M8
+PORT LAYER TEXT 3143
+LAYER M9_text        3144
+LAYER MAP 139 TEXTTYPE 0 3144
+TEXT LAYER 3144 ATTACH 3144 M9
+PORT LAYER TEXT 3144
+LAYER poly_text      3145 3146 
+LAYER MAP 149 TEXTTYPE 0 3145
+PORT LAYER TEXT 3145
+LAYER MAP 149 TEXTTYPE 1 3146
+PORT LAYER TEXT 3146
+TEXT LAYER 3145 ATTACH 3145 n_fpoly_svt
+TEXT LAYER 3145 ATTACH 3145 n_fpoly_lvt
+TEXT LAYER 3145 ATTACH 3145 n_fpoly_io
+TEXT LAYER 3145 ATTACH 3145 p_fpoly_svt
+TEXT LAYER 3145 ATTACH 3145 p_fpoly_lvt
+TEXT LAYER 3145 ATTACH 3145 p_fpoly_io
+TEXT LAYER 3146 ATTACH 3146 n_fpoly_svt
+TEXT LAYER 3146 ATTACH 3146 n_fpoly_lvt
+TEXT LAYER 3146 ATTACH 3146 n_fpoly_io
+TEXT LAYER 3146 ATTACH 3146 p_fpoly_svt
+TEXT LAYER 3146 ATTACH 3146 p_fpoly_lvt
+TEXT LAYER 3146 ATTACH 3146 p_fpoly_io
+#IFDEF WELL_TEXT
+LAYER nxwell_text    3147
+LAYER MAP 3 TEXTTYPE 6 3147
+TEXT LAYER 3147 ATTACH 3147 nxwell
+PORT LAYER TEXT 3147
+#ENDIF
+#IFDEF WELL_TEXT
+LAYER psub_text      3148
+LAYER MAP 2 TEXTTYPE 6 3148
+TEXT LAYER 3148 ATTACH 3148 psub
+PORT LAYER TEXT 3148
+#ENDIF
+LAYER TAP_text       3149
+LAYER MAP 127 TEXTTYPE 74 3149
+TEXT LAYER 3149 ATTACH 3149 AP
+LAYER TM1_text       3150
+LAYER MAP 127 TEXTTYPE 31 3150
+TEXT LAYER 3150 ATTACH 3150 M1
+LAYER TM10_text      3151
+LAYER MAP 127 TEXTTYPE 40 3151
+TEXT LAYER 3151 ATTACH 3151 M10
+LAYER TM11_text      3152
+LAYER MAP 127 TEXTTYPE 41 3152
+TEXT LAYER 3152 ATTACH 3152 M11
+LAYER TM2_text       3153
+LAYER MAP 127 TEXTTYPE 32 3153
+TEXT LAYER 3153 ATTACH 3153 M2
+LAYER TM3_text       3154
+LAYER MAP 127 TEXTTYPE 33 3154
+TEXT LAYER 3154 ATTACH 3154 M3
+LAYER TM4_text       3155
+LAYER MAP 127 TEXTTYPE 34 3155
+TEXT LAYER 3155 ATTACH 3155 M4
+LAYER TM5_text       3156
+LAYER MAP 127 TEXTTYPE 35 3156
+TEXT LAYER 3156 ATTACH 3156 M5
+LAYER TM6_text       3157
+LAYER MAP 127 TEXTTYPE 36 3157
+TEXT LAYER 3157 ATTACH 3157 M6
+LAYER TM7_text       3158
+LAYER MAP 127 TEXTTYPE 37 3158
+TEXT LAYER 3158 ATTACH 3158 M7
+LAYER TM8_text       3159
+LAYER MAP 127 TEXTTYPE 38 3159
+TEXT LAYER 3159 ATTACH 3159 M8
+LAYER TM9_text       3160
+LAYER MAP 127 TEXTTYPE 39 3160
+TEXT LAYER 3160 ATTACH 3160 M9
+LAYER Tpoly_text     3161 
+LAYER MAP 127 TEXTTYPE 17 3161
+TEXT LAYER 3161 ATTACH 3161 n_fpoly_svt
+TEXT LAYER 3161 ATTACH 3161 n_fpoly_lvt
+TEXT LAYER 3161 ATTACH 3161 n_fpoly_io
+TEXT LAYER 3161 ATTACH 3161 p_fpoly_svt
+TEXT LAYER 3161 ATTACH 3161 p_fpoly_lvt
+TEXT LAYER 3161 ATTACH 3161 p_fpoly_io
+//#############################################
+//# LOGIC OPERATION POOL                      #
+//#############################################
+
+//Form BULK layer
+DRC:1 = EXTENT
+BULK  = SIZE DRC:1 BY 0.005
+
+//***** Define connectivity/via layer -- ngate_mac ****
+PO1 = POI OR DPO 
+PO2 = PO1 OR SR_DPO 
+PO3 = COPY PO2 
+poly_cut = CPO OR DCPO 
+POx = PO3 NOT poly_cut  //  Real physical poly
+PO = POx NOT SR_DPO  //  For device formation
+M0_ODa = COPY M0_ODii 
+M0_ODb = M0_ODa OR DM0D 
+M0_ODc = M0_ODb OR SR_DMD 
+C_M0_ODa = CM0_OD OR DCM0_OD 
+C_M0_OD = C_M0_ODa OR SR_DCM0_OD 
+M0_ODd = M0_ODc NOT C_M0_OD 
+rmg3 = PO NOT INTERACT M0_ODd 
+rmg4 = rmg3 NOT INTERACT RH_TNi 
+RPDMYi = RPDMYai NOT SR_DOD 
+RPDMY1 = RPDMYa1 NOT SR_DOD 
+RPDMY = RPDMYi OR RPDMY1 
+rmg5 = rmg4 AND RPDMY 
+ODz = ODI OR DOD 
+ODy = ODz OR SR_DOD 
+ODw = COPY ODy 
+OD = COPY ODw 
+rmg6 = rmg5 NOT INTERACT OD 
+M0_POx1 = M0_POi OR DM0P  //  include DM0_PO
+M0_POx2 = M0_POx1 OR SR_DMP  //  include SR_DM0_PO
+RH_TN_all = RH_TNi OR SR_DTN 
+OD2 = COPY OD18 
+poly_io1 = poly_cci AND OD2 
+poly_io = COPY poly_io1 
+npoly_io = poly_io AND NP 
+ppoly_io = poly_io NOT npoly_io 
+p_fpoly_io = ppoly_io NOT OD 
+p_gpoly_io_all = ppoly_io NOT p_fpoly_io 
+p_gpoly_io1 = p_gpoly_io_all NOT all_mos_gates 
+BJTDMY = BJTDMYi NOT SR_DOD 
+DIODMY = DIODMYi NOT SR_DOD 
+nocg_dmy1 = BJTDMY OR DIODMY 
+nocg_dmy = COPY nocg_dmy1 
+p_gpoly_nocg_io = p_gpoly_io1 AND nocg_dmy 
+
+//* Define layer -- rhim1
+rhim1_tmp01 = RH_TNi NOT OD
+rhim1_tmp02 = rhim1_tmp01 NOT PO
+rhim1_tmp03 = rhim1_tmp02 AND RPDMY
+rhim1_tmp04 = rhim1_tmp03 NOT VAR
+rhim1_tmp05 = rhim1_tmp04 NOT BJTDMYi
+rhim1 = rhim1_tmp05 NOT DIODMY
+
+RH_TN = RH_TN_all NOT rhim1  //  RH_TN resistor terminal
+M0_PO_TiN1 = M0_POx2 AND RH_TN 
+M0_PO_TiN = M0_POx2 INTERACT M0_PO_TiN1  //  M0_PO used for TiN resistors, the thickness differ from general MP
+M0_POx = M0_POx2 NOT M0_PO_TiN 
+M0_STIa = COPY M0_ODd 
+M0_OD = M0_ODd AND OD  //  M0_OD on OD
+M0_STIb = M0_STIa NOT M0_OD 
+M0_POy = M0_POx AND POx  //  M0_STI should exclude the region where M0_PO overlap PO/SR_DPO || SR_DMP overlap SR_DPO
+M0_STIc = M0_STIb NOT M0_POy  //  M0_OD on STI, when M0_STI goes to POx region, it belongs to M0_PO
+M0_PO1 = M0_POx NOT M0_STIc  //  when M0_STI overlap M0_PO, M0_STI is selected
+M0_PO = M0_PO1 NOT M0_OD 
+rmg = rmg6 TOUCH M0_PO 
+poly_cci = POx NOT rmg 
+realpo = poly_cci NOT SR_DPO  //  poly for device formation
+diffa2 = COPY OD 
+diff1 = diffa2 INTERACT M0_ODd 
+diff_MD = diff1 OR M0_ODd 
+MD_valid1 = M0_ODd INTERACT M0_POi 
+VIA0i = COPY VIA0 
+MD_valid2 = M0_ODd INTERACT VIA0i 
+MD_valid4 = MD_valid1 OR MD_valid2 
+MD_valid3 = M0_ODd WITH TEXT "?" M0_OD_text
+MD_valid = MD_valid4 OR MD_valid3 
+diff_valid = diff_MD INTERACT MD_valid 
+diffa = diffa2 AND diff_valid  //  Valid diff to form devices
+diff = diffa INTERACT M0_ODd 
+dumpo1 = poly_cci INSIDE diff 
+M0_STI = COPY M0_STIc 
+VIA0_M0_STI_com = VIA0i AND M0_STI 
+VIA0_M0_PO1 = VIA0i NOT INTERACT VIA0_M0_STI_com 
+VIA0_M0_PO_com1 = VIA0i AND M0_PO 
+VIA0_M0_PO_com = VIA0_M0_PO_com1 NOT M0_OD 
+VIA0_M0_PO = VIA0_M0_PO1 INTERACT VIA0_M0_PO_com 
+dumpo2 = dumpo1 NOT INTERACT VIA0_M0_PO 
+gate1a = realpo NOT dumpo2 
+mdiff = COPY diff 
+gate1 = gate1a AND mdiff 
+gate_a1 = COPY gate1 
+gate = gate_a1 AND FINMOS 
+nxwell = COPY NW 
+gatennw = gate NOT nxwell  //  gate not inside nwell ( nmos gate )
+tngate0 = gatennw AND NP 
+VAR = VARi NOT SR_DOD 
+mos_exclude_layer1 = VAR OR BJTDMY 
+mos_exclude_layer2 = mos_exclude_layer1 OR DIODMY 
+mos_exclude_layer3 = COPY mos_exclude_layer2 
+mos_exclude_layer4 = mos_exclude_layer3 OR RPDMY 
+mos_exclude_layer7 = COPY mos_exclude_layer4 
+mos_exclude_layer = mos_exclude_layer7 OR RH_TNi 
+tngate1 = tngate0 NOT mos_exclude_layer 
+tngate2 = tngate1 NOT PODE_GATE 
+
+//* Define layer -- ngate_mac
+ngate_mac_tmp01 = tngate3 NOT dnwdmy
+ngate_mac_tmp02 = ngate_mac_tmp01 NOT OD18
+ngate_mac_tmp03 = ngate_mac_tmp02 NOT VTL_N
+ngate_mac_tmp04 = ngate_mac_tmp03 NOT VTL_P
+ngate_mac_tmp05 = ngate_mac_tmp04 AND VTS_N
+ngate_mac = ngate_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- psub ****
+psub = BULK NOT NW 
+
+//***** Define connectivity/via layer -- nlvgate_mac ****
+
+//* Define layer -- nlvgate_mac
+nlvgate_mac_tmp01 = tngate3 NOT dnwdmy
+nlvgate_mac_tmp02 = nlvgate_mac_tmp01 NOT OD18
+nlvgate_mac_tmp03 = nlvgate_mac_tmp02 AND VTL_N
+nlvgate_mac_tmp04 = nlvgate_mac_tmp03 NOT VTL_P
+nlvgate_mac_tmp05 = nlvgate_mac_tmp04 NOT VTS_N
+nlvgate_mac = nlvgate_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- nrgate_mac ****
+
+//* Define layer -- nrgate_mac
+nrgate_mac_tmp01 = tngate3 AND dnwdmy
+nrgate_mac_tmp02 = nrgate_mac_tmp01 NOT OD18
+nrgate_mac_tmp03 = nrgate_mac_tmp02 NOT VTL_N
+nrgate_mac_tmp04 = nrgate_mac_tmp03 NOT VTL_P
+nrgate_mac_tmp05 = nrgate_mac_tmp04 AND VTS_N
+nrgate_mac = nrgate_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- n1lvgate_mac ****
+
+//* Define layer -- n1lvgate_mac
+n1lvgate_mac_tmp01 = tngate3 AND dnwdmy
+n1lvgate_mac_tmp02 = n1lvgate_mac_tmp01 NOT OD18
+n1lvgate_mac_tmp03 = n1lvgate_mac_tmp02 AND VTL_N
+n1lvgate_mac_tmp04 = n1lvgate_mac_tmp03 NOT VTL_P
+n1lvgate_mac_tmp05 = n1lvgate_mac_tmp04 NOT VTS_N
+n1lvgate_mac = n1lvgate_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- ngate_18_mac ****
+
+//* Define layer -- ngate_18_mac
+ngate_18_mac_tmp01 = tngate3 NOT dnwdmy
+ngate_18_mac_tmp02 = ngate_18_mac_tmp01 AND OD18
+ngate_18_mac_tmp03 = ngate_18_mac_tmp02 NOT VTL_N
+ngate_18_mac_tmp04 = ngate_18_mac_tmp03 NOT VTL_P
+ngate_18_mac_tmp05 = ngate_18_mac_tmp04 NOT VTS_N
+ngate_18_mac = ngate_18_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- dngate_18_mac ****
+
+//* Define layer -- dngate_18_mac
+dngate_18_mac_tmp01 = tngate3 AND dnwdmy
+dngate_18_mac_tmp02 = dngate_18_mac_tmp01 AND OD18
+dngate_18_mac_tmp03 = dngate_18_mac_tmp02 NOT VTL_N
+dngate_18_mac_tmp04 = dngate_18_mac_tmp03 NOT VTL_P
+dngate_18_mac_tmp05 = dngate_18_mac_tmp04 NOT VTS_N
+dngate_18_mac = dngate_18_mac_tmp05 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- pgate_mac ****
+
+//* Define layer -- pgate_mac
+pgate_mac_tmp01 = tpgate2 NOT OD18
+pgate_mac_tmp02 = pgate_mac_tmp01 NOT VTL_N
+pgate_mac_tmp03 = pgate_mac_tmp02 NOT VTL_P
+pgate_mac_tmp04 = pgate_mac_tmp03 NOT VTS_N
+pgate_mac = pgate_mac_tmp04 AND VTS_P
+
+
+//***** Define connectivity/via layer -- plvgate_mac ****
+
+//* Define layer -- plvgate_mac
+plvgate_mac_tmp01 = tpgate2 NOT OD18
+plvgate_mac_tmp02 = plvgate_mac_tmp01 NOT VTL_N
+plvgate_mac_tmp03 = plvgate_mac_tmp02 AND VTL_P
+plvgate_mac_tmp04 = plvgate_mac_tmp03 NOT VTS_N
+plvgate_mac = plvgate_mac_tmp04 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- pgate_18_mac ****
+
+//* Define layer -- pgate_18_mac
+pgate_18_mac_tmp01 = tpgate2 AND OD18
+pgate_18_mac_tmp02 = pgate_18_mac_tmp01 NOT VTL_N
+pgate_18_mac_tmp03 = pgate_18_mac_tmp02 NOT VTL_P
+pgate_18_mac_tmp04 = pgate_18_mac_tmp03 NOT VTS_N
+pgate_18_mac = pgate_18_mac_tmp04 NOT VTS_P
+
+
+//***** Define connectivity/via layer -- ngate_mpode_mac ****
+Small_Poly3 = POx AND OD 
+Small_Poly2 = Small_Poly3 AND PODE_GATE 
+INT_OD_CORN = INT OD < 0.05 ABUT == 90 REGION INTERSECTING ONLY
+Small_Poly1 = Small_Poly2 INTERACT INT_OD_CORN 
+EXT_OD_CORN = EXT OD < 0.05 ABUT == 90 REGION INTERSECTING ONLY
+Small_Poly = Small_Poly1 INTERACT EXT_OD_CORN 
+Small_gate_edge = Small_Poly INSIDE EDGE OD 
+Pre_Small_gate1 = INT Small_gate_edge < L_SHAPE_OD_GATE_LEN OPPOSITE PARALLEL ONLY REGION
+Mpode_gate1 = Small_Poly2 NOT INTERACT INT_OD_CORN 
+Mpode_gate = Mpode_gate1 NOT INTERACT EXT_OD_CORN 
+Pre_Small_gate = Pre_Small_gate1 OR Mpode_gate 
+PODE_4T = PODE_GATE AND Pre_Small_gate 
+ngate_mpode_mac1 = tngate1 AND PODE_4T 
+ngate_mpode_mac2 = ngate_mpode_mac1 NOT OD18 
+ngate_mpode_mac = ngate_mpode_mac2 INTERACT VTS_N 
+
+//***** Define connectivity/via layer -- nlvgate_mpode_mac ****
+nlvgate_mpode_mac1 = ngate_mpode_mac2 INTERACT VTL_N 
+nlvgate_mpode_mac = nlvgate_mpode_mac1 NOT INTERACT VTS_N 
+
+//***** Define connectivity/via layer -- pgate_mpode_mac ****
+gatenw = gate AND nxwell 
+pgate_imp = COPY PP 
+tpgate0 = gatenw AND pgate_imp 
+tpgate1 = tpgate0 NOT mos_exclude_layer 
+pgate_mpode_mac1 = tpgate1 AND PODE_4T 
+pgate_mpode_mac2 = pgate_mpode_mac1 NOT OD18 
+pgate_mpode_mac = pgate_mpode_mac2 INTERACT VTS_P 
+
+//***** Define connectivity/via layer -- plvgate_mpode_mac ****
+plvgate_mpode_mac1 = pgate_mpode_mac2 INTERACT VTL_P 
+plvgate_mpode_mac = plvgate_mpode_mac1 NOT INTERACT VTS_P 
+
+//* Define device -- xdev npode_svt_mac
+nthin1 = mdiff AND NP 
+nthin = nthin1 NOT SR_DPO 
+ndiffb1 = diffa NOT diff 
+ndiffb = ndiffb1 AND NP 
+tndiff_ori1 = nthin OR ndiffb 
+diffrc1 = diffa2 NOT diffa 
+ndiffrc = diffrc1 AND NP 
+tndiff_ori2 = tndiff_ori1 OR ndiffrc 
+tndiff_ori = tndiff_ori2 NOT POx 
+PODE_3T = PODE_GATE NOT Pre_Small_gate 
+npode_edge1 = PODE_3T TOUCH EDGE tndiff_ori
+npode_edge2 = EXPAND EDGE npode_edge1 OUTSIDE BY 0.001
+npode_edge3 = tndiff_ori NOT npode_edge2 
+npode_edge = tndiff_ori NOT npode_edge3 
+ngate_pode3t1 = tngate1 AND PODE_3T 
+ngate_pode3t2 = ngate_pode3t1 NOT OD18 
+ngate_pode3t = ngate_pode3t2 INTERACT VTS_N 
+ngate_pode3t_edge = npode_edge INTERACT ngate_pode3t 
+
+//* Define device -- xdev npode_lvt_mac
+nlvgate_pode3t1 = ngate_pode3t2 INTERACT VTL_N 
+nlvgate_pode3t = nlvgate_pode3t1 NOT INTERACT VTS_N 
+nlvgate_pode3t_edge = npode_edge INTERACT nlvgate_pode3t 
+
+//* Define device -- xdev npode_18_mac
+ngate_18_pode3t = ngate_pode3t1 AND OD18 
+ngate_18_pode3t_edge = npode_edge INTERACT ngate_18_pode3t 
+
+//* Define device -- xdev ppode_svt_mac
+pthin1 = mdiff AND PP 
+pthin = pthin1 NOT SR_DPO 
+pdiffb1 = diffa NOT diff 
+pdiffb = pdiffb1 NOT ndiffb 
+tpdiff_ori1 = pthin OR pdiffb 
+pdiffrc = diffrc1 NOT ndiffrc 
+tpdiff_ori2 = tpdiff_ori1 OR pdiffrc 
+tpdiff_ori = tpdiff_ori2 NOT POx 
+ppode_edge1 = PODE_3T TOUCH EDGE tpdiff_ori
+ppode_edge2 = EXPAND EDGE ppode_edge1 OUTSIDE BY 0.001
+ppode_edge3 = tpdiff_ori NOT ppode_edge2 
+ppode_edge = tpdiff_ori NOT ppode_edge3 
+pgate_pode3t1 = tpgate1 AND PODE_3T 
+pgate_pode3t2 = pgate_pode3t1 NOT OD18 
+pgate_pode3t = pgate_pode3t2 INTERACT VTS_P 
+pgate_pode3t_edge = ppode_edge INTERACT pgate_pode3t 
+
+//* Define device -- xdev ppode_lvt_mac
+plvgate_pode3t1 = pgate_pode3t2 INTERACT VTL_P 
+plvgate_pode3t = plvgate_pode3t1 NOT INTERACT VTS_P 
+plvgate_pode3t_edge = ppode_edge INTERACT plvgate_pode3t 
+
+//* Define device -- xdev ppode_18_mac
+pgate_18_pode3t = pgate_pode3t1 AND OD18 
+pgate_18_pode3t_edge = ppode_edge INTERACT pgate_18_pode3t 
+
+//* Define device -- diode nwdio
+
+//* Define layer -- nwdio_r
+nwdio_r_tmp01 = DIONW NOT DNW
+nwdio_r_tmp02 = nwdio_r_tmp01 AND NW
+nwdio_r_tmp03 = nwdio_r_tmp02 NOT VTL_N
+nwdio_r_tmp04 = nwdio_r_tmp03 NOT VTL_P
+nwdio_r_tmp05 = nwdio_r_tmp04 NOT VTS_N
+nwdio_r_tmp06 = nwdio_r_tmp05 NOT VTS_P
+nwdio_r_tmp07 = nwdio_r_tmp06 NOT PP
+nwdio_r_tmp08 = nwdio_r_tmp07 NOT RH_TNi
+nwdio_r_tmp09 = nwdio_r_tmp08 NOT RPDMY
+nwdio_r_tmp10 = nwdio_r_tmp09 NOT VAR
+nwdio_r = nwdio_r_tmp10 NOT BJTDMYi
+
+
+//* Define device -- bjt pnp2_mac
+
+//* Define layer -- cemit_reg
+cemit_reg_tmp01 = emit_reg NOT DNW
+cemit_reg_tmp02 = cemit_reg_tmp01 AND FINMOS
+cemit_reg_tmp03 = cemit_reg_tmp02 AND NW
+cemit_reg_tmp04 = cemit_reg_tmp03 NOT OD18
+cemit_reg_tmp05 = cemit_reg_tmp04 NOT VTL_N
+cemit_reg_tmp06 = cemit_reg_tmp05 NOT VTL_P
+cemit_reg_tmp07 = cemit_reg_tmp06 NOT VTS_N
+cemit_reg_tmp08 = cemit_reg_tmp07 NOT VTS_P
+cemit_reg_tmp09 = cemit_reg_tmp08 NOT NP
+cemit_reg_tmp10 = cemit_reg_tmp09 AND PP
+cemit_reg_tmp11 = cemit_reg_tmp10 NOT RPDMY
+cemit_reg_tmp12 = cemit_reg_tmp11 NOT VAR
+cemit_reg_tmp13 = cemit_reg_tmp12 AND BJTDMYi
+cemit_reg_tmp14 = cemit_reg_tmp13 NOT DIODMY
+cemit_reg = cemit_reg_tmp14 NOT RH_TNi
+
+cemit2_mac1 = AREA cemit_reg  > 4.91955  < 4.91957 
+cemit2_mac = COPY cemit2_mac1 
+
+//***** Define connectivity/via layer -- coll1 ****
+nbase1k = nxwell NOT INTERACT DNW 
+nbase1 = nbase1k AND BJTDMY 
+collsur = psub TOUCH nbase1 
+coll1a = collsur OR nbase1  //  define both BJTs collector
+ttdiff = tpdiff_ori AND BJTDMY 
+cnbase1 = nbase1 INTERACT PP  //  define PNP base terminal
+cemit1_1 = ttdiff AND cnbase1 
+cemit1 = FINMOS AND cemit1_1  //  define PNP emitter
+coll1 = coll1a NOT cemit1  //   define pnp collector
+
+//***** Define connectivity/via layer -- tpdiff_bjt ****
+tpdiff_bjt = tpdiff_ori INTERACT BJTDMY 
+
+//* Define device -- xdev ndio_mac
+
+//* Define layer -- ndio_r
+ndio_r_tmp01 = dio0 AND FINMOS
+ndio_r_tmp02 = ndio_r_tmp01 AND OD
+ndio_r_tmp03 = ndio_r_tmp02 NOT NW
+ndio_r_tmp04 = ndio_r_tmp03 NOT OD18
+ndio_r_tmp05 = ndio_r_tmp04 NOT VTL_N
+ndio_r_tmp06 = ndio_r_tmp05 NOT VTL_P
+ndio_r_tmp07 = ndio_r_tmp06 NOT VTS_N
+ndio_r_tmp08 = ndio_r_tmp07 NOT VTS_P
+ndio_r_tmp09 = ndio_r_tmp08 AND NP
+ndio_r_tmp10 = ndio_r_tmp09 NOT PP
+ndio_r_tmp11 = ndio_r_tmp10 NOT RH_TNi
+ndio_r_tmp12 = ndio_r_tmp11 NOT RPDMY
+ndio_r_tmp13 = ndio_r_tmp12 NOT VAR
+ndio_r_tmp14 = ndio_r_tmp13 NOT BJTDMYi
+ndio_r = ndio_r_tmp14 AND DIODMY
+
+
+//***** Define connectivity/via layer -- tndiff_dio ****
+
+//* Define layer -- ndio_18_r
+ndio_18_r_tmp01 = dio0 AND FINMOS
+ndio_18_r_tmp02 = ndio_18_r_tmp01 AND OD
+ndio_18_r_tmp03 = ndio_18_r_tmp02 NOT NW
+ndio_18_r_tmp04 = ndio_18_r_tmp03 AND OD18
+ndio_18_r_tmp05 = ndio_18_r_tmp04 NOT VTL_N
+ndio_18_r_tmp06 = ndio_18_r_tmp05 NOT VTL_P
+ndio_18_r_tmp07 = ndio_18_r_tmp06 NOT VTS_N
+ndio_18_r_tmp08 = ndio_18_r_tmp07 NOT VTS_P
+ndio_18_r_tmp09 = ndio_18_r_tmp08 AND NP
+ndio_18_r_tmp10 = ndio_18_r_tmp09 NOT PP
+ndio_18_r_tmp11 = ndio_18_r_tmp10 NOT RH_TNi
+ndio_18_r_tmp12 = ndio_18_r_tmp11 NOT RPDMY
+ndio_18_r_tmp13 = ndio_18_r_tmp12 NOT VAR
+ndio_18_r_tmp14 = ndio_18_r_tmp13 NOT BJTDMYi
+ndio_18_r = ndio_18_r_tmp14 AND DIODMY
+
+all_ndio_rec1 = ndio_r OR ndio_18_r  //  ndio_mac / ndio_18_mac
+all_ndio_rec = all_ndio_rec1 OR nwdio_r  //  nwdio
+
+//* Define layer -- pdio_r
+pdio_r_tmp01 = dio0 AND FINMOS
+pdio_r_tmp02 = pdio_r_tmp01 AND OD
+pdio_r_tmp03 = pdio_r_tmp02 AND NW
+pdio_r_tmp04 = pdio_r_tmp03 NOT OD18
+pdio_r_tmp05 = pdio_r_tmp04 NOT VTL_N
+pdio_r_tmp06 = pdio_r_tmp05 NOT VTL_P
+pdio_r_tmp07 = pdio_r_tmp06 NOT VTS_N
+pdio_r_tmp08 = pdio_r_tmp07 NOT VTS_P
+pdio_r_tmp09 = pdio_r_tmp08 NOT NP
+pdio_r_tmp10 = pdio_r_tmp09 AND PP
+pdio_r_tmp11 = pdio_r_tmp10 NOT RH_TNi
+pdio_r_tmp12 = pdio_r_tmp11 NOT RPDMY
+pdio_r_tmp13 = pdio_r_tmp12 NOT VAR
+pdio_r_tmp14 = pdio_r_tmp13 NOT BJTDMYi
+pdio_r = pdio_r_tmp14 AND DIODMY
+
+
+//* Define layer -- pdio_18_r
+pdio_18_r_tmp01 = dio0 AND FINMOS
+pdio_18_r_tmp02 = pdio_18_r_tmp01 AND OD
+pdio_18_r_tmp03 = pdio_18_r_tmp02 AND NW
+pdio_18_r_tmp04 = pdio_18_r_tmp03 AND OD18
+pdio_18_r_tmp05 = pdio_18_r_tmp04 NOT VTL_N
+pdio_18_r_tmp06 = pdio_18_r_tmp05 NOT VTL_P
+pdio_18_r_tmp07 = pdio_18_r_tmp06 NOT VTS_N
+pdio_18_r_tmp08 = pdio_18_r_tmp07 NOT VTS_P
+pdio_18_r_tmp09 = pdio_18_r_tmp08 NOT NP
+pdio_18_r_tmp10 = pdio_18_r_tmp09 AND PP
+pdio_18_r_tmp11 = pdio_18_r_tmp10 NOT RH_TNi
+pdio_18_r_tmp12 = pdio_18_r_tmp11 NOT RPDMY
+pdio_18_r_tmp13 = pdio_18_r_tmp12 NOT VAR
+pdio_18_r_tmp14 = pdio_18_r_tmp13 NOT BJTDMYi
+pdio_18_r = pdio_18_r_tmp14 AND DIODMY
+
+all_pdio_rec = pdio_r OR pdio_18_r  //  pdio_mac / pdio_18_mac
+all_diode_rec = all_ndio_rec OR all_pdio_rec 
+tndiff_dio1 = tndiff_ori INTERACT all_diode_rec 
+tndiff_dio = tndiff_dio1 AND diff 
+
+//***** Define connectivity/via layer -- tpdiff_dio ****
+tpdiff_dio1 = tpdiff_ori INTERACT all_diode_rec 
+tpdiff_dio = tpdiff_dio1 AND diff 
+
+//* Define device -- xdev dnwpsub
+dnwdio_b = nxwell INTERACT DNW 
+dnwdio_a = nxwell INSIDE DNW 
+dnwdio_k = dnwdio_b NOT dnwdio_a 
+dnwdio = DNW INTERACT dnwdio_k 
+
+//* Define device -- xdev pwdnw
+rwdio1 = DNW NOT nxwell 
+rwdio2 = rwdio1 NOT BJTDMY 
+rwdio = COPY rwdio2 
+
+//***** Define connectivity/via layer -- psub_term ****
+psub_term_a = BULK AND DNW 
+psub_term_b = BULK NOT psub_term_a 
+psub_term = psub_term_b INTERACT DNW 
+
+//* Define device -- xdev pnwdio
+pnwdio1 = nxwell OUTSIDE nwdio_r 
+pnwdio2a = pnwdio1 NOT DNW 
+BJTDMY2 = COPY BJTDMYi 
+pnwdio2 = pnwdio2a NOT BJTDMY2 
+rwel = psub INSIDE DNW 
+pnwdio3 = pnwdio1 INSIDE rwel 
+pnwdio4 = pnwdio2 OR pnwdio3 
+pnwdio_r = pnwdio4 TOUCH psub == 1
+
+//* Define device -- xdev nmoscap_18
+
+//* Define layer -- vargt_18
+vargt_18_tmp01 = vargt2 AND FINMOS
+vargt_18_tmp02 = vargt_18_tmp01 AND OD
+vargt_18_tmp03 = vargt_18_tmp02 AND NW
+vargt_18_tmp04 = vargt_18_tmp03 AND OD18
+vargt_18_tmp05 = vargt_18_tmp04 AND PO
+vargt_18_tmp06 = vargt_18_tmp05 NOT VTL_N
+vargt_18_tmp07 = vargt_18_tmp06 NOT VTL_P
+vargt_18_tmp08 = vargt_18_tmp07 NOT VTS_N
+vargt_18_tmp09 = vargt_18_tmp08 NOT VTS_P
+vargt_18_tmp10 = vargt_18_tmp09 AND NP
+vargt_18_tmp11 = vargt_18_tmp10 NOT PP
+vargt_18_tmp12 = vargt_18_tmp11 NOT RH_TNi
+vargt_18_tmp13 = vargt_18_tmp12 NOT RPDMY
+vargt_18_tmp14 = vargt_18_tmp13 AND VAR
+vargt_18_tmp15 = vargt_18_tmp14 NOT BJTDMYi
+vargt_18 = vargt_18_tmp15 NOT DIODMY
+
+
+//***** Define connectivity/via layer -- n_fpoly_io ****
+n_fpoly_io = npoly_io NOT OD 
+
+//* Define device -- xdev rhim
+rhim_r = COPY rhim1  //  2T TiN resistor
+
+//* Define device -- xdev rm1w
+metal1i = M1i OR DUM1  // ALL metal pattern
+VIA0_and_M1 = VIA0 AND metal1i 
+VIA0_int_M1 = VIA0 INTERACT VIA0_and_M1 
+M1X = metal1i OR VIA0_int_M1 
+mt1resa = M1X AND RMDMY1  //  M1 resistor
+mt1res_ori = mt1resa INTERACT M1i 
+VIA1 = COPY VIA1i 
+mt1res_body_and_via_up = mt1res_ori AND VIA1 
+mt1res_1 = mt1res_ori NOT INTERACT mt1res_body_and_via_up 
+mt1res_body_and_via_down = mt1res_ori AND VIA0 
+mt1res = mt1res_1 NOT INTERACT mt1res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M1 ****
+M1Y = COPY M1X 
+M1Y1 = M1Y NOT mt1res 
+M1 = COPY M1Y1 
+
+//* Define device -- xdev rm2w
+metal2i = M2i OR DUM2  // ALL metal pattern
+M2Y = COPY metal2i 
+mt2resa = M2Y AND RMDMY2 
+mt2res_ori = mt2resa INTERACT M2i  //  M2 resistor
+VIA2 = COPY VIA2i 
+mt2res_body_and_via_up = mt2res_ori AND VIA2 
+mt2res_1 = mt2res_ori NOT INTERACT mt2res_body_and_via_up 
+mt2res_body_and_via_down = mt2res_ori AND VIA1 
+mt2res = mt2res_1 NOT INTERACT mt2res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M2 ****
+M2 = M2Y NOT mt2res 
+
+//* Define device -- xdev rm3w
+metal3i = M3i OR DUM3  // ALL metal pattern
+M3Y = COPY metal3i 
+mt3resa = M3Y AND RMDMY3 
+mt3res_ori = mt3resa INTERACT M3i  //  M3 resistor
+VIA3 = COPY VIA3i 
+mt3res_body_and_via_up = mt3res_ori AND VIA3 
+mt3res_1 = mt3res_ori NOT INTERACT mt3res_body_and_via_up 
+mt3res_body_and_via_down = mt3res_ori AND VIA2 
+mt3res = mt3res_1 NOT INTERACT mt3res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M3 ****
+M3W = M3Y NOT mt3res 
+M3 = COPY M3W 
+
+//* Define device -- xdev rm4w
+metal4i = M4i OR DUM4  // ALL metal pattern
+M4Y = COPY metal4i 
+mt4resa = M4Y AND RMDMY4 
+mt4res_ori = mt4resa INTERACT M4i  //  M4 resistor
+VIA4 = COPY VIA4i 
+mt4res_body_and_via_up = mt4res_ori AND VIA4 
+mt4res_1 = mt4res_ori NOT INTERACT mt4res_body_and_via_up 
+mt4res_body_and_via_down = mt4res_ori AND VIA3 
+mt4res = mt4res_1 NOT INTERACT mt4res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M4 ****
+M4Z = M4Y NOT mt4res  //  M4 interconnect
+M4 = COPY M4Z 
+
+//* Define device -- xdev rm5w
+metal5i = M5i OR DUM5  // ALL metal pattern
+M5Y = COPY metal5i 
+mt5resa = M5Y AND RMDMY5 
+mt5res_ori = mt5resa INTERACT M5i  //  M5 resistor
+VIA5 = COPY VIA5i 
+mt5res_body_and_via_up = mt5res_ori AND VIA5 
+mt5res_1 = mt5res_ori NOT INTERACT mt5res_body_and_via_up 
+mt5res_body_and_via_down = mt5res_ori AND VIA4 
+mt5res = mt5res_1 NOT INTERACT mt5res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M5 ****
+M5Z = M5Y NOT mt5res  //  M5 interconnect
+M5 = COPY M5Z 
+
+//* Define device -- xdev rm6w
+metal6i = M6i OR DUM6  // ALL metal pattern
+M6Y = COPY metal6i 
+mt6resa = M6Y AND RMDMY6 
+mt6res_ori = mt6resa INTERACT M6i  //  M6 resistor
+VIA6 = COPY VIA6i 
+mt6res_body_and_via_up = mt6res_ori AND VIA6 
+mt6res_1 = mt6res_ori NOT INTERACT mt6res_body_and_via_up 
+mt6res_body_and_via_down = mt6res_ori AND VIA5 
+mt6res = mt6res_1 NOT INTERACT mt6res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M6 ****
+M6Z = M6Y NOT mt6res  //  M6 interconnect
+M6 = COPY M6Z 
+
+//* Define device -- xdev rm7w
+metal7i = M7i OR DUM7  // ALL metal pattern
+M7Y = COPY metal7i 
+mt7resa = M7Y AND RMDMY7 
+mt7res_ori = mt7resa INTERACT M7i  //  M7 resistor
+VIA7 = COPY VIA7i 
+mt7res_body_and_via_up = mt7res_ori AND VIA7 
+mt7res_1 = mt7res_ori NOT INTERACT mt7res_body_and_via_up 
+mt7res_body_and_via_down = mt7res_ori AND VIA6 
+mt7res = mt7res_1 NOT INTERACT mt7res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M7 ****
+M7Z = M7Y NOT mt7res  //  M7 interconnect
+M7 = COPY M7Z 
+
+//* Define device -- xdev rm8w
+metal8i = M8i OR DUM8  // ALL metal pattern
+M8Y = COPY metal8i 
+mt8resa = M8Y AND RMDMY8 
+mt8res_ori = mt8resa INTERACT M8i  //  M8 resistor
+VIA8 = COPY VIA8i 
+mt8res_body_and_via_up = mt8res_ori AND VIA8 
+mt8res_1 = mt8res_ori NOT INTERACT mt8res_body_and_via_up 
+mt8res_body_and_via_down = mt8res_ori AND VIA7 
+mt8res = mt8res_1 NOT INTERACT mt8res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M8 ****
+M8Z = M8Y NOT mt8res  //  M8 interconnect
+M8 = COPY M8Z 
+
+//* Define device -- xdev rm9w
+metal9i = M9i OR DUM9  // ALL metal pattern
+M9Y = COPY metal9i 
+mt9resa = M9Y AND RMDMY9 
+mt9res_ori = mt9resa INTERACT M9i  //  M9 resistor
+VIA9 = COPY VIA9i 
+mt9res_body_and_via_up = mt9res_ori AND VIA9 
+mt9res_1 = mt9res_ori NOT INTERACT mt9res_body_and_via_up 
+mt9res_body_and_via_down = mt9res_ori AND VIA8 
+mt9res = mt9res_1 NOT INTERACT mt9res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M9 ****
+M9Z = M9Y NOT mt9res  //  M9 interconnect
+M9 = COPY M9Z 
+
+//* Define device -- xdev rm10w
+metal10i = M10i OR DUM10  // ALL metal pattern
+M10Y = COPY metal10i 
+mt10resa = M10Y AND RMDMY10 
+mt10res_ori = mt10resa INTERACT M10i  //  M10 resistor
+VIA10 = COPY VIA10i 
+mt10res_body_and_via_up = mt10res_ori AND VIA10 
+mt10res_1 = mt10res_ori NOT INTERACT mt10res_body_and_via_up 
+mt10res_body_and_via_down = mt10res_ori AND VIA9 
+mt10res = mt10res_1 NOT INTERACT mt10res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M10 ****
+M10Z = M10Y NOT mt10res  //  M10 interconnect
+M10 = COPY M10Z 
+
+//* Define device -- xdev rm11w
+metal11i = M11i OR DUM11  // ALL metal pattern
+M11Y = COPY metal11i 
+mt11resa = M11Y AND RMDMY11 
+mt11res_ori = mt11resa INTERACT M11i  //  M11 resistor
+RV = COPY RVi 
+mt11res_body_and_via_up = mt11res_ori AND RV 
+mt11res_1 = mt11res_ori NOT INTERACT mt11res_body_and_via_up 
+mt11res_body_and_via_down = mt11res_ori AND VIA10 
+mt11res = mt11res_1 NOT INTERACT mt11res_body_and_via_down 
+
+//***** Define connectivity/via layer -- M11 ****
+M11Z = M11Y NOT mt11res  //  M11 interconnect
+M11 = COPY M11Z 
+
+//* Define device -- xdev rmap
+APY = COPY APi 
+mtAPresa = APY AND RMDMYAP 
+mtAPresb = APY NOT RMDMYAP 
+mtAPres_ori = mtAPresa INTERACT mtAPresb == 2 //  AP resistor
+mtAPres_body_and_via_down = mtAPres_ori AND RV 
+mtAPres = mtAPres_ori NOT INTERACT mtAPres_body_and_via_down 
+
+//***** Define connectivity/via layer -- AP ****
+AP = APY NOT mtAPres  //  AP interconnect
+
+//* Define ERC or other layers
+gate1_not_IO2a = COPY gate1 
+gate1_not_IO2b = gate1_not_IO2a NOT PODE_GATE 
+gate1_not_IO2 = gate1_not_IO2b NOT OD18 
+
+//***** Define connectivity/via layer -- p_fpoly_svt ****
+VTL_P_rgn = COPY VTL_P 
+P_s_l_edge1 = VTS_P COINCIDENT EDGE VTL_P_rgn
+P_s_l_edge2 = P_s_l_edge1 INSIDE EDGE Small_Poly3 
+P_s_l_edge = P_s_l_edge1 TOUCH EDGE P_s_l_edge2
+VTS_P_exp = EXPAND EDGE P_s_l_edge OUTSIDE BY VT_SHIFTED_DISTANCE
+VTSP = VTS_P OR VTS_P_exp 
+ppoly_co_s1 = COPY VTSP 
+VAR_and_PP = VARi AND PP 
+ppoly_co_s2 = ppoly_co_s1 OR VAR_and_PP 
+ppoly_co_s3 = ppoly_co_s2 NOT OD2 
+ppoly_co_s = poly_cci AND ppoly_co_s3 
+p_fpoly_svt = ppoly_co_s NOT OD 
+
+//***** Define connectivity/via layer -- p_fptap_io ****
+poly_mp_tap = M0_PO AND poly_cci 
+fptap = poly_mp_tap NOT OD 
+p_fptap_com_io = fptap AND p_fpoly_io 
+p_fptap_io = fptap AND p_fptap_com_io 
+
+//***** Define connectivity/via layer -- p_gpoly_nocg_lvt ****
+VTL_N_rgn = COPY VTL_N 
+N_s_l_edge1 = VTS_N COINCIDENT EDGE VTL_N_rgn
+N_s_l_edge2 = N_s_l_edge1 INSIDE EDGE Small_Poly3 
+N_s_l_edge = N_s_l_edge1 TOUCH EDGE N_s_l_edge2
+VTS_N_exp = EXPAND EDGE N_s_l_edge OUTSIDE BY VT_SHIFTED_DISTANCE
+VTSN = VTS_N OR VTS_N_exp 
+npoly_co_s1 = COPY VTSN 
+VAR_and_NP = VARi AND NP 
+npoly_co_s2 = npoly_co_s1 OR VAR_and_NP 
+npoly_co_s3 = npoly_co_s2 NOT OD2 
+npoly_co_s = poly_cci AND npoly_co_s3 
+VTLN = VTL_N_rgn NOT VTS_N_exp 
+npoly_co_l1 = COPY VTLN 
+BJTDMYi_and_NP = BJTDMYi AND NP 
+npoly_co_l2 = npoly_co_l1 OR BJTDMYi_and_NP 
+DIODMYi_and_NP = DIODMYi AND NP 
+npoly_co_l3 = npoly_co_l2 OR DIODMYi_and_NP 
+npoly_co_l4 = npoly_co_l3 NOT OD2 
+npoly_co_l = poly_cci AND npoly_co_l4 
+poly_set1 = npoly_co_s OR npoly_co_l 
+poly_set2 = poly_set1 OR ppoly_co_s 
+poly_set3 = poly_set2 OR npoly_io 
+poly_set4 = poly_set3 OR ppoly_io 
+poly_set = COPY poly_set4 
+ppoly_co_l = poly_cci NOT poly_set 
+p_fpoly_lvt = ppoly_co_l NOT OD 
+p_gpoly_lvt_all = ppoly_co_l NOT p_fpoly_lvt 
+p_gpoly_lvt1 = p_gpoly_lvt_all NOT all_mos_gates 
+p_gpoly_nocg_lvt = p_gpoly_lvt1 AND nocg_dmy 
+
+//***** Define connectivity/via layer -- p_odtap ****
+odtap = M0_OD AND OD 
+p_odtap1 = odtap AND tpdiff_ori 
+p_odtap2 = COPY p_odtap1 
+p_odtap = p_odtap2 NOT tpdiff_bjt 
+
+//***** Define connectivity/via layer -- n_gptap_svt ****
+gptap = poly_mp_tap AND OD 
+n_fpoly_svt = npoly_co_s NOT OD 
+n_gpoly_svt_all = npoly_co_s NOT n_fpoly_svt 
+n_gptap_svt = gptap AND n_gpoly_svt_all 
+
+//***** Define connectivity/via layer -- VIA0_M0_STI ****
+VIA0_M0_STI = VIA0i INTERACT VIA0_M0_STI_com 
+
+//***** Define connectivity/via layer -- p_fptap_svt ****
+n_fptap_com_svt = fptap AND n_fpoly_svt 
+p_fptap_svt1 = fptap NOT INTERACT n_fptap_com_svt 
+n_fpoly_lvt = npoly_co_l NOT OD 
+n_fptap_com_lvt = fptap AND n_fpoly_lvt 
+p_fptap_svt2 = p_fptap_svt1 NOT INTERACT n_fptap_com_lvt 
+p_fptap_com_svt = fptap AND p_fpoly_svt 
+p_fptap_svt = p_fptap_svt2 INTERACT p_fptap_com_svt 
+tpgate2 = tpgate1 NOT PODE_GATE 
+
+//***** Define connectivity/via layer -- n_fptap_lvt ****
+n_fptap_lvt1 = fptap NOT INTERACT n_fptap_com_svt 
+n_fptap_lvt = n_fptap_lvt1 INTERACT n_fptap_com_lvt 
+
+//***** Define connectivity/via layer -- p_gpoly_lvt ****
+p_gpoly_lvt = p_gpoly_lvt1 NOT p_gpoly_nocg_lvt 
+
+//***** Define connectivity/via layer -- p_gptap_lvt ****
+p_gptap_lvt = gptap AND p_gpoly_lvt_all 
+
+//***** Define connectivity/via layer -- n_odtap ****
+n_odtap1 = odtap NOT tpdiff_ori 
+n_odtap2 = COPY n_odtap1 
+tndiff_bjt = tndiff_ori INTERACT BJTDMY 
+n_odtap = n_odtap2 NOT tndiff_bjt 
+
+//***** Define connectivity/via layer -- dnwc ****
+dnwc = DNW AND nxwell 
+
+//***** Define connectivity/via layer -- tiod ****
+tioda = diff NOT tpdiff_ori 
+tiodb = tioda NOT tndiff_ori 
+tiod1 = tiodb NOT POx 
+tiod = tiod1 NOT RPDMY 
+
+//***** Define connectivity/via layer -- n_psub ****
+n_psub = COPY BULK 
+
+//***** Define connectivity/via layer -- n_gpoly_nocg_lvt ****
+n_gpoly_lvt_all = npoly_co_l NOT n_fpoly_lvt 
+n_gpoly_lvt1 = n_gpoly_lvt_all NOT all_mos_gates 
+n_gpoly_nocg_lvt = n_gpoly_lvt1 AND nocg_dmy 
+unrecognized_mos_7 = realpo NOT all_mos_gates 
+unrecognized_mos_8 = unrecognized_mos_7 AND diff 
+unrecognized_mos_2 = COPY BJTDMY 
+unrecognized_mos_3 = unrecognized_mos_2 OR all_diode_rec 
+unrecognized_mos_9 = unrecognized_mos_8 NOT unrecognized_mos_3 
+unrecognized_mos_4 = NP AND nxwell 
+unrecognized_mos_5 = PP AND psub 
+unrecognized_mos_6 = unrecognized_mos_4 OR unrecognized_mos_5 
+unrecognized_mos_10 = unrecognized_mos_9 NOT unrecognized_mos_6 
+unrecognized_mos = COPY unrecognized_mos_10 
+
+//***** Define connectivity/via layer -- fin_lay ****
+diff_to_fin = COPY diffa2 
+findiff = diff_to_fin INTERACT POx 
+DFM SPEC FILL fin_fill_hor
+   INSIDE OF LAYER findiff
+   INITIAL FILLREGION
+   STRIPE FIN_WIDTH FIN_SPACE HORIZONTAL
+
+fin_lay_hor1 = DFM FILL fin_fill_hor
+
+fin_gen_gate = findiff AND POx 
+fin_gen_od   = findiff NOT fin_gen_gate
+fin_gen_gate_side = fin_gen_gate COIN EDGE fin_gen_od 
+fin_gen_gate_end  = fin_gen_gate TOUCH EDGE fin_gen_od ENDPOINT ONLY
+fin_gen_gate_end_edge = OD TOUCH EDGE fin_gen_gate_end
+fin_lay_hor_bad = ENC fin_lay_hor1 fin_gen_gate_end_edge < 0.0001 ABUT == 90 REGION
+
+findiff_hor       = findiff NOT INTERACT fin_lay_hor_bad
+fin_lay_hor  = fin_lay_hor1 AND findiff_hor
+findiff_ver       = findiff INTERACT fin_lay_hor_bad 
+
+DFM SPEC FILL fin_fill_ver
+   INSIDE OF LAYER findiff_ver
+   INITIAL FILLREGION
+   STRIPE FIN_WIDTH FIN_SPACE VERTICAL
+
+fin_lay_ver  = DFM FILL fin_fill_ver
+fin_lay_tmp  = fin_lay_hor OR fin_lay_ver
+fin_lay2           = PUSH fin_lay_tmp
+fin_lay1 = COPY fin_lay2 
+EMPTY1 = SIZE ODI BY 0.005 
+Empty = ODI NOT EMPTY1 
+#IFDEF CCI_DECK
+   fin_lay_new = COPY fin_lay1
+#ELSE
+   fin_lay_new = COPY Empty
+#ENDIF
+fingate_l = diff_to_fin INSIDE EDGE POx 
+fin_E0a = findiff TOUCH EDGE fingate_l
+fin_A0 = EXPAND EDGE fin_E0a INSIDE BY FIN_WIDTH
+fin_E0_ori = fin_A0 INSIDE EDGE findiff 
+fin_B1_ori = EXPAND EDGE fin_E0_ori OUTSIDE BY FIN_SPACE
+fin_E0_ex1 = LENGTH fin_E0_ori == FIN_WIDTH
+fin_B1_ex1 = EXPAND EDGE fin_E0_ex1 OUTSIDE BY FIN_SPACE
+fin_B1a = fin_B1_ori NOT fin_B1_ex1 
+fin_E0_ex2 = LENGTH fin_E0_ori == FIN_SPACE
+fin_B1_ex2 = EXPAND EDGE fin_E0_ex2 OUTSIDE BY FIN_SPACE
+fin_B1 = fin_B1a NOT fin_B1_ex2 
+fin_lay1o = findiff NOT fin_B1 
+fin_E0 = fin_B1 INSIDE EDGE findiff 
+fin_A1 = EXPAND EDGE fin_E0 INSIDE BY FIN_PITCH
+diffin0 = diff_to_fin NOT fin_A0 
+fin_E1_ori = fin_A1 INSIDE EDGE diffin0 
+fin_B2_ori = EXPAND EDGE fin_E1_ori OUTSIDE BY FIN_SPACE
+fin_E1_ex1 = LENGTH fin_E1_ori == FIN_WIDTH
+fin_B2_ex1 = EXPAND EDGE fin_E1_ex1 OUTSIDE BY FIN_SPACE
+fin_B2a = fin_B2_ori NOT fin_B2_ex1 
+fin_E1_ex2 = LENGTH fin_E1_ori == FIN_PITCH
+fin_B2_ex2 = EXPAND EDGE fin_E1_ex2 OUTSIDE BY FIN_SPACE
+fin_B2 = fin_B2a NOT fin_B2_ex2 
+fin_lay2o = fin_lay1o NOT fin_B2 
+fin_E1 = fin_B2 INSIDE EDGE diffin0 
+fin_A2 = EXPAND EDGE fin_E1 INSIDE BY FIN_PITCH
+diffin1 = diffin0 NOT fin_A1 
+fin_E2_ori = fin_A2 INSIDE EDGE diffin1 
+fin_B3_ori = EXPAND EDGE fin_E2_ori OUTSIDE BY FIN_SPACE
+fin_E2_ex1 = LENGTH fin_E2_ori == FIN_WIDTH
+fin_B3_ex1 = EXPAND EDGE fin_E2_ex1 OUTSIDE BY FIN_SPACE
+fin_B3a = fin_B3_ori NOT fin_B3_ex1 
+fin_E2_ex2 = LENGTH fin_E2_ori == FIN_PITCH
+fin_B3_ex2 = EXPAND EDGE fin_E2_ex2 OUTSIDE BY FIN_SPACE
+fin_B3 = fin_B3a NOT fin_B3_ex2 
+fin_lay3o = fin_lay2o NOT fin_B3 
+fin_E2 = fin_B3 INSIDE EDGE diffin1 
+fin_A3 = EXPAND EDGE fin_E2 INSIDE BY FIN_PITCH
+diffin2 = diffin1 NOT fin_A2 
+fin_E3_ori = fin_A3 INSIDE EDGE diffin2 
+fin_B4_ori = EXPAND EDGE fin_E3_ori OUTSIDE BY FIN_SPACE
+fin_E3_ex1 = LENGTH fin_E3_ori == FIN_WIDTH
+fin_B4_ex1 = EXPAND EDGE fin_E3_ex1 OUTSIDE BY FIN_SPACE
+fin_B4a = fin_B4_ori NOT fin_B4_ex1 
+fin_E3_ex2 = LENGTH fin_E3_ori == FIN_PITCH
+fin_B4_ex2 = EXPAND EDGE fin_E3_ex2 OUTSIDE BY FIN_SPACE
+fin_B4 = fin_B4a NOT fin_B4_ex2 
+fin_lay4o = fin_lay3o NOT fin_B4 
+fin_E3 = fin_B4 INSIDE EDGE diffin2 
+fin_A4 = EXPAND EDGE fin_E3 INSIDE BY FIN_PITCH
+diffin3 = diffin2 NOT fin_A3 
+fin_E4_ori = fin_A4 INSIDE EDGE diffin3 
+fin_B5_ori = EXPAND EDGE fin_E4_ori OUTSIDE BY FIN_SPACE
+fin_E4_ex1 = LENGTH fin_E4_ori == FIN_WIDTH
+fin_B5_ex1 = EXPAND EDGE fin_E4_ex1 OUTSIDE BY FIN_SPACE
+fin_B5a = fin_B5_ori NOT fin_B5_ex1 
+fin_E4_ex2 = LENGTH fin_E4_ori == FIN_PITCH
+fin_B5_ex2 = EXPAND EDGE fin_E4_ex2 OUTSIDE BY FIN_SPACE
+fin_B5 = fin_B5a NOT fin_B5_ex2 
+fin_lay5o = fin_lay4o NOT fin_B5 
+fin_E4 = fin_B5 INSIDE EDGE diffin3 
+fin_A5 = EXPAND EDGE fin_E4 INSIDE BY FIN_PITCH
+diffin4 = diffin3 NOT fin_A4 
+fin_E5_ori = fin_A5 INSIDE EDGE diffin4 
+fin_B6_ori = EXPAND EDGE fin_E5_ori OUTSIDE BY FIN_SPACE
+fin_E5_ex1 = LENGTH fin_E5_ori == FIN_WIDTH
+fin_B6_ex1 = EXPAND EDGE fin_E5_ex1 OUTSIDE BY FIN_SPACE
+fin_B6a = fin_B6_ori NOT fin_B6_ex1 
+fin_E5_ex2 = LENGTH fin_E5_ori == FIN_PITCH
+fin_B6_ex2 = EXPAND EDGE fin_E5_ex2 OUTSIDE BY FIN_SPACE
+fin_B6 = fin_B6a NOT fin_B6_ex2 
+fin_lay6o = fin_lay5o NOT fin_B6 
+fin_E5 = fin_B6 INSIDE EDGE diffin4 
+fin_A6 = EXPAND EDGE fin_E5 INSIDE BY FIN_PITCH
+diffin5 = diffin4 NOT fin_A5 
+fin_E6_ori = fin_A6 INSIDE EDGE diffin5 
+fin_B7_ori = EXPAND EDGE fin_E6_ori OUTSIDE BY FIN_SPACE
+fin_E6_ex1 = LENGTH fin_E6_ori == FIN_WIDTH
+fin_B7_ex1 = EXPAND EDGE fin_E6_ex1 OUTSIDE BY FIN_SPACE
+fin_B7a = fin_B7_ori NOT fin_B7_ex1 
+fin_E6_ex2 = LENGTH fin_E6_ori == FIN_PITCH
+fin_B7_ex2 = EXPAND EDGE fin_E6_ex2 OUTSIDE BY FIN_SPACE
+fin_B7 = fin_B7a NOT fin_B7_ex2 
+fin_lay7o = fin_lay6o NOT fin_B7 
+fin_E6 = fin_B7 INSIDE EDGE diffin5 
+fin_A7 = EXPAND EDGE fin_E6 INSIDE BY FIN_PITCH
+diffin6 = diffin5 NOT fin_A6 
+fin_E7_ori = fin_A7 INSIDE EDGE diffin6 
+fin_B8_ori = EXPAND EDGE fin_E7_ori OUTSIDE BY FIN_SPACE
+fin_E7_ex1 = LENGTH fin_E7_ori == FIN_WIDTH
+fin_B8_ex1 = EXPAND EDGE fin_E7_ex1 OUTSIDE BY FIN_SPACE
+fin_B8a = fin_B8_ori NOT fin_B8_ex1 
+fin_E7_ex2 = LENGTH fin_E7_ori == FIN_PITCH
+fin_B8_ex2 = EXPAND EDGE fin_E7_ex2 OUTSIDE BY FIN_SPACE
+fin_B8 = fin_B8a NOT fin_B8_ex2 
+fin_lay8o = fin_lay7o NOT fin_B8 
+fin_E7 = fin_B8 INSIDE EDGE diffin6 
+fin_A8 = EXPAND EDGE fin_E7 INSIDE BY FIN_PITCH
+diffin7 = diffin6 NOT fin_A7 
+fin_E8_ori = fin_A8 INSIDE EDGE diffin7 
+fin_B9_ori = EXPAND EDGE fin_E8_ori OUTSIDE BY FIN_SPACE
+fin_E8_ex1 = LENGTH fin_E8_ori == FIN_WIDTH
+fin_B9_ex1 = EXPAND EDGE fin_E8_ex1 OUTSIDE BY FIN_SPACE
+fin_B9a = fin_B9_ori NOT fin_B9_ex1 
+fin_E8_ex2 = LENGTH fin_E8_ori == FIN_PITCH
+fin_B9_ex2 = EXPAND EDGE fin_E8_ex2 OUTSIDE BY FIN_SPACE
+fin_B9 = fin_B9a NOT fin_B9_ex2 
+fin_lay9o = fin_lay8o NOT fin_B9 
+fin_E8 = fin_B9 INSIDE EDGE diffin7 
+fin_A9 = EXPAND EDGE fin_E8 INSIDE BY FIN_PITCH
+diffin8 = diffin7 NOT fin_A8 
+fin_E9_ori = fin_A9 INSIDE EDGE diffin8 
+fin_B10_ori = EXPAND EDGE fin_E9_ori OUTSIDE BY FIN_SPACE
+fin_E9_ex1 = LENGTH fin_E9_ori == FIN_WIDTH
+fin_B10_ex1 = EXPAND EDGE fin_E9_ex1 OUTSIDE BY FIN_SPACE
+fin_B10a = fin_B10_ori NOT fin_B10_ex1 
+fin_E9_ex2 = LENGTH fin_E9_ori == FIN_PITCH
+fin_B10_ex2 = EXPAND EDGE fin_E9_ex2 OUTSIDE BY FIN_SPACE
+fin_B10 = fin_B10a NOT fin_B10_ex2 
+fin_lay10o = fin_lay9o NOT fin_B10 
+fin_E9 = fin_B10 INSIDE EDGE diffin8 
+fin_A10 = EXPAND EDGE fin_E9 INSIDE BY FIN_PITCH
+diffin9 = diffin8 NOT fin_A9 
+fin_E10_ori = fin_A10 INSIDE EDGE diffin9 
+fin_B11_ori = EXPAND EDGE fin_E10_ori OUTSIDE BY FIN_SPACE
+fin_E10_ex1 = LENGTH fin_E10_ori == FIN_WIDTH
+fin_B11_ex1 = EXPAND EDGE fin_E10_ex1 OUTSIDE BY FIN_SPACE
+fin_B11a = fin_B11_ori NOT fin_B11_ex1 
+fin_E10_ex2 = LENGTH fin_E10_ori == FIN_PITCH
+fin_B11_ex2 = EXPAND EDGE fin_E10_ex2 OUTSIDE BY FIN_SPACE
+fin_B11 = fin_B11a NOT fin_B11_ex2 
+fin_lay11o = fin_lay10o NOT fin_B11 
+fin_E10 = fin_B11 INSIDE EDGE diffin9 
+fin_A11 = EXPAND EDGE fin_E10 INSIDE BY FIN_PITCH
+diffin10 = diffin9 NOT fin_A10 
+fin_E11_ori = fin_A11 INSIDE EDGE diffin10 
+fin_B12_ori = EXPAND EDGE fin_E11_ori OUTSIDE BY FIN_SPACE
+fin_E11_ex1 = LENGTH fin_E11_ori == FIN_WIDTH
+fin_B12_ex1 = EXPAND EDGE fin_E11_ex1 OUTSIDE BY FIN_SPACE
+fin_B12a = fin_B12_ori NOT fin_B12_ex1 
+fin_E11_ex2 = LENGTH fin_E11_ori == FIN_PITCH
+fin_B12_ex2 = EXPAND EDGE fin_E11_ex2 OUTSIDE BY FIN_SPACE
+fin_B12 = fin_B12a NOT fin_B12_ex2 
+fin_lay12o = fin_lay11o NOT fin_B12 
+fin_E11 = fin_B12 INSIDE EDGE diffin10 
+fin_A12 = EXPAND EDGE fin_E11 INSIDE BY FIN_PITCH
+diffin11 = diffin10 NOT fin_A11 
+fin_E12_ori = fin_A12 INSIDE EDGE diffin11 
+fin_B13_ori = EXPAND EDGE fin_E12_ori OUTSIDE BY FIN_SPACE
+fin_E12_ex1 = LENGTH fin_E12_ori == FIN_WIDTH
+fin_B13_ex1 = EXPAND EDGE fin_E12_ex1 OUTSIDE BY FIN_SPACE
+fin_B13a = fin_B13_ori NOT fin_B13_ex1 
+fin_E12_ex2 = LENGTH fin_E12_ori == FIN_PITCH
+fin_B13_ex2 = EXPAND EDGE fin_E12_ex2 OUTSIDE BY FIN_SPACE
+fin_B13 = fin_B13a NOT fin_B13_ex2 
+fin_lay13o = fin_lay12o NOT fin_B13 
+fin_E12 = fin_B13 INSIDE EDGE diffin11 
+fin_A13 = EXPAND EDGE fin_E12 INSIDE BY FIN_PITCH
+diffin12 = diffin11 NOT fin_A12 
+fin_E13_ori = fin_A13 INSIDE EDGE diffin12 
+fin_B14_ori = EXPAND EDGE fin_E13_ori OUTSIDE BY FIN_SPACE
+fin_E13_ex1 = LENGTH fin_E13_ori == FIN_WIDTH
+fin_B14_ex1 = EXPAND EDGE fin_E13_ex1 OUTSIDE BY FIN_SPACE
+fin_B14a = fin_B14_ori NOT fin_B14_ex1 
+fin_E13_ex2 = LENGTH fin_E13_ori == FIN_PITCH
+fin_B14_ex2 = EXPAND EDGE fin_E13_ex2 OUTSIDE BY FIN_SPACE
+fin_B14 = fin_B14a NOT fin_B14_ex2 
+fin_lay14o = fin_lay13o NOT fin_B14 
+fin_E13 = fin_B14 INSIDE EDGE diffin12 
+fin_A14 = EXPAND EDGE fin_E13 INSIDE BY FIN_PITCH
+diffin13 = diffin12 NOT fin_A13 
+fin_E14_ori = fin_A14 INSIDE EDGE diffin13 
+fin_B15_ori = EXPAND EDGE fin_E14_ori OUTSIDE BY FIN_SPACE
+fin_E14_ex1 = LENGTH fin_E14_ori == FIN_WIDTH
+fin_B15_ex1 = EXPAND EDGE fin_E14_ex1 OUTSIDE BY FIN_SPACE
+fin_B15a = fin_B15_ori NOT fin_B15_ex1 
+fin_E14_ex2 = LENGTH fin_E14_ori == FIN_PITCH
+fin_B15_ex2 = EXPAND EDGE fin_E14_ex2 OUTSIDE BY FIN_SPACE
+fin_B15 = fin_B15a NOT fin_B15_ex2 
+fin_lay15o = fin_lay14o NOT fin_B15 
+fin_E14 = fin_B15 INSIDE EDGE diffin13 
+fin_A15 = EXPAND EDGE fin_E14 INSIDE BY FIN_PITCH
+diffin14 = diffin13 NOT fin_A14 
+fin_E15_ori = fin_A15 INSIDE EDGE diffin14 
+fin_B16_ori = EXPAND EDGE fin_E15_ori OUTSIDE BY FIN_SPACE
+fin_E15_ex1 = LENGTH fin_E15_ori == FIN_WIDTH
+fin_B16_ex1 = EXPAND EDGE fin_E15_ex1 OUTSIDE BY FIN_SPACE
+fin_B16a = fin_B16_ori NOT fin_B16_ex1 
+fin_E15_ex2 = LENGTH fin_E15_ori == FIN_PITCH
+fin_B16_ex2 = EXPAND EDGE fin_E15_ex2 OUTSIDE BY FIN_SPACE
+fin_B16 = fin_B16a NOT fin_B16_ex2 
+fin_lay16o = fin_lay15o NOT fin_B16 
+fin_E15 = fin_B16 INSIDE EDGE diffin14 
+fin_A16 = EXPAND EDGE fin_E15 INSIDE BY FIN_PITCH
+diffin15 = diffin14 NOT fin_A15 
+fin_E16_ori = fin_A16 INSIDE EDGE diffin15 
+fin_B17_ori = EXPAND EDGE fin_E16_ori OUTSIDE BY FIN_SPACE
+fin_E16_ex1 = LENGTH fin_E16_ori == FIN_WIDTH
+fin_B17_ex1 = EXPAND EDGE fin_E16_ex1 OUTSIDE BY FIN_SPACE
+fin_B17a = fin_B17_ori NOT fin_B17_ex1 
+fin_E16_ex2 = LENGTH fin_E16_ori == FIN_PITCH
+fin_B17_ex2 = EXPAND EDGE fin_E16_ex2 OUTSIDE BY FIN_SPACE
+fin_B17 = fin_B17a NOT fin_B17_ex2 
+fin_lay17o = fin_lay16o NOT fin_B17 
+fin_E16 = fin_B17 INSIDE EDGE diffin15 
+fin_A17 = EXPAND EDGE fin_E16 INSIDE BY FIN_PITCH
+diffin16 = diffin15 NOT fin_A16 
+fin_E17_ori = fin_A17 INSIDE EDGE diffin16 
+fin_B18_ori = EXPAND EDGE fin_E17_ori OUTSIDE BY FIN_SPACE
+fin_E17_ex1 = LENGTH fin_E17_ori == FIN_WIDTH
+fin_B18_ex1 = EXPAND EDGE fin_E17_ex1 OUTSIDE BY FIN_SPACE
+fin_B18a = fin_B18_ori NOT fin_B18_ex1 
+fin_E17_ex2 = LENGTH fin_E17_ori == FIN_PITCH
+fin_B18_ex2 = EXPAND EDGE fin_E17_ex2 OUTSIDE BY FIN_SPACE
+fin_B18 = fin_B18a NOT fin_B18_ex2 
+fin_lay18o = fin_lay17o NOT fin_B18 
+fin_E17 = fin_B18 INSIDE EDGE diffin16 
+fin_A18 = EXPAND EDGE fin_E17 INSIDE BY FIN_PITCH
+diffin17 = diffin16 NOT fin_A17 
+fin_E18_ori = fin_A18 INSIDE EDGE diffin17 
+fin_B19_ori = EXPAND EDGE fin_E18_ori OUTSIDE BY FIN_SPACE
+fin_E18_ex1 = LENGTH fin_E18_ori == FIN_WIDTH
+fin_B19_ex1 = EXPAND EDGE fin_E18_ex1 OUTSIDE BY FIN_SPACE
+fin_B19a = fin_B19_ori NOT fin_B19_ex1 
+fin_E18_ex2 = LENGTH fin_E18_ori == FIN_PITCH
+fin_B19_ex2 = EXPAND EDGE fin_E18_ex2 OUTSIDE BY FIN_SPACE
+fin_B19 = fin_B19a NOT fin_B19_ex2 
+fin_lay19o = fin_lay18o NOT fin_B19 
+fin_E18 = fin_B19 INSIDE EDGE diffin17 
+fin_A19 = EXPAND EDGE fin_E18 INSIDE BY FIN_PITCH
+diffin18 = diffin17 NOT fin_A18 
+fin_E19_ori = fin_A19 INSIDE EDGE diffin18 
+fin_B20_ori = EXPAND EDGE fin_E19_ori OUTSIDE BY FIN_SPACE
+fin_E19_ex1 = LENGTH fin_E19_ori == FIN_WIDTH
+fin_B20_ex1 = EXPAND EDGE fin_E19_ex1 OUTSIDE BY FIN_SPACE
+fin_B20a = fin_B20_ori NOT fin_B20_ex1 
+fin_E19_ex2 = LENGTH fin_E19_ori == FIN_PITCH
+fin_B20_ex2 = EXPAND EDGE fin_E19_ex2 OUTSIDE BY FIN_SPACE
+fin_B20 = fin_B20a NOT fin_B20_ex2 
+fin_lay20o = fin_lay19o NOT fin_B20 
+fin_E19 = fin_B20 INSIDE EDGE diffin18 
+fin_A20 = EXPAND EDGE fin_E19 INSIDE BY FIN_PITCH
+diffin19 = diffin18 NOT fin_A19 
+fin_E20_ori = fin_A20 INSIDE EDGE diffin19 
+fin_B21_ori = EXPAND EDGE fin_E20_ori OUTSIDE BY FIN_SPACE
+fin_E20_ex1 = LENGTH fin_E20_ori == FIN_WIDTH
+fin_B21_ex1 = EXPAND EDGE fin_E20_ex1 OUTSIDE BY FIN_SPACE
+fin_B21a = fin_B21_ori NOT fin_B21_ex1 
+fin_E20_ex2 = LENGTH fin_E20_ori == FIN_PITCH
+fin_B21_ex2 = EXPAND EDGE fin_E20_ex2 OUTSIDE BY FIN_SPACE
+fin_B21 = fin_B21a NOT fin_B21_ex2 
+fin_lay21o = fin_lay20o NOT fin_B21 
+fin_E20 = fin_B21 INSIDE EDGE diffin19 
+fin_A21 = EXPAND EDGE fin_E20 INSIDE BY FIN_PITCH
+diffin20 = diffin19 NOT fin_A20 
+fin_E21_ori = fin_A21 INSIDE EDGE diffin20 
+fin_B22_ori = EXPAND EDGE fin_E21_ori OUTSIDE BY FIN_SPACE
+fin_E21_ex1 = LENGTH fin_E21_ori == FIN_WIDTH
+fin_B22_ex1 = EXPAND EDGE fin_E21_ex1 OUTSIDE BY FIN_SPACE
+fin_B22a = fin_B22_ori NOT fin_B22_ex1 
+fin_E21_ex2 = LENGTH fin_E21_ori == FIN_PITCH
+fin_B22_ex2 = EXPAND EDGE fin_E21_ex2 OUTSIDE BY FIN_SPACE
+fin_B22 = fin_B22a NOT fin_B22_ex2 
+fin_lay22o = fin_lay21o NOT fin_B22 
+fin_E21 = fin_B22 INSIDE EDGE diffin20 
+fin_A22 = EXPAND EDGE fin_E21 INSIDE BY FIN_PITCH
+diffin21 = diffin20 NOT fin_A21 
+fin_E22_ori = fin_A22 INSIDE EDGE diffin21 
+fin_B23_ori = EXPAND EDGE fin_E22_ori OUTSIDE BY FIN_SPACE
+fin_E22_ex1 = LENGTH fin_E22_ori == FIN_WIDTH
+fin_B23_ex1 = EXPAND EDGE fin_E22_ex1 OUTSIDE BY FIN_SPACE
+fin_B23a = fin_B23_ori NOT fin_B23_ex1 
+fin_E22_ex2 = LENGTH fin_E22_ori == FIN_PITCH
+fin_B23_ex2 = EXPAND EDGE fin_E22_ex2 OUTSIDE BY FIN_SPACE
+fin_B23 = fin_B23a NOT fin_B23_ex2 
+fin_lay23o = fin_lay22o NOT fin_B23 
+fin_E22 = fin_B23 INSIDE EDGE diffin21 
+fin_A23 = EXPAND EDGE fin_E22 INSIDE BY FIN_PITCH
+diffin22 = diffin21 NOT fin_A22 
+fin_E23_ori = fin_A23 INSIDE EDGE diffin22 
+fin_B24_ori = EXPAND EDGE fin_E23_ori OUTSIDE BY FIN_SPACE
+fin_E23_ex1 = LENGTH fin_E23_ori == FIN_WIDTH
+fin_B24_ex1 = EXPAND EDGE fin_E23_ex1 OUTSIDE BY FIN_SPACE
+fin_B24a = fin_B24_ori NOT fin_B24_ex1 
+fin_E23_ex2 = LENGTH fin_E23_ori == FIN_PITCH
+fin_B24_ex2 = EXPAND EDGE fin_E23_ex2 OUTSIDE BY FIN_SPACE
+fin_B24 = fin_B24a NOT fin_B24_ex2 
+fin_lay24o = fin_lay23o NOT fin_B24 
+fin_E23 = fin_B24 INSIDE EDGE diffin22 
+fin_A24 = EXPAND EDGE fin_E23 INSIDE BY FIN_PITCH
+diffin23 = diffin22 NOT fin_A23 
+fin_E24_ori = fin_A24 INSIDE EDGE diffin23 
+fin_B25_ori = EXPAND EDGE fin_E24_ori OUTSIDE BY FIN_SPACE
+fin_E24_ex1 = LENGTH fin_E24_ori == FIN_WIDTH
+fin_B25_ex1 = EXPAND EDGE fin_E24_ex1 OUTSIDE BY FIN_SPACE
+fin_B25a = fin_B25_ori NOT fin_B25_ex1 
+fin_E24_ex2 = LENGTH fin_E24_ori == FIN_PITCH
+fin_B25_ex2 = EXPAND EDGE fin_E24_ex2 OUTSIDE BY FIN_SPACE
+fin_B25 = fin_B25a NOT fin_B25_ex2 
+fin_lay25o = fin_lay24o NOT fin_B25 
+fin_E24 = fin_B25 INSIDE EDGE diffin23 
+fin_A25 = EXPAND EDGE fin_E24 INSIDE BY FIN_PITCH
+diffin24 = diffin23 NOT fin_A24 
+fin_E25_ori = fin_A25 INSIDE EDGE diffin24 
+fin_B26_ori = EXPAND EDGE fin_E25_ori OUTSIDE BY FIN_SPACE
+fin_E25_ex1 = LENGTH fin_E25_ori == FIN_WIDTH
+fin_B26_ex1 = EXPAND EDGE fin_E25_ex1 OUTSIDE BY FIN_SPACE
+fin_B26a = fin_B26_ori NOT fin_B26_ex1 
+fin_E25_ex2 = LENGTH fin_E25_ori == FIN_PITCH
+fin_B26_ex2 = EXPAND EDGE fin_E25_ex2 OUTSIDE BY FIN_SPACE
+fin_B26 = fin_B26a NOT fin_B26_ex2 
+fin_lay26o = fin_lay25o NOT fin_B26 
+fin_E25 = fin_B26 INSIDE EDGE diffin24 
+fin_A26 = EXPAND EDGE fin_E25 INSIDE BY FIN_PITCH
+diffin25 = diffin24 NOT fin_A25 
+fin_E26_ori = fin_A26 INSIDE EDGE diffin25 
+fin_B27_ori = EXPAND EDGE fin_E26_ori OUTSIDE BY FIN_SPACE
+fin_E26_ex1 = LENGTH fin_E26_ori == FIN_WIDTH
+fin_B27_ex1 = EXPAND EDGE fin_E26_ex1 OUTSIDE BY FIN_SPACE
+fin_B27a = fin_B27_ori NOT fin_B27_ex1 
+fin_E26_ex2 = LENGTH fin_E26_ori == FIN_PITCH
+fin_B27_ex2 = EXPAND EDGE fin_E26_ex2 OUTSIDE BY FIN_SPACE
+fin_B27 = fin_B27a NOT fin_B27_ex2 
+fin_lay27o = fin_lay26o NOT fin_B27 
+fin_E26 = fin_B27 INSIDE EDGE diffin25 
+fin_A27 = EXPAND EDGE fin_E26 INSIDE BY FIN_PITCH
+diffin26 = diffin25 NOT fin_A26 
+fin_E27_ori = fin_A27 INSIDE EDGE diffin26 
+fin_B28_ori = EXPAND EDGE fin_E27_ori OUTSIDE BY FIN_SPACE
+fin_E27_ex1 = LENGTH fin_E27_ori == FIN_WIDTH
+fin_B28_ex1 = EXPAND EDGE fin_E27_ex1 OUTSIDE BY FIN_SPACE
+fin_B28a = fin_B28_ori NOT fin_B28_ex1 
+fin_E27_ex2 = LENGTH fin_E27_ori == FIN_PITCH
+fin_B28_ex2 = EXPAND EDGE fin_E27_ex2 OUTSIDE BY FIN_SPACE
+fin_B28 = fin_B28a NOT fin_B28_ex2 
+fin_lay28o = fin_lay27o NOT fin_B28 
+fin_E27 = fin_B28 INSIDE EDGE diffin26 
+fin_A28 = EXPAND EDGE fin_E27 INSIDE BY FIN_PITCH
+diffin27 = diffin26 NOT fin_A27 
+fin_E28_ori = fin_A28 INSIDE EDGE diffin27 
+fin_B29_ori = EXPAND EDGE fin_E28_ori OUTSIDE BY FIN_SPACE
+fin_E28_ex1 = LENGTH fin_E28_ori == FIN_WIDTH
+fin_B29_ex1 = EXPAND EDGE fin_E28_ex1 OUTSIDE BY FIN_SPACE
+fin_B29a = fin_B29_ori NOT fin_B29_ex1 
+fin_E28_ex2 = LENGTH fin_E28_ori == FIN_PITCH
+fin_B29_ex2 = EXPAND EDGE fin_E28_ex2 OUTSIDE BY FIN_SPACE
+fin_B29 = fin_B29a NOT fin_B29_ex2 
+fin_lay29o = fin_lay28o NOT fin_B29 
+fin_E28 = fin_B29 INSIDE EDGE diffin27 
+fin_A29 = EXPAND EDGE fin_E28 INSIDE BY FIN_PITCH
+diffin28 = diffin27 NOT fin_A28 
+fin_E29_ori = fin_A29 INSIDE EDGE diffin28 
+fin_B30_ori = EXPAND EDGE fin_E29_ori OUTSIDE BY FIN_SPACE
+fin_E29_ex1 = LENGTH fin_E29_ori == FIN_WIDTH
+fin_B30_ex1 = EXPAND EDGE fin_E29_ex1 OUTSIDE BY FIN_SPACE
+fin_B30a = fin_B30_ori NOT fin_B30_ex1 
+fin_E29_ex2 = LENGTH fin_E29_ori == FIN_PITCH
+fin_B30_ex2 = EXPAND EDGE fin_E29_ex2 OUTSIDE BY FIN_SPACE
+fin_B30 = fin_B30a NOT fin_B30_ex2 
+fin_lay30o = fin_lay29o NOT fin_B30 
+fin_E29 = fin_B30 INSIDE EDGE diffin28 
+fin_A30 = EXPAND EDGE fin_E29 INSIDE BY FIN_PITCH
+diffin29 = diffin28 NOT fin_A29 
+fin_E30_ori = fin_A30 INSIDE EDGE diffin29 
+fin_B31_ori = EXPAND EDGE fin_E30_ori OUTSIDE BY FIN_SPACE
+fin_E30_ex1 = LENGTH fin_E30_ori == FIN_WIDTH
+fin_B31_ex1 = EXPAND EDGE fin_E30_ex1 OUTSIDE BY FIN_SPACE
+fin_B31a = fin_B31_ori NOT fin_B31_ex1 
+fin_E30_ex2 = LENGTH fin_E30_ori == FIN_PITCH
+fin_B31_ex2 = EXPAND EDGE fin_E30_ex2 OUTSIDE BY FIN_SPACE
+fin_B31 = fin_B31a NOT fin_B31_ex2 
+fin_lay31o = fin_lay30o NOT fin_B31 
+fin_E30 = fin_B31 INSIDE EDGE diffin29 
+fin_A31 = EXPAND EDGE fin_E30 INSIDE BY FIN_PITCH
+diffin30 = diffin29 NOT fin_A30 
+fin_E31_ori = fin_A31 INSIDE EDGE diffin30 
+fin_B32_ori = EXPAND EDGE fin_E31_ori OUTSIDE BY FIN_SPACE
+fin_E31_ex1 = LENGTH fin_E31_ori == FIN_WIDTH
+fin_B32_ex1 = EXPAND EDGE fin_E31_ex1 OUTSIDE BY FIN_SPACE
+fin_B32a = fin_B32_ori NOT fin_B32_ex1 
+fin_E31_ex2 = LENGTH fin_E31_ori == FIN_PITCH
+fin_B32_ex2 = EXPAND EDGE fin_E31_ex2 OUTSIDE BY FIN_SPACE
+fin_B32 = fin_B32a NOT fin_B32_ex2 
+fin_lay32o = fin_lay31o NOT fin_B32 
+fin_E31 = fin_B32 INSIDE EDGE diffin30 
+fin_A32 = EXPAND EDGE fin_E31 INSIDE BY FIN_PITCH
+diffin31 = diffin30 NOT fin_A31 
+fin_E32_ori = fin_A32 INSIDE EDGE diffin31 
+fin_B33_ori = EXPAND EDGE fin_E32_ori OUTSIDE BY FIN_SPACE
+fin_E32_ex1 = LENGTH fin_E32_ori == FIN_WIDTH
+fin_B33_ex1 = EXPAND EDGE fin_E32_ex1 OUTSIDE BY FIN_SPACE
+fin_B33a = fin_B33_ori NOT fin_B33_ex1 
+fin_E32_ex2 = LENGTH fin_E32_ori == FIN_PITCH
+fin_B33_ex2 = EXPAND EDGE fin_E32_ex2 OUTSIDE BY FIN_SPACE
+fin_B33 = fin_B33a NOT fin_B33_ex2 
+fin_lay33o = fin_lay32o NOT fin_B33 
+fin_E32 = fin_B33 INSIDE EDGE diffin31 
+fin_A33 = EXPAND EDGE fin_E32 INSIDE BY FIN_PITCH
+diffin32 = diffin31 NOT fin_A32 
+fin_E33_ori = fin_A33 INSIDE EDGE diffin32 
+fin_B34_ori = EXPAND EDGE fin_E33_ori OUTSIDE BY FIN_SPACE
+fin_E33_ex1 = LENGTH fin_E33_ori == FIN_WIDTH
+fin_B34_ex1 = EXPAND EDGE fin_E33_ex1 OUTSIDE BY FIN_SPACE
+fin_B34a = fin_B34_ori NOT fin_B34_ex1 
+fin_E33_ex2 = LENGTH fin_E33_ori == FIN_PITCH
+fin_B34_ex2 = EXPAND EDGE fin_E33_ex2 OUTSIDE BY FIN_SPACE
+fin_B34 = fin_B34a NOT fin_B34_ex2 
+fin_lay34o = fin_lay33o NOT fin_B34 
+fin_E33 = fin_B34 INSIDE EDGE diffin32 
+fin_A34 = EXPAND EDGE fin_E33 INSIDE BY FIN_PITCH
+diffin33 = diffin32 NOT fin_A33 
+fin_E34_ori = fin_A34 INSIDE EDGE diffin33 
+fin_B35_ori = EXPAND EDGE fin_E34_ori OUTSIDE BY FIN_SPACE
+fin_E34_ex1 = LENGTH fin_E34_ori == FIN_WIDTH
+fin_B35_ex1 = EXPAND EDGE fin_E34_ex1 OUTSIDE BY FIN_SPACE
+fin_B35a = fin_B35_ori NOT fin_B35_ex1 
+fin_E34_ex2 = LENGTH fin_E34_ori == FIN_PITCH
+fin_B35_ex2 = EXPAND EDGE fin_E34_ex2 OUTSIDE BY FIN_SPACE
+fin_B35 = fin_B35a NOT fin_B35_ex2 
+fin_lay35o = fin_lay34o NOT fin_B35 
+fin_E34 = fin_B35 INSIDE EDGE diffin33 
+fin_A35 = EXPAND EDGE fin_E34 INSIDE BY FIN_PITCH
+diffin34 = diffin33 NOT fin_A34 
+fin_E35_ori = fin_A35 INSIDE EDGE diffin34 
+fin_B36_ori = EXPAND EDGE fin_E35_ori OUTSIDE BY FIN_SPACE
+fin_E35_ex1 = LENGTH fin_E35_ori == FIN_WIDTH
+fin_B36_ex1 = EXPAND EDGE fin_E35_ex1 OUTSIDE BY FIN_SPACE
+fin_B36a = fin_B36_ori NOT fin_B36_ex1 
+fin_E35_ex2 = LENGTH fin_E35_ori == FIN_PITCH
+fin_B36_ex2 = EXPAND EDGE fin_E35_ex2 OUTSIDE BY FIN_SPACE
+fin_B36 = fin_B36a NOT fin_B36_ex2 
+fin_lay36o = fin_lay35o NOT fin_B36 
+fin_E35 = fin_B36 INSIDE EDGE diffin34 
+fin_A36 = EXPAND EDGE fin_E35 INSIDE BY FIN_PITCH
+diffin35 = diffin34 NOT fin_A35 
+fin_E36_ori = fin_A36 INSIDE EDGE diffin35 
+fin_B37_ori = EXPAND EDGE fin_E36_ori OUTSIDE BY FIN_SPACE
+fin_E36_ex1 = LENGTH fin_E36_ori == FIN_WIDTH
+fin_B37_ex1 = EXPAND EDGE fin_E36_ex1 OUTSIDE BY FIN_SPACE
+fin_B37a = fin_B37_ori NOT fin_B37_ex1 
+fin_E36_ex2 = LENGTH fin_E36_ori == FIN_PITCH
+fin_B37_ex2 = EXPAND EDGE fin_E36_ex2 OUTSIDE BY FIN_SPACE
+fin_B37 = fin_B37a NOT fin_B37_ex2 
+fin_lay37o = fin_lay36o NOT fin_B37 
+fin_E36 = fin_B37 INSIDE EDGE diffin35 
+fin_A37 = EXPAND EDGE fin_E36 INSIDE BY FIN_PITCH
+diffin36 = diffin35 NOT fin_A36 
+fin_E37_ori = fin_A37 INSIDE EDGE diffin36 
+fin_B38_ori = EXPAND EDGE fin_E37_ori OUTSIDE BY FIN_SPACE
+fin_E37_ex1 = LENGTH fin_E37_ori == FIN_WIDTH
+fin_B38_ex1 = EXPAND EDGE fin_E37_ex1 OUTSIDE BY FIN_SPACE
+fin_B38a = fin_B38_ori NOT fin_B38_ex1 
+fin_E37_ex2 = LENGTH fin_E37_ori == FIN_PITCH
+fin_B38_ex2 = EXPAND EDGE fin_E37_ex2 OUTSIDE BY FIN_SPACE
+fin_B38 = fin_B38a NOT fin_B38_ex2 
+fin_lay38o = fin_lay37o NOT fin_B38 
+fin_E37 = fin_B38 INSIDE EDGE diffin36 
+fin_A38 = EXPAND EDGE fin_E37 INSIDE BY FIN_PITCH
+diffin37 = diffin36 NOT fin_A37 
+fin_E38_ori = fin_A38 INSIDE EDGE diffin37 
+fin_B39_ori = EXPAND EDGE fin_E38_ori OUTSIDE BY FIN_SPACE
+fin_E38_ex1 = LENGTH fin_E38_ori == FIN_WIDTH
+fin_B39_ex1 = EXPAND EDGE fin_E38_ex1 OUTSIDE BY FIN_SPACE
+fin_B39a = fin_B39_ori NOT fin_B39_ex1 
+fin_E38_ex2 = LENGTH fin_E38_ori == FIN_PITCH
+fin_B39_ex2 = EXPAND EDGE fin_E38_ex2 OUTSIDE BY FIN_SPACE
+fin_B39 = fin_B39a NOT fin_B39_ex2 
+fin_lay39o = fin_lay38o NOT fin_B39 
+fin_E38 = fin_B39 INSIDE EDGE diffin37 
+fin_A39 = EXPAND EDGE fin_E38 INSIDE BY FIN_PITCH
+diffin38 = diffin37 NOT fin_A38 
+fin_E39_ori = fin_A39 INSIDE EDGE diffin38 
+fin_B40_ori = EXPAND EDGE fin_E39_ori OUTSIDE BY FIN_SPACE
+fin_E39_ex1 = LENGTH fin_E39_ori == FIN_WIDTH
+fin_B40_ex1 = EXPAND EDGE fin_E39_ex1 OUTSIDE BY FIN_SPACE
+fin_B40a = fin_B40_ori NOT fin_B40_ex1 
+fin_E39_ex2 = LENGTH fin_E39_ori == FIN_PITCH
+fin_B40_ex2 = EXPAND EDGE fin_E39_ex2 OUTSIDE BY FIN_SPACE
+fin_B40 = fin_B40a NOT fin_B40_ex2 
+fin_lay40o = fin_lay39o NOT fin_B40 
+fin_E39 = fin_B40 INSIDE EDGE diffin38 
+fin_A40 = EXPAND EDGE fin_E39 INSIDE BY FIN_PITCH
+diffin39 = diffin38 NOT fin_A39 
+fin_E40_ori = fin_A40 INSIDE EDGE diffin39 
+fin_B41_ori = EXPAND EDGE fin_E40_ori OUTSIDE BY FIN_SPACE
+fin_E40_ex1 = LENGTH fin_E40_ori == FIN_WIDTH
+fin_B41_ex1 = EXPAND EDGE fin_E40_ex1 OUTSIDE BY FIN_SPACE
+fin_B41a = fin_B41_ori NOT fin_B41_ex1 
+fin_E40_ex2 = LENGTH fin_E40_ori == FIN_PITCH
+fin_B41_ex2 = EXPAND EDGE fin_E40_ex2 OUTSIDE BY FIN_SPACE
+fin_B41 = fin_B41a NOT fin_B41_ex2 
+fin_lay41o = fin_lay40o NOT fin_B41 
+fin_E40 = fin_B41 INSIDE EDGE diffin39 
+fin_A41 = EXPAND EDGE fin_E40 INSIDE BY FIN_PITCH
+diffin40 = diffin39 NOT fin_A40 
+fin_E41_ori = fin_A41 INSIDE EDGE diffin40 
+fin_B42_ori = EXPAND EDGE fin_E41_ori OUTSIDE BY FIN_SPACE
+fin_E41_ex1 = LENGTH fin_E41_ori == FIN_WIDTH
+fin_B42_ex1 = EXPAND EDGE fin_E41_ex1 OUTSIDE BY FIN_SPACE
+fin_B42a = fin_B42_ori NOT fin_B42_ex1 
+fin_E41_ex2 = LENGTH fin_E41_ori == FIN_PITCH
+fin_B42_ex2 = EXPAND EDGE fin_E41_ex2 OUTSIDE BY FIN_SPACE
+fin_B42 = fin_B42a NOT fin_B42_ex2 
+fin_lay42o = fin_lay41o NOT fin_B42 
+fin_E41 = fin_B42 INSIDE EDGE diffin40 
+fin_A42 = EXPAND EDGE fin_E41 INSIDE BY FIN_PITCH
+diffin41 = diffin40 NOT fin_A41 
+fin_E42_ori = fin_A42 INSIDE EDGE diffin41 
+fin_B43_ori = EXPAND EDGE fin_E42_ori OUTSIDE BY FIN_SPACE
+fin_E42_ex1 = LENGTH fin_E42_ori == FIN_WIDTH
+fin_B43_ex1 = EXPAND EDGE fin_E42_ex1 OUTSIDE BY FIN_SPACE
+fin_B43a = fin_B43_ori NOT fin_B43_ex1 
+fin_E42_ex2 = LENGTH fin_E42_ori == FIN_PITCH
+fin_B43_ex2 = EXPAND EDGE fin_E42_ex2 OUTSIDE BY FIN_SPACE
+fin_B43 = fin_B43a NOT fin_B43_ex2 
+fin_lay43o = fin_lay42o NOT fin_B43 
+fin_E42 = fin_B43 INSIDE EDGE diffin41 
+fin_A43 = EXPAND EDGE fin_E42 INSIDE BY FIN_PITCH
+diffin42 = diffin41 NOT fin_A42 
+fin_E43_ori = fin_A43 INSIDE EDGE diffin42 
+fin_B44_ori = EXPAND EDGE fin_E43_ori OUTSIDE BY FIN_SPACE
+fin_E43_ex1 = LENGTH fin_E43_ori == FIN_WIDTH
+fin_B44_ex1 = EXPAND EDGE fin_E43_ex1 OUTSIDE BY FIN_SPACE
+fin_B44a = fin_B44_ori NOT fin_B44_ex1 
+fin_E43_ex2 = LENGTH fin_E43_ori == FIN_PITCH
+fin_B44_ex2 = EXPAND EDGE fin_E43_ex2 OUTSIDE BY FIN_SPACE
+fin_B44 = fin_B44a NOT fin_B44_ex2 
+fin_lay44o = fin_lay43o NOT fin_B44 
+fin_E43 = fin_B44 INSIDE EDGE diffin42 
+fin_A44 = EXPAND EDGE fin_E43 INSIDE BY FIN_PITCH
+diffin43 = diffin42 NOT fin_A43 
+fin_E44_ori = fin_A44 INSIDE EDGE diffin43 
+fin_B45_ori = EXPAND EDGE fin_E44_ori OUTSIDE BY FIN_SPACE
+fin_E44_ex1 = LENGTH fin_E44_ori == FIN_WIDTH
+fin_B45_ex1 = EXPAND EDGE fin_E44_ex1 OUTSIDE BY FIN_SPACE
+fin_B45a = fin_B45_ori NOT fin_B45_ex1 
+fin_E44_ex2 = LENGTH fin_E44_ori == FIN_PITCH
+fin_B45_ex2 = EXPAND EDGE fin_E44_ex2 OUTSIDE BY FIN_SPACE
+fin_B45 = fin_B45a NOT fin_B45_ex2 
+fin_lay45o = fin_lay44o NOT fin_B45 
+fin_E44 = fin_B45 INSIDE EDGE diffin43 
+fin_A45 = EXPAND EDGE fin_E44 INSIDE BY FIN_PITCH
+diffin44 = diffin43 NOT fin_A44 
+fin_E45_ori = fin_A45 INSIDE EDGE diffin44 
+fin_B46_ori = EXPAND EDGE fin_E45_ori OUTSIDE BY FIN_SPACE
+fin_E45_ex1 = LENGTH fin_E45_ori == FIN_WIDTH
+fin_B46_ex1 = EXPAND EDGE fin_E45_ex1 OUTSIDE BY FIN_SPACE
+fin_B46a = fin_B46_ori NOT fin_B46_ex1 
+fin_E45_ex2 = LENGTH fin_E45_ori == FIN_PITCH
+fin_B46_ex2 = EXPAND EDGE fin_E45_ex2 OUTSIDE BY FIN_SPACE
+fin_B46 = fin_B46a NOT fin_B46_ex2 
+fin_lay46o = fin_lay45o NOT fin_B46 
+fin_E45 = fin_B46 INSIDE EDGE diffin44 
+fin_A46 = EXPAND EDGE fin_E45 INSIDE BY FIN_PITCH
+diffin45 = diffin44 NOT fin_A45 
+fin_E46_ori = fin_A46 INSIDE EDGE diffin45 
+fin_B47_ori = EXPAND EDGE fin_E46_ori OUTSIDE BY FIN_SPACE
+fin_E46_ex1 = LENGTH fin_E46_ori == FIN_WIDTH
+fin_B47_ex1 = EXPAND EDGE fin_E46_ex1 OUTSIDE BY FIN_SPACE
+fin_B47a = fin_B47_ori NOT fin_B47_ex1 
+fin_E46_ex2 = LENGTH fin_E46_ori == FIN_PITCH
+fin_B47_ex2 = EXPAND EDGE fin_E46_ex2 OUTSIDE BY FIN_SPACE
+fin_B47 = fin_B47a NOT fin_B47_ex2 
+fin_lay47o = fin_lay46o NOT fin_B47 
+fin_E46 = fin_B47 INSIDE EDGE diffin45 
+fin_A47 = EXPAND EDGE fin_E46 INSIDE BY FIN_PITCH
+diffin46 = diffin45 NOT fin_A46 
+fin_E47_ori = fin_A47 INSIDE EDGE diffin46 
+fin_B48_ori = EXPAND EDGE fin_E47_ori OUTSIDE BY FIN_SPACE
+fin_E47_ex1 = LENGTH fin_E47_ori == FIN_WIDTH
+fin_B48_ex1 = EXPAND EDGE fin_E47_ex1 OUTSIDE BY FIN_SPACE
+fin_B48a = fin_B48_ori NOT fin_B48_ex1 
+fin_E47_ex2 = LENGTH fin_E47_ori == FIN_PITCH
+fin_B48_ex2 = EXPAND EDGE fin_E47_ex2 OUTSIDE BY FIN_SPACE
+fin_B48 = fin_B48a NOT fin_B48_ex2 
+fin_lay48o = fin_lay47o NOT fin_B48 
+fin_E47 = fin_B48 INSIDE EDGE diffin46 
+fin_A48 = EXPAND EDGE fin_E47 INSIDE BY FIN_PITCH
+diffin47 = diffin46 NOT fin_A47 
+fin_E48_ori = fin_A48 INSIDE EDGE diffin47 
+fin_B49_ori = EXPAND EDGE fin_E48_ori OUTSIDE BY FIN_SPACE
+fin_E48_ex1 = LENGTH fin_E48_ori == FIN_WIDTH
+fin_B49_ex1 = EXPAND EDGE fin_E48_ex1 OUTSIDE BY FIN_SPACE
+fin_B49a = fin_B49_ori NOT fin_B49_ex1 
+fin_E48_ex2 = LENGTH fin_E48_ori == FIN_PITCH
+fin_B49_ex2 = EXPAND EDGE fin_E48_ex2 OUTSIDE BY FIN_SPACE
+fin_B49 = fin_B49a NOT fin_B49_ex2 
+fin_lay49o = fin_lay48o NOT fin_B49 
+fin_E48 = fin_B49 INSIDE EDGE diffin47 
+fin_A49 = EXPAND EDGE fin_E48 INSIDE BY FIN_PITCH
+diffin48 = diffin47 NOT fin_A48 
+fin_E49_ori = fin_A49 INSIDE EDGE diffin48 
+fin_B50_ori = EXPAND EDGE fin_E49_ori OUTSIDE BY FIN_SPACE
+fin_E49_ex1 = LENGTH fin_E49_ori == FIN_WIDTH
+fin_B50_ex1 = EXPAND EDGE fin_E49_ex1 OUTSIDE BY FIN_SPACE
+fin_B50a = fin_B50_ori NOT fin_B50_ex1 
+fin_E49_ex2 = LENGTH fin_E49_ori == FIN_PITCH
+fin_B50_ex2 = EXPAND EDGE fin_E49_ex2 OUTSIDE BY FIN_SPACE
+fin_B50 = fin_B50a NOT fin_B50_ex2 
+fin_lay50o = fin_lay49o NOT fin_B50 
+fin_E49 = fin_B50 INSIDE EDGE diffin48 
+fin_A50 = EXPAND EDGE fin_E49 INSIDE BY FIN_PITCH
+diffin49 = diffin48 NOT fin_A49 
+fin_E50_ori = fin_A50 INSIDE EDGE diffin49 
+fin_B51_ori = EXPAND EDGE fin_E50_ori OUTSIDE BY FIN_SPACE
+fin_E50_ex1 = LENGTH fin_E50_ori == FIN_WIDTH
+fin_B51_ex1 = EXPAND EDGE fin_E50_ex1 OUTSIDE BY FIN_SPACE
+fin_B51a = fin_B51_ori NOT fin_B51_ex1 
+fin_E50_ex2 = LENGTH fin_E50_ori == FIN_PITCH
+fin_B51_ex2 = EXPAND EDGE fin_E50_ex2 OUTSIDE BY FIN_SPACE
+fin_B51 = fin_B51a NOT fin_B51_ex2 
+fin_lay51o = fin_lay50o NOT fin_B51 
+fin_E50 = fin_B51 INSIDE EDGE diffin49 
+fin_A51 = EXPAND EDGE fin_E50 INSIDE BY FIN_PITCH
+diffin50 = diffin49 NOT fin_A50 
+fin_E51_ori = fin_A51 INSIDE EDGE diffin50 
+fin_B52_ori = EXPAND EDGE fin_E51_ori OUTSIDE BY FIN_SPACE
+fin_E51_ex1 = LENGTH fin_E51_ori == FIN_WIDTH
+fin_B52_ex1 = EXPAND EDGE fin_E51_ex1 OUTSIDE BY FIN_SPACE
+fin_B52a = fin_B52_ori NOT fin_B52_ex1 
+fin_E51_ex2 = LENGTH fin_E51_ori == FIN_PITCH
+fin_B52_ex2 = EXPAND EDGE fin_E51_ex2 OUTSIDE BY FIN_SPACE
+fin_B52 = fin_B52a NOT fin_B52_ex2 
+fin_lay52o = fin_lay51o NOT fin_B52 
+fin_E51 = fin_B52 INSIDE EDGE diffin50 
+fin_A52 = EXPAND EDGE fin_E51 INSIDE BY FIN_PITCH
+diffin51 = diffin50 NOT fin_A51 
+fin_E52_ori = fin_A52 INSIDE EDGE diffin51 
+fin_B53_ori = EXPAND EDGE fin_E52_ori OUTSIDE BY FIN_SPACE
+fin_E52_ex1 = LENGTH fin_E52_ori == FIN_WIDTH
+fin_B53_ex1 = EXPAND EDGE fin_E52_ex1 OUTSIDE BY FIN_SPACE
+fin_B53a = fin_B53_ori NOT fin_B53_ex1 
+fin_E52_ex2 = LENGTH fin_E52_ori == FIN_PITCH
+fin_B53_ex2 = EXPAND EDGE fin_E52_ex2 OUTSIDE BY FIN_SPACE
+fin_B53 = fin_B53a NOT fin_B53_ex2 
+fin_lay53o = fin_lay52o NOT fin_B53 
+fin_E52 = fin_B53 INSIDE EDGE diffin51 
+fin_A53 = EXPAND EDGE fin_E52 INSIDE BY FIN_PITCH
+diffin52 = diffin51 NOT fin_A52 
+fin_E53_ori = fin_A53 INSIDE EDGE diffin52 
+fin_B54_ori = EXPAND EDGE fin_E53_ori OUTSIDE BY FIN_SPACE
+fin_E53_ex1 = LENGTH fin_E53_ori == FIN_WIDTH
+fin_B54_ex1 = EXPAND EDGE fin_E53_ex1 OUTSIDE BY FIN_SPACE
+fin_B54a = fin_B54_ori NOT fin_B54_ex1 
+fin_E53_ex2 = LENGTH fin_E53_ori == FIN_PITCH
+fin_B54_ex2 = EXPAND EDGE fin_E53_ex2 OUTSIDE BY FIN_SPACE
+fin_B54 = fin_B54a NOT fin_B54_ex2 
+fin_lay54o = fin_lay53o NOT fin_B54 
+fin_lay_old1 = COPY fin_lay54o 
+#IFDEF CCI_DECK
+   fin_lay_old = COPY fin_lay_old1
+#ELSE
+   fin_lay_old = COPY Empty
+#ENDIF
+#IFDEF FIN_GEN_DFM_SPEC_FILL
+   fin_lay = COPY fin_lay_new
+#ELSE
+   fin_lay = COPY fin_lay_old
+#ENDIF
+
+//***** Define connectivity/via layer -- p_gpoly_svt ****
+p_gpoly_svt_all = ppoly_co_s NOT p_fpoly_svt 
+p_gpoly_svt = p_gpoly_svt_all NOT all_mos_gates 
+
+//***** Define connectivity/via layer -- VIA0_M0_OD_P ****
+VIA0_M0_OD_P1 = VIA0i NOT INTERACT VIA0_M0_STI_com 
+VIA0_M0_OD = VIA0i AND M0_OD 
+M0_OD_P1 = M0_OD AND tpdiff_ori 
+M0_OD_P = COPY M0_OD_P1 
+VIA0_M0_OD_P_com = VIA0_M0_OD AND M0_OD_P 
+VIA0_M0_OD_P = VIA0_M0_OD_P1 INTERACT VIA0_M0_OD_P_com 
+
+//***** Define connectivity/via layer -- n_gpoly_lvt ****
+n_gpoly_lvt = n_gpoly_lvt1 NOT n_gpoly_nocg_lvt 
+
+//***** Define connectivity/via layer -- pplug ****
+pplug1 = tpdiff_ori AND psub 
+plug_sel1 = tndiff_ori OR tpdiff_ori 
+plug_sel2a = plug_sel1 OR tiod 
+plug_sel2b = COPY plug_sel2a 
+plug_sel2 = COPY plug_sel2b 
+plug_valid = M0_OD INTERACT MD_valid 
+plug_sel3 = plug_sel2a INTERACT plug_valid 
+#IFDEF CCI_DECK
+   plug_sel = COPY plug_sel2
+#ELSE
+   plug_sel = COPY plug_sel3
+#ENDIF
+pplug2 = pplug1 AND plug_sel 
+pplug = COPY pplug2 
+
+//***** Define connectivity/via layer -- p_fptap_lvt ****
+p_fptap_lvt1 = fptap NOT INTERACT n_fptap_com_svt 
+p_fptap_lvt2 = p_fptap_lvt1 NOT INTERACT n_fptap_com_lvt 
+p_fptap_lvt3 = p_fptap_lvt2 NOT INTERACT p_fptap_com_svt 
+n_fptap_com_io = fptap AND n_fpoly_io 
+p_fptap_lvt4 = p_fptap_lvt3 NOT INTERACT n_fptap_com_io 
+p_fptap_lvt5 = p_fptap_lvt4 NOT INTERACT p_fptap_com_io 
+p_fptap_com_lvt = fptap AND p_fpoly_lvt 
+p_fptap_lvt = p_fptap_lvt5 INTERACT p_fptap_com_lvt 
+
+//***** Define connectivity/via layer -- p_gpoly_io ****
+p_gpoly_io = p_gpoly_io1 NOT p_gpoly_nocg_io 
+
+//***** Define connectivity/via layer -- n_fptap_svt ****
+n_fptap_svt = fptap INTERACT n_fptap_com_svt 
+
+//***** Define connectivity/via layer -- n_gpoly_io ****
+n_gpoly_io_all = npoly_io NOT n_fpoly_io 
+n_gpoly_io1 = n_gpoly_io_all NOT all_mos_gates 
+n_gpoly_nocg_io = n_gpoly_io1 AND nocg_dmy 
+n_gpoly_io = n_gpoly_io1 NOT n_gpoly_nocg_io 
+tndiff1 = tndiff_ori NOT tndiff_dio 
+tndiff2 = tndiff1 NOT tndiff_bjt 
+tndiff_all = COPY tndiff2 
+
+//***** Define connectivity/via layer -- VIA0_M0_PO_TiN ****
+VIA0_M0_PO_TiN = VIA0i AND M0_PO_TiN 
+
+//***** Define connectivity/via layer -- VIA0_M0_OD_N ****
+VIA0_M0_OD_N1 = VIA0i NOT INTERACT VIA0_M0_STI_com 
+VIA0_M0_OD_N2 = VIA0_M0_OD_N1 NOT INTERACT VIA0_M0_OD_P_com 
+M0_OD_N1 = M0_OD NOT M0_OD_P1 
+M0_OD_N = COPY M0_OD_N1 
+VIA0_M0_OD_N_com = VIA0_M0_OD AND M0_OD_N 
+VIA0_M0_OD_N = VIA0_M0_OD_N2 INTERACT VIA0_M0_OD_N_com 
+all_npode_gate = tngate1 AND PODE_GATE 
+all_abut_npode_gate = all_npode_gate INTERACT tndiff_ori == 2
+unrecognized_ndio_1 = tndiff_all NOT SR_DOD 
+unrecognized_ndio_2 = unrecognized_ndio_1 NOT nxwell 
+unrecognized_dio_n = tndiff_all INTERACT all_mos_gates 
+unrecognized_ndio_3 = unrecognized_ndio_2 NOT unrecognized_dio_n 
+unrecognized_ndio_4 = diff AND unrecognized_ndio_3 
+unrecognized_ndio = COPY unrecognized_ndio_4 
+dio0 = mdiff INTERACT POI 
+tpdiff1 = tpdiff_ori NOT tpdiff_dio 
+tpdiff_all = tpdiff1 NOT tpdiff_bjt 
+unrecognized_pdio_1 = tpdiff_all NOT SR_DOD 
+unrecognized_pdio_2 = unrecognized_pdio_1 NOT psub 
+unrecognized_dio_p = tpdiff_all INTERACT all_mos_gates 
+unrecognized_pdio_3 = unrecognized_pdio_2 NOT unrecognized_dio_p 
+unrecognized_pdio_4 = diff AND unrecognized_pdio_3 
+unrecognized_pdio = COPY unrecognized_pdio_4 
+unrecognized_bjt_1 = COPY cemit2_mac 
+unrecognized_bjt_3 = COPY unrecognized_bjt_1 
+unrecognized_bjt_4 = BJTDMY2 INTERACT unrecognized_bjt_3 
+unrecognized_bjt = BJTDMY2 NOT unrecognized_bjt_4 
+DIONW1 = DIODMY OUTSIDE tpdiff_ori 
+DIONW2 = DIONW1 INTERACT FINMOS 
+DIONW3 = DIONW2 INTERACT PO 
+DIONW = DIONW3 INTERACT OD 
+
+//***** Define connectivity/via layer -- tiod_not_fin ****
+fin_lay_size = SIZE fin_lay BY 0.005 
+tiod_not_fin = tiod NOT fin_lay_size 
+
+//***** Define connectivity/via layer -- nplug ****
+nplug1 = tndiff_ori AND nxwell 
+nplug2 = nplug1 INTERACT plug_valid 
+tpdiffco = tpdiff_ori INTERACT plug_valid 
+nplug3 = nplug1 INTERACT tpdiffco 
+nplug = nplug2 OR nplug3  //  define NW contact
+erc_pmos_gates = COPY tpgate1 
+
+//***** Define connectivity/via layer -- tintap ****
+tintap = M0_PO_TiN AND RH_TN 
+
+//***** Define connectivity/via layer -- p_gptap_io ****
+p_gptap_io = gptap AND p_gpoly_io_all 
+
+//***** Define connectivity/via layer -- n_gptap_io ****
+n_gptap_io = gptap AND n_gpoly_io_all 
+
+//***** Define connectivity/via layer -- n_odtap_bjt ****
+n_odtap_bjt = n_odtap2 AND tndiff_bjt 
+tngate3 = COPY tngate2 
+emit = BJTEDMY INTERACT mdiff 
+emit_reg = emit INTERACT POI 
+all_ppode_gate = tpgate1 AND PODE_GATE 
+all_abut_ppode_gate = all_ppode_gate INTERACT tpdiff_ori == 2
+
+//***** Define connectivity/via layer -- ntap ****
+xwell = COPY NW 
+ntapx = tndiff_ori AND xwell 
+ntap1 = ntapx NOT BJTDMY 
+ntap2 = ntap1 INTERACT plug_valid 
+ntap3 = ntap1 INTERACT tpdiffco 
+ntap = ntap2 OR ntap3 
+
+//***** Define connectivity/via layer -- n_pplug ****
+n_pplug1 = tpdiff_ori AND plug_sel 
+n_pplug2 = n_pplug1 NOT nxwell 
+n_pplug3 = n_pplug2 NOT rwel 
+n_pplug4 = n_pplug3 AND n_psub 
+n_pplug = COPY n_pplug4 
+gate_mac1 = tngate1 OR tpgate1 
+gate_mac2 = gate_mac1 NOT PODE_3T  //  for layout effect measurement
+all_sd = tndiff_ori OR tpdiff_ori  //  for layout effect measurement 
+gate_mac = gate_mac2 TOUCH all_sd == 2
+
+//***** Define connectivity/via layer -- n_gpoly_svt ****
+n_gpoly_svt = n_gpoly_svt_all NOT all_mos_gates 
+
+//***** Define connectivity/via layer -- p_odtap_bjt ****
+p_odtap_bjt = p_odtap2 AND tpdiff_bjt 
+
+//***** Define connectivity/via layer -- n_fptap_io ****
+n_fptap_io = fptap AND n_fptap_com_io 
+
+//***** Define connectivity/via layer -- p_gptap_svt ****
+p_gptap_svt = gptap AND p_gpoly_svt_all 
+vargt1 = gatenw AND VAR 
+var_exclude_layer = COPY PODE_GATE 
+vargt2 = vargt1 NOT var_exclude_layer 
+nxwell_float = nxwell NOT INTERACT VAR  //  exclude nwell under VAR for floating nwell check
+
+//***** Define connectivity/via layer -- ptap ****
+ptap1 = tpdiff_ori AND psub 
+ptap2 = ptap1 OR Empty 
+ptap3 = ptap2 AND plug_sel 
+ptap = COPY ptap3 
+
+//***** Define connectivity/via layer -- n_gptap_lvt ****
+n_gptap_lvt = gptap AND n_gpoly_lvt_all 
+dnwdmy = DNW AND LVSDMY4 
+valid_rh_tn = RPDMYai INTERACT rhim_r 
+unrecognized_rh_tn_1 = RPDMY NOT valid_rh_tn 
+all_rh_tn = COPY rhim_r 
+rh_tn_body_should_not_has_MP_1 = all_rh_tn AND M0_POx2 
+rh_tn_body_should_not_has_MP = all_rh_tn INTERACT rh_tn_body_should_not_has_MP_1 
+unrecognized_rh_tn = unrecognized_rh_tn_1 OR rh_tn_body_should_not_has_MP 
+erc_nmos_gates = COPY tngate1 
+//#############################################
+//# CONNECTION                                #
+//#############################################
+CONNECT AP M11 BY RV
+CONNECT M0_OD_N M0_OD_P
+CONNECT M0_OD_N M0_STI
+CONNECT M0_OD_N tndiff BY n_odtap
+CONNECT M0_OD_N tndiff_bjt BY n_odtap_bjt
+CONNECT M0_OD_N tndiff_dio BY n_odtap
+CONNECT M0_OD_P M0_STI
+CONNECT M0_OD_P tpdiff BY p_odtap
+CONNECT M0_OD_P tpdiff_bjt BY p_odtap_bjt
+CONNECT M0_OD_P tpdiff_dio BY p_odtap
+CONNECT M0_PO M0_OD_N
+CONNECT M0_PO M0_OD_P
+CONNECT M0_PO M0_STI
+CONNECT M0_PO n_fpoly_io BY n_fptap_io
+CONNECT M0_PO n_fpoly_lvt BY n_fptap_lvt
+CONNECT M0_PO n_fpoly_svt BY n_fptap_svt
+CONNECT M0_PO n_gpoly_io BY n_gptap_io
+CONNECT M0_PO n_gpoly_lvt BY n_gptap_lvt
+CONNECT M0_PO n_gpoly_nocg_io BY n_gptap_io
+CONNECT M0_PO n_gpoly_nocg_lvt BY n_gptap_lvt
+CONNECT M0_PO n_gpoly_svt BY n_gptap_svt
+CONNECT M0_PO p_fpoly_io BY p_fptap_io
+CONNECT M0_PO p_fpoly_lvt BY p_fptap_lvt
+CONNECT M0_PO p_fpoly_svt BY p_fptap_svt
+CONNECT M0_PO p_gpoly_io BY p_gptap_io
+CONNECT M0_PO p_gpoly_lvt BY p_gptap_lvt
+CONNECT M0_PO p_gpoly_nocg_io BY p_gptap_io
+CONNECT M0_PO p_gpoly_nocg_lvt BY p_gptap_lvt
+CONNECT M0_PO p_gpoly_svt BY p_gptap_svt
+CONNECT M0_PO_TiN M0_OD_N
+CONNECT M0_PO_TiN M0_OD_P
+CONNECT M0_PO_TiN M0_STI
+CONNECT M0_PO_TiN RH_TN BY tintap
+CONNECT M1 M0_OD_N BY VIA0_M0_OD_N
+CONNECT M1 M0_OD_P BY VIA0_M0_OD_P
+CONNECT M1 M0_PO BY VIA0_M0_PO
+CONNECT M1 M0_PO_TiN BY VIA0_M0_PO_TiN
+CONNECT M1 M0_STI BY VIA0_M0_STI
+CONNECT M10 M9 BY VIA9
+CONNECT M11 M10 BY VIA10
+CONNECT M2 M1 BY VIA1
+CONNECT M3 M2 BY VIA2
+CONNECT M4 M3 BY VIA3
+CONNECT M5 M4 BY VIA4
+CONNECT M6 M5 BY VIA5
+CONNECT M7 M6 BY VIA6
+CONNECT M8 M7 BY VIA7
+CONNECT M9 M8 BY VIA8
+CONNECT cnbase1 tndiff BY nplug
+CONNECT cnbase1 tndiff_bjt BY nplug
+CONNECT fin_lay tiod_not_fin
+CONNECT n_fpoly_io n_fpoly_svt
+CONNECT n_fpoly_io n_gpoly_io
+CONNECT n_fpoly_io n_gpoly_nocg_io
+CONNECT n_fpoly_io p_fpoly_io
+CONNECT n_fpoly_io p_fpoly_svt
+CONNECT n_fpoly_lvt n_fpoly_io
+CONNECT n_fpoly_lvt n_fpoly_svt
+CONNECT n_fpoly_lvt n_gpoly_lvt
+CONNECT n_fpoly_lvt n_gpoly_nocg_lvt
+CONNECT n_fpoly_lvt p_fpoly_io
+CONNECT n_fpoly_lvt p_fpoly_lvt
+CONNECT n_fpoly_lvt p_fpoly_svt
+CONNECT n_fpoly_svt n_gpoly_svt
+CONNECT n_fpoly_svt p_fpoly_svt
+CONNECT n_pplug tpdiff
+CONNECT n_pplug tpdiff_bjt
+CONNECT n_pplug tpdiff_dio
+CONNECT ngate_18_pode3t dngate_18_mac
+CONNECT ngate_18_pode3t ngate_18_mac
+CONNECT ngate_pode3t ngate_mac
+CONNECT ngate_pode3t ngate_mpode_mac
+CONNECT ngate_pode3t nrgate_mac
+CONNECT nlvgate_pode3t n1lvgate_mac
+CONNECT nlvgate_pode3t nlvgate_mac
+CONNECT nlvgate_pode3t nlvgate_mpode_mac
+CONNECT p_fpoly_io n_fpoly_svt
+CONNECT p_fpoly_io p_fpoly_svt
+CONNECT p_fpoly_io p_gpoly_io
+CONNECT p_fpoly_io p_gpoly_nocg_io
+CONNECT p_fpoly_lvt n_fpoly_io
+CONNECT p_fpoly_lvt n_fpoly_svt
+CONNECT p_fpoly_lvt p_fpoly_io
+CONNECT p_fpoly_lvt p_fpoly_svt
+CONNECT p_fpoly_lvt p_gpoly_lvt
+CONNECT p_fpoly_lvt p_gpoly_nocg_lvt
+CONNECT p_fpoly_svt p_gpoly_svt
+CONNECT pgate_18_pode3t pgate_18_mac
+CONNECT pgate_pode3t pgate_mac
+CONNECT pgate_pode3t pgate_mpode_mac
+CONNECT plvgate_pode3t plvgate_mac
+CONNECT plvgate_pode3t plvgate_mpode_mac
+CONNECT tiod_not_fin tiod
+CONNECT tndiff tiod
+CONNECT tndiff tndiff_bjt
+CONNECT tndiff tndiff_dio
+CONNECT tndiff tpdiff
+CONNECT tpdiff tiod
+CONNECT tpdiff tpdiff_bjt
+CONNECT tpdiff tpdiff_dio
+#IFNDEF CCI_DECK
+CONNECT ntap tndiff
+CONNECT ntap tndiff_RC
+CONNECT ntap tndiff_bjt
+CONNECT ntap tndiff_dio
+CONNECT ptap tpdiff
+CONNECT ptap tpdiff_RC
+CONNECT ptap tpdiff_bjt
+CONNECT ptap tpdiff_dio
+#ENDIF
+
+#IFDEF CCI_DECK
+CONNECT  nxwell DNW BY dnwc
+CONNECT  tpdiff_dio psub_term BY pplug
+CONNECT  tpdiff_dio psub BY pplug
+CONNECT  tndiff_dio nxwell BY nplug
+CONNECT  tndiff_bjt nxwell BY nplug
+CONNECT  tpdiff_bjt psub_term BY pplug
+CONNECT  tpdiff_bjt psub BY pplug
+CONNECT  tpdiff_bjt coll1 BY pplug
+CONNECT  tpdiff psub_term BY pplug
+CONNECT  tpdiff psub BY pplug
+CONNECT  tpdiff coll1 BY pplug
+CONNECT  tndiff nxwell BY nplug
+#ELSE
+SCONNECT nxwell DNW BY dnwc
+#IFNDEF NW_RING
+  SCONNECT tpdiff_dio n_psub BY n_pplug
+#ENDIF
+SCONNECT tpdiff_dio psub_term BY pplug
+SCONNECT tpdiff_dio psub BY pplug
+SCONNECT tndiff_dio nxwell BY nplug
+SCONNECT tndiff_bjt nxwell BY nplug
+#IFNDEF NW_RING
+  SCONNECT tpdiff_bjt n_psub BY n_pplug
+#ENDIF
+SCONNECT tpdiff_bjt psub_term BY pplug
+SCONNECT tpdiff_bjt psub BY pplug
+SCONNECT tpdiff_bjt coll1 BY pplug
+#IFNDEF NW_RING
+  SCONNECT tpdiff n_psub BY n_pplug
+#ENDIF
+SCONNECT tpdiff psub_term BY pplug
+SCONNECT tpdiff psub BY pplug
+SCONNECT tpdiff coll1 BY pplug
+SCONNECT tndiff nxwell BY nplug
+#ENDIF
+/* Modify poly interconnect for CCI extraction */  
+all_mos_gates = vargt_18 OR (pgate_18_pode3t OR (plvgate_pode3t OR (pgate_pode3t OR (ngate_18_pode3t OR (nlvgate_pode3t OR (ngate_pode3t OR (plvgate_mpode_mac OR (pgate_mpode_mac OR (nlvgate_mpode_mac OR (ngate_mpode_mac OR (pgate_18_mac OR (plvgate_mac OR (pgate_mac OR (dngate_18_mac OR (ngate_18_mac OR (n1lvgate_mac OR (nrgate_mac OR (ngate_mac OR nlvgate_mac))))))))))))))))))
+tndiff_gates = tndiff_all INTERACT all_mos_gates
+tpdiff_gates = tpdiff_all INTERACT all_mos_gates
+
+all_diode_form = COPY nwdio_r
+tndiff_diode = tndiff_all INTERACT all_diode_form
+tpdiff_diode = tpdiff_all INTERACT all_diode_form
+
+all_rdiff_form = pgate_18_pode3t_edge OR (plvgate_pode3t_edge OR (pgate_pode3t_edge OR (ngate_18_pode3t_edge OR (ngate_pode3t_edge OR nlvgate_pode3t_edge))))
+tndiff_r = tndiff_all INTERACT all_rdiff_form
+tpdiff_r = tpdiff_all INTERACT all_rdiff_form
+
+tndiff_RC = tndiff_all NOT ((tndiff_gates OR tndiff_diode) OR tndiff_r)
+tndiff = tndiff_all NOT tndiff_RC
+
+tpdiff_RC = tpdiff_all NOT ((tpdiff_gates OR tpdiff_diode) OR tpdiff_r)
+tpdiff = tpdiff_all NOT tpdiff_RC
+
+
+ /* SPECIAL CONNECTIONS FOR CCI */ 
+
+CONNECT tndiff tndiff_RC
+CONNECT M0_OD_N tndiff_RC BY n_odtap 
+CONNECT cnbase1 tndiff_RC BY nplug 
+CONNECT tndiff_RC tiod 
+CONNECT tndiff_RC tndiff_bjt 
+CONNECT tndiff_RC tndiff_dio 
+CONNECT tndiff_RC tpdiff 
+
+#IFDEF CCI_DECK
+CONNECT tndiff_RC nxwell BY nplug 
+#ELSE
+SCONNECT tndiff_RC nxwell BY nplug 
+#ENDIF
+#IFDEF CCI_DECK
+CONNECT tpdiff_RC coll1 BY pplug 
+CONNECT tpdiff_RC psub BY pplug 
+CONNECT tpdiff_RC psub_term BY pplug 
+#ELSE
+SCONNECT tpdiff_RC coll1 BY pplug 
+#IFNDEF NW_RING
+  SCONNECT tpdiff_RC n_psub BY n_pplug 
+#ENDIF
+SCONNECT tpdiff_RC psub BY pplug 
+SCONNECT tpdiff_RC psub_term BY pplug 
+#ENDIF
+CONNECT tpdiff tpdiff_RC
+CONNECT tpdiff_RC tndiff_RC
+CONNECT M0_OD_P tpdiff_RC BY p_odtap 
+CONNECT n_pplug tpdiff_RC 
+CONNECT tndiff tpdiff_RC 
+CONNECT tpdiff_RC tiod 
+CONNECT tpdiff_RC tpdiff_bjt 
+CONNECT tpdiff_RC tpdiff_dio 
+
+CONNECT dngate_18_mac n_fpoly_io
+CONNECT ngate_18_mac n_fpoly_io
+CONNECT n1lvgate_mac n_fpoly_lvt
+CONNECT nlvgate_mac n_fpoly_lvt
+CONNECT nlvgate_mpode_mac n_fpoly_lvt
+CONNECT ngate_mpode_mac n_fpoly_svt
+CONNECT nrgate_mac n_fpoly_svt
+CONNECT ngate_mac n_fpoly_svt
+CONNECT pgate_18_mac p_fpoly_io
+CONNECT plvgate_mac p_fpoly_lvt
+CONNECT plvgate_mpode_mac p_fpoly_lvt
+CONNECT pgate_mpode_mac p_fpoly_svt
+CONNECT pgate_mac p_fpoly_svt
+CONNECT n_fpoly_io vargt_18
+CONNECT n_fpoly_io ngate_18_pode3t
+CONNECT n_fpoly_lvt nlvgate_pode3t
+CONNECT n_fpoly_svt ngate_pode3t
+CONNECT p_fpoly_io pgate_18_pode3t
+CONNECT p_fpoly_lvt plvgate_pode3t
+CONNECT p_fpoly_svt pgate_pode3t
+
+CONNECT dngate_18_mac M0_PO BY n_gptap_io
+CONNECT ngate_18_mac M0_PO BY n_gptap_io
+CONNECT n1lvgate_mac M0_PO BY n_gptap_lvt
+CONNECT nlvgate_mac M0_PO BY n_gptap_lvt
+CONNECT nlvgate_mpode_mac M0_PO BY n_gptap_lvt
+CONNECT ngate_mpode_mac M0_PO BY n_gptap_svt
+CONNECT nrgate_mac M0_PO BY n_gptap_svt
+CONNECT ngate_mac M0_PO BY n_gptap_svt
+CONNECT pgate_18_mac M0_PO BY p_gptap_io
+CONNECT plvgate_mac M0_PO BY p_gptap_lvt
+CONNECT plvgate_mpode_mac M0_PO BY p_gptap_lvt
+CONNECT pgate_mpode_mac M0_PO BY p_gptap_svt
+CONNECT pgate_mac M0_PO BY p_gptap_svt
+CONNECT M0_PO vargt_18 BY n_gptap_io
+CONNECT M0_PO ngate_18_pode3t BY n_gptap_io
+CONNECT M0_PO nlvgate_pode3t BY n_gptap_lvt
+CONNECT M0_PO ngate_pode3t BY n_gptap_svt
+CONNECT M0_PO pgate_18_pode3t BY p_gptap_io
+CONNECT M0_PO plvgate_pode3t BY p_gptap_lvt
+CONNECT M0_PO pgate_pode3t BY p_gptap_svt
+
+//#############################################
+//# FORM DEVICE                               #
+//#############################################
+
+#IFNDEF LVS_DECK
+DEVICE MN(nch_18_dnw_mac) dngate_18_mac dngate_18_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_18_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(dngate_18_mac, tndiff ) + perimeter_inside(dngate_18_mac, tndiff)) / 2
+   L = area(dngate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_18_mac) ngate_18_mac ngate_18_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_18_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(ngate_18_mac, tndiff ) + perimeter_inside(ngate_18_mac, tndiff)) / 2
+   L = area(ngate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_lvt_dnw_mac) n1lvgate_mac n1lvgate_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_lvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(n1lvgate_mac, tndiff ) + perimeter_inside(n1lvgate_mac, tndiff)) / 2
+   L = area(n1lvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_lvt_mac) nlvgate_mac nlvgate_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_lvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(nlvgate_mac, tndiff ) + perimeter_inside(nlvgate_mac, tndiff)) / 2
+   L = area(nlvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_mpodelvt_mac) nlvgate_mpode_mac nlvgate_mpode_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_mpodelvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(nlvgate_mpode_mac, tndiff ) + perimeter_inside(nlvgate_mpode_mac, tndiff)) / 2
+   L = area(nlvgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_mpodesvt_mac) ngate_mpode_mac ngate_mpode_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_mpodesvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(ngate_mpode_mac, tndiff ) + perimeter_inside(ngate_mpode_mac, tndiff)) / 2
+   L = area(ngate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_svt_dnw_mac) nrgate_mac nrgate_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_svt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(nrgate_mac, tndiff ) + perimeter_inside(nrgate_mac, tndiff)) / 2
+   L = area(nrgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MN(nch_svt_mac) ngate_mac ngate_mac(G) tndiff(S) tndiff(D) psub(B) <nthin> <OD> <lod_PROP> netlist model nch_svt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(ngate_mac, tndiff ) + perimeter_inside(ngate_mac, tndiff)) / 2
+   L = area(ngate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,nthin)
+   PI_D_OD = perimeter_inside(D,nthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MP(pch_18_mac) pgate_18_mac pgate_18_mac(G) tpdiff(S) tpdiff(D) nxwell(B) <pthin> <OD> <lod_PROP> netlist model pch_18_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(pgate_18_mac, tpdiff ) + perimeter_inside(pgate_18_mac, tpdiff)) / 2
+   L = area(pgate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,pthin)
+   PI_D_OD = perimeter_inside(D,pthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MP(pch_lvt_mac) plvgate_mac plvgate_mac(G) tpdiff(S) tpdiff(D) nxwell(B) <pthin> <OD> <lod_PROP> netlist model pch_lvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(plvgate_mac, tpdiff ) + perimeter_inside(plvgate_mac, tpdiff)) / 2
+   L = area(plvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,pthin)
+   PI_D_OD = perimeter_inside(D,pthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MP(pch_mpodelvt_mac) plvgate_mpode_mac plvgate_mpode_mac(G) tpdiff(S) tpdiff(D) nxwell(B) <pthin> <OD> <lod_PROP> netlist model pch_mpodelvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(plvgate_mpode_mac, tpdiff ) + perimeter_inside(plvgate_mpode_mac, tpdiff)) / 2
+   L = area(plvgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,pthin)
+   PI_D_OD = perimeter_inside(D,pthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MP(pch_mpodesvt_mac) pgate_mpode_mac pgate_mpode_mac(G) tpdiff(S) tpdiff(D) nxwell(B) <pthin> <OD> <lod_PROP> netlist model pch_mpodesvt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(pgate_mpode_mac, tpdiff ) + perimeter_inside(pgate_mpode_mac, tpdiff)) / 2
+   L = area(pgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,pthin)
+   PI_D_OD = perimeter_inside(D,pthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+DEVICE MP(pch_svt_mac) pgate_mac pgate_mac(G) tpdiff(S) tpdiff(D) nxwell(B) <pthin> <OD> <lod_PROP> netlist model pch_svt_mac netlist element "X" [
+  property sa,sb,L,AS,AD,PD,PS,NRD,NRS,nfin
+   #IFDEF EXTRACT_W
+   ,W
+   #ENDIF
+   SCALE = PRESCALE
+   W = (perimeter_coincide(pgate_mac, tpdiff ) + perimeter_inside(pgate_mac, tpdiff)) / 2
+   L = area(pgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   LODX_1 = DFM_VEC_VAL( lod_PROP, "PER_1" )
+   LODX_2 = DFM_VEC_VAL( lod_PROP, "PER_2" )
+   sa = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_1, W, L, UNIT_LENGTH(), SCALE )
+   sb = TVF_NUM_FUN( "calc_lod_sasb", "device_function", LODX_2, W, L, UNIT_LENGTH(), SCALE )
+   PI_S_OD = perimeter_inside(S,pthin)
+   PI_D_OD = perimeter_inside(D,pthin)
+   IF(PI_S_OD == 0) {
+    AD = area(D) * W / PI_D_OD
+    AS = AD
+    PD = perimeter(D) * W /PI_D_OD
+    PS = PD } 
+   ELSE IF(PI_D_OD == 0) {
+    AS = area(S) * W / PI_S_OD
+    AD = AS
+    PS = perimeter(S) * W /PI_S_OD
+    PD = PS } 
+   ELSE {
+    AS = area(S) * W / PI_S_OD
+    AD = area(D) * W / PI_D_OD
+    PS = perimeter(S) * W /PI_S_OD
+    PD = perimeter(D) * W /PI_D_OD }
+   NRS = 0
+   NRD = 0
+]
+
+#ELSE
+DEVICE MN(nch_18_dnw_mac) dngate_18_mac dngate_18_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(dngate_18_mac, tndiff ) + perimeter_inside(dngate_18_mac, tndiff)) / 2 
+   L=area(dngate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_18_mac) ngate_18_mac ngate_18_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(ngate_18_mac, tndiff ) + perimeter_inside(ngate_18_mac, tndiff)) / 2 
+   L=area(ngate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_lvt_dnw_mac) n1lvgate_mac n1lvgate_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(n1lvgate_mac, tndiff ) + perimeter_inside(n1lvgate_mac, tndiff)) / 2 
+   L=area(n1lvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_lvt_mac) nlvgate_mac nlvgate_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(nlvgate_mac, tndiff ) + perimeter_inside(nlvgate_mac, tndiff)) / 2 
+   L=area(nlvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_mpodelvt_mac) nlvgate_mpode_mac nlvgate_mpode_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(nlvgate_mpode_mac, tndiff ) + perimeter_inside(nlvgate_mpode_mac, tndiff)) / 2 
+   L=area(nlvgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_mpodesvt_mac) ngate_mpode_mac ngate_mpode_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(ngate_mpode_mac, tndiff ) + perimeter_inside(ngate_mpode_mac, tndiff)) / 2 
+   L=area(ngate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_svt_dnw_mac) nrgate_mac nrgate_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(nrgate_mac, tndiff ) + perimeter_inside(nrgate_mac, tndiff)) / 2 
+   L=area(nrgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MN(nch_svt_mac) ngate_mac ngate_mac(G) tndiff(S) tndiff(D) psub(B) [
+   property nfin,L
+   W=(perimeter_coincide(ngate_mac, tndiff ) + perimeter_inside(ngate_mac, tndiff)) / 2 
+   L=area(ngate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MP(pch_18_mac) pgate_18_mac pgate_18_mac(G) tpdiff(S) tpdiff(D) nxwell(B) [
+   property nfin,L
+   W=(perimeter_coincide(pgate_18_mac, tpdiff ) + perimeter_inside(pgate_18_mac, tpdiff)) / 2 
+   L=area(pgate_18_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MP(pch_lvt_mac) plvgate_mac plvgate_mac(G) tpdiff(S) tpdiff(D) nxwell(B) [
+   property nfin,L
+   W=(perimeter_coincide(plvgate_mac, tpdiff ) + perimeter_inside(plvgate_mac, tpdiff)) / 2 
+   L=area(plvgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MP(pch_mpodelvt_mac) plvgate_mpode_mac plvgate_mpode_mac(G) tpdiff(S) tpdiff(D) nxwell(B) [
+   property nfin,L
+   W=(perimeter_coincide(plvgate_mpode_mac, tpdiff ) + perimeter_inside(plvgate_mpode_mac, tpdiff)) / 2 
+   L=area(plvgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MP(pch_mpodesvt_mac) pgate_mpode_mac pgate_mpode_mac(G) tpdiff(S) tpdiff(D) nxwell(B) [
+   property nfin,L
+   W=(perimeter_coincide(pgate_mpode_mac, tpdiff ) + perimeter_inside(pgate_mpode_mac, tpdiff)) / 2 
+   L=area(pgate_mpode_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+DEVICE MP(pch_svt_mac) pgate_mac pgate_mac(G) tpdiff(S) tpdiff(D) nxwell(B) [
+   property nfin,L
+   W=(perimeter_coincide(pgate_mac, tpdiff ) + perimeter_inside(pgate_mac, tpdiff)) / 2 
+   L=area(pgate_mac) / W
+   nfin=TRUNC( ((W * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+
+#ENDIF
+
+#IFDEF FILTER_PODE
+LVS FILTER MN(nch_mpodelvt_mac)      OPEN LAYOUT
+LVS FILTER MN(nch_mpodesvt_mac)      OPEN LAYOUT
+LVS FILTER MP(pch_mpodelvt_mac)      OPEN LAYOUT
+LVS FILTER MP(pch_mpodesvt_mac)      OPEN LAYOUT
+#ENDIF
+
+TRACE PROPERTY MN(nch_18_dnw_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_18_dnw_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_18_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_18_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_lvt_dnw_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_lvt_dnw_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_lvt_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_lvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_mpodelvt_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_mpodelvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_mpodesvt_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_mpodesvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_svt_dnw_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_svt_dnw_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MN(nch_svt_mac) L L MOS_Lerr
+TRACE PROPERTY MN(nch_svt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MP(pch_18_mac) L L MOS_Lerr
+TRACE PROPERTY MP(pch_18_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MP(pch_lvt_mac) L L MOS_Lerr
+TRACE PROPERTY MP(pch_lvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MP(pch_mpodelvt_mac) L L MOS_Lerr
+TRACE PROPERTY MP(pch_mpodelvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MP(pch_mpodesvt_mac) L L MOS_Lerr
+TRACE PROPERTY MP(pch_mpodesvt_mac) nfin nfin MOS_NFINerr
+TRACE PROPERTY MP(pch_svt_mac) L L MOS_Lerr
+TRACE PROPERTY MP(pch_svt_mac) nfin nfin MOS_NFINerr
+DEVICE Q(pnp2_mac) cemit2_mac coll1 cnbase1 tpdiff_bjt netlist element "X" netlist model pnp2_mac
+DEVICE D(nwdio) nwdio_r psub nxwell netlist model nwdio
+  TRACE PROPERTY D(nwdio) A A DIO_Aerr
+
+// User define devices 
+#IFDEF extract_dnwpsub
+DEVICE D(dnwpsub) dnwdio psub_term DNW [
+   property a, pj
+   a = area(DNW)
+   pj = perimeter(DNW) 
+]
+TRACE PROPERTY D(dnwpsub) a a DIOWELL_Aerr
+#ENDIF
+
+
+DEVICE ndio_18_mac ndio_18_r psub(PLUS) tndiff_dio(MINUS) [
+	property nfin, l
+        #IFDEF EXTRACT_W
+	,w
+        #ENDIF
+	diffn = count(tndiff_dio)
+	w = perimeter_inside(tndiff_dio,ndio_18_r) / 2 / diffn
+	l = area(ndio_18_r) / w
+        nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )	
+]
+TRACE PROPERTY ndio_18_mac nfin   nfin   DIO_NFINerr
+TRACE PROPERTY ndio_18_mac l      l      DIO_Lerr
+
+
+DEVICE ndio_mac ndio_r psub(PLUS) tndiff_dio(MINUS) [
+	property nfin, l
+        #IFDEF EXTRACT_W
+	,w
+        #ENDIF
+	diffn = count(tndiff_dio)
+	w = perimeter_inside(tndiff_dio,ndio_r) / 2 / diffn
+	l = area(ndio_r) / w
+        nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )	
+]
+TRACE PROPERTY ndio_mac nfin   nfin   DIO_NFINerr
+TRACE PROPERTY ndio_mac l      l      DIO_Lerr
+
+
+DEVICE nmoscap_18 vargt_18 vargt_18(PLUS) tndiff(MINUS) <nthin> [
+       property lr,nfin
+       #IFDEF EXTRACT_W
+       ,wr
+       #ENDIF
+
+       lr = perimeter_coincide(vargt_18,nthin)/2
+       wr = area(vargt_18)/lr
+       nfin = TRUNC( ((wr * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+]
+TRACE PROPERTY nmoscap_18 nfin nfin MOSCAP_NFINerr
+TRACE PROPERTY nmoscap_18 lr   lr   MOSCAP_Lerr
+
+
+#IFDEF CCI_DECK
+DEVICE npode_18_mac ngate_18_pode3t_edge tndiff(S) ngate_18_pode3t(G) psub(B) <nthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(ngate_18_pode3t_edge, ngate_18_pode3t) 
+   l  = area(ngate_18_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,nthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE npode_18_mac ngate_18_pode3t_edge tndiff(S) ngate_18_pode3t(G) psub(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(ngate_18_pode3t_edge, ngate_18_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(ngate_18_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY npode_18_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY npode_18_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER npode_18_mac LAYOUT OPEN
+#ENDIF
+
+#IFDEF CCI_DECK
+DEVICE npode_lvt_mac nlvgate_pode3t_edge tndiff(S) nlvgate_pode3t(G) psub(B) <nthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(nlvgate_pode3t_edge, nlvgate_pode3t) 
+   l  = area(nlvgate_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,nthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE npode_lvt_mac nlvgate_pode3t_edge tndiff(S) nlvgate_pode3t(G) psub(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(nlvgate_pode3t_edge, nlvgate_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(nlvgate_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY npode_lvt_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY npode_lvt_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER npode_lvt_mac LAYOUT OPEN
+#ENDIF
+
+#IFDEF CCI_DECK
+DEVICE npode_svt_mac ngate_pode3t_edge tndiff(S) ngate_pode3t(G) psub(B) <nthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(ngate_pode3t_edge, ngate_pode3t) 
+   l  = area(ngate_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,nthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE npode_svt_mac ngate_pode3t_edge tndiff(S) ngate_pode3t(G) psub(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(ngate_pode3t_edge, ngate_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(ngate_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY npode_svt_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY npode_svt_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER npode_svt_mac LAYOUT OPEN
+#ENDIF
+
+
+DEVICE pdio_18_mac pdio_18_r tpdiff_dio(PLUS) nxwell(MINUS) [
+	property nfin, l
+        #IFDEF EXTRACT_W
+	,w
+        #ENDIF
+	diffn = count(tpdiff_dio)
+	w = perimeter_inside(tpdiff_dio,pdio_18_r) / 2 / diffn
+	l = area(pdio_18_r) / w
+        nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )	
+]
+TRACE PROPERTY pdio_18_mac nfin   nfin   DIO_NFINerr
+TRACE PROPERTY pdio_18_mac l      l      DIO_Lerr
+
+
+DEVICE pdio_mac pdio_r tpdiff_dio(PLUS) nxwell(MINUS) [
+	property nfin, l
+        #IFDEF EXTRACT_W
+	,w
+        #ENDIF
+	diffn = count(tpdiff_dio)
+	w = perimeter_inside(tpdiff_dio,pdio_r) / 2 / diffn
+	l = area(pdio_r) / w
+        nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )	
+]
+TRACE PROPERTY pdio_mac nfin   nfin   DIO_NFINerr
+TRACE PROPERTY pdio_mac l      l      DIO_Lerr
+
+#IFDEF extract_pnwdio
+DEVICE D(pnwdio) pnwdio_r psub nxwell netlist model nwdio
+#ENDIF
+
+#IFDEF CCI_DECK
+DEVICE ppode_18_mac pgate_18_pode3t_edge tpdiff(S) pgate_18_pode3t(G) nxwell(B) <pthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(pgate_18_pode3t_edge, pgate_18_pode3t) 
+   l  = area(pgate_18_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,pthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE ppode_18_mac pgate_18_pode3t_edge tpdiff(S) pgate_18_pode3t(G) nxwell(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(pgate_18_pode3t_edge, pgate_18_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(pgate_18_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY ppode_18_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY ppode_18_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER ppode_18_mac LAYOUT OPEN
+#ENDIF
+
+#IFDEF CCI_DECK
+DEVICE ppode_lvt_mac plvgate_pode3t_edge tpdiff(S) plvgate_pode3t(G) nxwell(B) <pthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(plvgate_pode3t_edge, plvgate_pode3t) 
+   l  = area(plvgate_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,pthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE ppode_lvt_mac plvgate_pode3t_edge tpdiff(S) plvgate_pode3t(G) nxwell(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(plvgate_pode3t_edge, plvgate_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(plvgate_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY ppode_lvt_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY ppode_lvt_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER ppode_lvt_mac LAYOUT OPEN
+#ENDIF
+
+#IFDEF CCI_DECK
+DEVICE ppode_svt_mac pgate_pode3t_edge tpdiff(S) pgate_pode3t(G) nxwell(B) <pthin> 
+[
+   PROPERTY l,nfin,as,ps
+   #IFDEF EXTRACT_W
+   ,w
+   #ENDIF
+   w  = perimeter_coincide(pgate_pode3t_edge, pgate_pode3t) 
+   l  = area(pgate_pode3t) / w
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   PI_S_OD = perimeter_inside(S,pthin)
+   as = area(S) * w / PI_S_OD
+   ps = perimeter(S) * w / PI_S_OD 
+]
+#ELSE
+
+DEVICE ppode_svt_mac pgate_pode3t_edge tpdiff(S) pgate_pode3t(G) nxwell(B)
+[
+   PROPERTY nfin,l
+   w  = perimeter_coincide(pgate_pode3t_edge, pgate_pode3t)
+   nfin = TRUNC( ((w * 1e6 - FIN_WIDTH) / FIN_PITCH) + 1.01 )
+   l  = area(pgate_pode3t) / w 
+]
+#ENDIF
+
+
+TRACE PROPERTY ppode_svt_mac nfin nfin MOS_NFINerr
+TRACE PROPERTY ppode_svt_mac l    l    MOS_Lerr
+#IFDEF FILTER_PODE
+LVS FILTER ppode_svt_mac LAYOUT OPEN
+#ENDIF
+
+#IFDEF extract_pwdnw
+DEVICE D(pwdnw) rwdio psub DNW [
+   property a, pj
+   a = area(rwdio)
+   pj = perimeter(rwdio)
+]    
+TRACE PROPERTY D(pwdnw) a a DIOWELL_Aerr 
+#ENDIF
+
+DEVICE rhim rhim_r RH_TN(PLUS) RH_TN(MINUS) (PLUS MINUS) [
+property l,w
+  w = perimeter_coincide(rhim_r,RH_TN)/2
+  l = area(rhim_r)/w
+]
+TRACE PROPERTY rhim w w RES_Werr
+TRACE PROPERTY rhim l l RES_Lerr
+
+DEVICE rm10w mt10res M10(PLUS) M10(MINUS) netlist model rmrw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt10res,M10)/2
+	l = area(mt10res)/w
+]
+TRACE PROPERTY rm10w w  w  RES_Werr
+TRACE PROPERTY rm10w l  l  RES_Lerr
+
+DEVICE rm11w mt11res M11(PLUS) M11(MINUS) netlist model rmrw (PLUS MINUS) [
+
+	property w,l
+	w = perimeter_coincide(mt11res,M11)/2
+	l = area(mt11res)/w
+]
+TRACE PROPERTY rm11w w  w  RES_Werr
+TRACE PROPERTY rm11w l  l  RES_Lerr
+
+DEVICE rm1w mt1res M1(PLUS) M1(MINUS) netlist model rm1w (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt1res,M1)/2
+	l = area(mt1res)/w
+]
+TRACE PROPERTY rm1w w  w  RES_Werr
+TRACE PROPERTY rm1w l  l  RES_Lerr
+
+DEVICE rm2w mt2res M2(PLUS) M2(MINUS) netlist model rmxaw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt2res,M2)/2
+	l = area(mt2res)/w
+]
+TRACE PROPERTY rm2w w  w  RES_Werr
+TRACE PROPERTY rm2w l  l  RES_Lerr
+
+DEVICE rm3w mt3res M3(PLUS) M3(MINUS) netlist model rmxaw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt3res,M3)/2
+	l = area(mt3res)/w
+]
+TRACE PROPERTY rm3w w  w  RES_Werr
+TRACE PROPERTY rm3w l  l  RES_Lerr
+
+DEVICE rm4w mt4res M4(PLUS) M4(MINUS) netlist model rmxdw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt4res,M4)/2
+	l = area(mt4res)/w
+]
+TRACE PROPERTY rm4w w  w  RES_Werr
+TRACE PROPERTY rm4w l  l  RES_Lerr
+
+DEVICE rm5w mt5res M5(PLUS) M5(MINUS) netlist model rmxew (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt5res,M5)/2
+	l = area(mt5res)/w
+]
+TRACE PROPERTY rm5w w  w  RES_Werr
+TRACE PROPERTY rm5w l  l  RES_Lerr
+
+DEVICE rm6w mt6res M6(PLUS) M6(MINUS) netlist model rmxew (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt6res,M6)/2
+	l = area(mt6res)/w
+]
+TRACE PROPERTY rm6w w  w  RES_Werr
+TRACE PROPERTY rm6w l  l  RES_Lerr
+
+DEVICE rm7w mt7res M7(PLUS) M7(MINUS) netlist model rmxew (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt7res,M7)/2
+	l = area(mt7res)/w
+]
+TRACE PROPERTY rm7w w  w  RES_Werr
+TRACE PROPERTY rm7w l  l  RES_Lerr
+
+DEVICE rm8w mt8res M8(PLUS) M8(MINUS) netlist model rmyw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt8res,M8)/2
+	l = area(mt8res)/w
+]
+TRACE PROPERTY rm8w w  w  RES_Werr
+TRACE PROPERTY rm8w l  l  RES_Lerr
+
+DEVICE rm9w mt9res M9(PLUS) M9(MINUS) netlist model rmyw (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mt9res,M9)/2
+	l = area(mt9res)/w
+]
+TRACE PROPERTY rm9w w  w  RES_Werr
+TRACE PROPERTY rm9w l  l  RES_Lerr
+
+DEVICE rmap mtAPres AP(PLUS) AP(MINUS) netlist model rmap (PLUS MINUS) [
+	property w,l
+	w = perimeter_coincide(mtAPres,AP)/2
+	l = area(mtAPres)/w
+]
+TRACE PROPERTY rmap w  w  RES_Werr
+TRACE PROPERTY rmap l  l  RES_Lerr
+
+// Serve X-resistor as an built-in resistor (for PATHCHK)
+LVS DEVICE TYPE RESISTOR rhim rm10w rm11w rm1w rm2w rm3w rm4w rm5w rm6w rm7w rm8w rm9w rmap [POS=PLUS NEG=MINUS]
+
+#IFDEF LVS_DECK
+//#############################################
+//# ERC CHECK                                 #
+//#############################################
+invalid_all_plug = COPY plug_sel2 
+od_dc1 = WD2_CORE_WO_IMP OR WD2_IO_WO_IMP 
+od_dc2 = od_dc1 OR WD4_CORE_WO_IMP 
+od_dc3 = od_dc2 OR WD4_IO_WO_IMP 
+od_dc4 = COPY od_dc3 
+od_dc5 = COPY od_dc4 
+od_all1 = ODI OR SR_DOD 
+od_all2 = od_all1 OR DOD 
+od_all = od_all2 NOT POx 
+od_dc6 = od_all AND od_dc5 
+od_dc = od_dc6 AND psub 
+nplug1_exclude = nplug1 NOT od_dc6 
+pplug1_include = pplug1 OR od_dc 
+invalid_nplug = invalid_all_plug AND nplug1_exclude 
+invalid_pplug = invalid_all_plug AND pplug1_include 
+MD_invalid = M0_ODd NOT MD_valid 
+check_region1 = POx INTERACT M0_POx2 
+check_region2 = check_region1 OR M0_POx2 
+check_region3 = check_region2 INTERACT M0_ODd 
+check_region4 = check_region3 OR M0_ODd 
+check_region = check_region4 INTERACT MD_invalid 
+MD_ntap_region1 = M0_ODd AND invalid_nplug 
+MD_ntap_region = MD_ntap_region1 AND check_region 
+MD_ptap_region1 = M0_ODd AND invalid_pplug 
+MD_ptap_region = MD_ptap_region1 AND check_region 
+
+MD_ntap = STAMP MD_ntap_region BY nxwell
+MD_ptap = STAMP MD_ptap_region BY psub
+pickup_p_to_p_MP_PO1 = check_region INTERACT MD_ptap >= 2 BY NET
+pickup_p_to_p_MP_PO2 = pickup_p_to_p_MP_PO1 NOT INTERACT MD_ntap 
+pickup_p_to_p_MP = pickup_p_to_p_MP_PO2 AND M0_POx2 
+pickup_p_to_p_PO = pickup_p_to_p_MP_PO2 AND POx 
+pickup_p_to_p1 = M0_ODd INTERACT invalid_pplug >= 2
+pickup_p_to_p2 = pickup_p_to_p1 NOT INTERACT invalid_nplug 
+pickup_p_to_p3 = pickup_p_to_p2 INTERACT OD >= 2
+pickup_p_to_p4 = pickup_p_to_p3 INTERACT psub >= 2 BY NET
+pickup_p_to_p_MD = pickup_p_to_p4 NOT INTERACT MD_valid 
+pickup_p_to_p_MP_PO = pickup_p_to_p_MP OR pickup_p_to_p_PO 
+pickup_p_to_p = pickup_p_to_p_MP_PO OR pickup_p_to_p_MD 
+pickup_n_to_n_MP_PO1 = check_region INTERACT MD_ntap >= 2 BY NET
+pickup_n_to_n_MP_PO2 = pickup_n_to_n_MP_PO1 NOT INTERACT MD_ptap 
+pickup_n_to_n_MP = pickup_n_to_n_MP_PO2 AND M0_POx2 
+pickup_n_to_n_PO = pickup_n_to_n_MP_PO2 AND POx 
+pickup_n_to_n1 = M0_ODd INTERACT invalid_nplug >= 2
+pickup_n_to_n2 = pickup_n_to_n1 NOT INTERACT invalid_pplug 
+pickup_n_to_n3 = pickup_n_to_n2 INTERACT OD >= 2
+pickup_n_to_n4 = pickup_n_to_n3 INTERACT nxwell >= 2 BY NET
+pickup_n_to_n_MD = pickup_n_to_n4 NOT INTERACT MD_valid 
+pickup_n_to_n_MP_PO = pickup_n_to_n_MP OR pickup_n_to_n_PO 
+pickup_n_to_n = pickup_n_to_n_MP_PO OR pickup_n_to_n_MD 
+pickup_n_to_p_MP_PO1 = check_region INTERACT MD_ntap 
+pickup_n_to_p_MP_PO2 = pickup_n_to_p_MP_PO1 INTERACT MD_ptap 
+pickup_n_to_p_MP = pickup_n_to_p_MP_PO2 AND M0_POx2 
+pickup_n_to_p_PO = pickup_n_to_p_MP_PO2 AND POx 
+pickup_n_to_p1 = M0_ODd INTERACT invalid_pplug 
+pickup_n_to_p2 = pickup_n_to_p1 INTERACT invalid_nplug 
+pickup_n_to_p_MD = pickup_n_to_p2 NOT INTERACT MD_valid 
+pickup_n_to_p_MP_PO = pickup_n_to_p_MP OR pickup_n_to_p_PO 
+pickup_n_to_p = pickup_n_to_p_MP_PO OR pickup_n_to_p_MD 
+// Reports regions on a DNW layer that connect to more than one node.
+LVS SOFTCHK DNW CONTACT
+// Reports regions on a nxwell layer that connect to more than one node.
+LVS SOFTCHK nxwell CONTACT
+// Reports regions on a coll1 layer that connect to more than one node.
+LVS SOFTCHK coll1 CONTACT
+// Reports regions on a n_psub layer that connect to more than one node.
+#IFNDEF NW_RING
+	LVS SOFTCHK n_psub CONTACT
+#ENDIF
+// Reports regions on a psub layer that connect to more than one node.
+LVS SOFTCHK psub CONTACT
+// Reports regions on a psub_term layer that connect to more than one node.
+LVS SOFTCHK psub_term CONTACT
+#IFDEF PICKUP_CHECK
+GROUP ERC_PICKUP_CHECK pickup.n_to_p pickup.n_to_n pickup.p_to_p
+ERC SELECT CHECK ERC_PICKUP_CHECK
+pickup.n_to_p { @ Dummy M0_PO/M0_OD/PO inside Dummy N-pickup connect to Dummy P-pickup
+  COPY pickup_n_to_p
+}
+pickup.n_to_n { @ Dummy M0_PO/M0_OD/PO inside Dummy N-pickup connect to Dummy N-pickup cross WELL
+  COPY pickup_n_to_n
+}
+pickup.p_to_p { @ Dummy M0_PO/M0_OD/PO inside Dummy P-pickup connect to Dummy P-pickup cross WELL
+  COPY pickup_p_to_p
+}
+#ENDIF
+#IFDEF unrecognized_device_checking
+GROUP ERC_unrecognized_device_checking unrecognized_mos unrecognized_ndio unrecognized_pdio unrecognized_bjt unrecognized_rh_tn
+ERC SELECT CHECK ERC_unrecognized_device_checking
+unrecognized_mos { @ unrecognized_mos checking
+  COPY unrecognized_mos
+}
+unrecognized_ndio { @ unrecognized_ndio checking
+  COPY unrecognized_ndio
+}
+unrecognized_pdio { @ unrecognized_pdio checking
+  COPY unrecognized_pdio
+}
+unrecognized_bjt { @ unrecognized_bjt checking
+  COPY unrecognized_bjt
+}
+unrecognized_rh_tn { @ unrecognized_rh_tn checking
+  COPY unrecognized_rh_tn
+}
+#ENDIF
+
+#IFDEF WELL_TO_PG_CHECK
+GROUP ERC_WELL_TO_PG_CHECK  npvss49 ppvdd49
+ERC SELECT CHECK ERC_WELL_TO_PG_CHECK
+#ENDIF
+
+#IFDEF GATE_TO_PG_CHECK
+GROUP ERC_GATE_TO_PG_CHECK  npvss150 ppvdd150
+ERC SELECT CHECK ERC_GATE_TO_PG_CHECK
+#ENDIF
+
+#IFDEF DS_TO_PG_CHECK
+GROUP ERC_DS_TO_PG_CHECK  mnpg mppg
+ERC SELECT CHECK ERC_DS_TO_PG_CHECK
+#ENDIF
+
+#IFDEF FLOATING_WELL_CHECK
+GROUP ERC_FLOATING_WELL_CHECK  floating.nxwell_float floating.psub
+ERC SELECT CHECK ERC_FLOATING_WELL_CHECK
+#ENDIF
+
+//MOS erc_nmos_gates S/D connect to POWER&GROUND --mnpg*/
+N1tndiff = NET tndiff POWER_NAME
+T1tndiff = erc_nmos_gates TOUCH N1tndiff
+N2tndiff = NET tndiff GROUND_NAME
+T2tndiff = erc_nmos_gates TOUCH N2tndiff
+
+#IFDEF DS_TO_PG_CHECK
+mnpg { @ MOS connected to both power and ground
+  T1tndiff AND T2tndiff
+}
+#ENDIF
+
+//MOS erc_pmos_gates S/D connect to POWER&GROUND --mppg*/
+N1tpdiff = NET tpdiff POWER_NAME
+T1tpdiff = erc_pmos_gates TOUCH N1tpdiff
+N2tpdiff = NET tpdiff GROUND_NAME
+T2tpdiff = erc_pmos_gates TOUCH N2tpdiff
+
+#IFDEF DS_TO_PG_CHECK
+mppg { @ MOS connected to both power and ground
+  T1tpdiff AND T2tpdiff
+}
+#ENDIF
+
+#IFDEF FLOATING_WELL_CHECK
+SCONNECT tndiff nxwell_float by nplug
+SCONNECT tndiff_dio nxwell_float by nplug
+SCONNECT tndiff_bjt nxwell_float by nplug
+SCONNECT tndiff_RC nxwell_float by nplug
+floating.nxwell_float { @ nxwell_float is not connected to POWER
+  no_power_path = PATHCHK !POWER nxwell_float PORTS ALSO
+  direct_connect_ground = NET nxwell_float GROUND_NAME
+  no_power_path or direct_connect_ground
+}
+#ENDIF
+
+#IFDEF FLOATING_WELL_CHECK
+floating.psub { @ psub is not connected to GROUND
+  no_ground_path = PATHCHK !GROUND psub PORTS ALSO
+  direct_connect_power = NET psub POWER_NAME
+  no_ground_path or direct_connect_power
+}
+#ENDIF
+gate1_not_IO2_GND = NET gate1_not_IO2_not_IO1 GROUND_NAME
+
+#IFDEF GATE_TO_PG_CHECK
+// Core gate connect to ground 
+npvss150 { @ gate1_not_IO2 connected to GROUND
+  gate1_not_IO2_GND_pmos = gate1_not_IO2_GND INTERACT N1tpdiff
+  gate1_not_IO2_GND_nmos = gate1_not_IO2_GND INTERACT N1tndiff
+  nxwell_PWR = NET nxwell POWER_NAME
+  psub_PWR = NET psub POWER_NAME
+  psub_GND = NET psub GROUND_NAME
+
+  gate1_not_IO2_GND_pmos_filter1_1 = gate1_not_IO2_GND_pmos INTERACT N1tpdiff == 2
+  gate1_not_IO2_GND_pmos_filter1 = gate1_not_IO2_GND_pmos_filter1_1 INTERACT nxwell_PWR
+
+  gate1_not_IO2_GND_nmos_filter1_1 = gate1_not_IO2_GND_nmos INTERACT N1tndiff == 2
+  gate1_not_IO2_GND_nmos_filter1 = gate1_not_IO2_GND_nmos_filter1_1 INTERACT psub_PWR
+
+  gate1_not_IO2_GND_nmos_filter2_1 = gate1_not_IO2_GND_nmos INTERACT N2tndiff
+  gate1_not_IO2_GND_nmos_filter2 = gate1_not_IO2_GND_nmos_filter2_1 INTERACT psub_GND
+
+  gate1_not_IO2_GND_nmos_filter3_1 = gate1_not_IO2_GND_nmos INTERACT N1tndiff == 2
+  gate1_not_IO2_GND_nmos_filter3 = gate1_not_IO2_GND_nmos_filter3_1 INTERACT (nxwell_PWR AND VARi)
+
+  ((((gate1_not_IO2_GND_pmos OR gate1_not_IO2_GND_nmos) NOT gate1_not_IO2_GND_pmos_filter1) NOT gate1_not_IO2_GND_nmos_filter1) NOT gate1_not_IO2_GND_nmos_filter2) NOT gate1_not_IO2_GND_nmos_filter3
+}
+#ENDIF
+
+#IFDEF WELL_TO_PG_CHECK
+// ntap connect to ground 
+npvss49 { @ ntap connected to GROUND
+  ntap_not_var = ntap NOT VARi
+  NET ntap_not_var GROUND_NAME
+}
+#ENDIF
+
+#IFDEF PATH_CHECK
+// Nodes with a path to ground but not power 
+ERC PATHCHK GROUND && !POWER
+#ENDIF
+
+#IFDEF PATH_CHECK
+// Nodes with a path to power but not ground 
+ERC PATHCHK POWER && !GROUND
+#ENDIF
+
+#IFDEF PATH_CHECK
+// Nodes without a path to power and ground 
+ERC PATHCHK !POWER && !GROUND NOFLOAT
+#ENDIF
+
+#IFDEF PATH_CHECK
+ERC PATHCHK !LABELED NOFLOAT
+#ENDIF
+gate1_not_IO2_not_IO1 = COPY gate1_not_IO2
+CONNECT gate1_not_IO2_not_IO1 n_fpoly_io
+CONNECT gate1_not_IO2_not_IO1 n_fpoly_lvt
+CONNECT gate1_not_IO2_not_IO1 n_fpoly_svt
+CONNECT gate1_not_IO2_not_IO1 p_fpoly_io
+CONNECT gate1_not_IO2_not_IO1 p_fpoly_lvt
+CONNECT gate1_not_IO2_not_IO1 p_fpoly_svt
+gate1_not_IO2_PWR = NET gate1_not_IO2_not_IO1 POWER_NAME
+
+#IFDEF GATE_TO_PG_CHECK
+// Core gate connect to power 
+ppvdd150 { @ gate1_not_IO2 connected to POWER
+  gate1_not_IO2_PWR_pmos = gate1_not_IO2_PWR INTERACT N2tpdiff
+  gate1_not_IO2_PWR_nmos = gate1_not_IO2_PWR INTERACT N2tndiff
+  nxwell_GND = NET nxwell GROUND_NAME
+  nxwell_PWR = NET nxwell POWER_NAME
+  psub_GND = NET psub GROUND_NAME
+
+  gate1_not_IO2_PWR_pmos_filter1_1 = gate1_not_IO2_PWR_pmos INTERACT N2tpdiff == 2
+  gate1_not_IO2_PWR_pmos_filter1 = gate1_not_IO2_PWR_pmos_filter1_1 INTERACT nxwell_GND
+
+  gate1_not_IO2_PWR_nmos_filter1_1 = gate1_not_IO2_PWR_nmos INTERACT N2tndiff == 2
+  gate1_not_IO2_PWR_nmos_filter1 = gate1_not_IO2_PWR_nmos_filter1_1 INTERACT psub_GND
+
+  gate1_not_IO2_PWR_pmos_filter2_1 = gate1_not_IO2_PWR_pmos INTERACT N1tpdiff
+  gate1_not_IO2_PWR_pmos_filter2 = gate1_not_IO2_PWR_pmos_filter2_1 INTERACT nxwell_PWR
+
+  gate1_not_IO2_PWR_nmos_filter3_1 = gate1_not_IO2_PWR_nmos INTERACT N2tndiff == 2
+  gate1_not_IO2_PWR_nmos_filter3 = gate1_not_IO2_PWR_nmos_filter3_1 INTERACT (nxwell_GND AND VARi)
+
+  ((((gate1_not_IO2_PWR_pmos OR gate1_not_IO2_PWR_nmos) NOT gate1_not_IO2_PWR_pmos_filter1) NOT gate1_not_IO2_PWR_nmos_filter1) NOT gate1_not_IO2_PWR_pmos_filter2 ) NOT gate1_not_IO2_PWR_nmos_filter3
+}
+#ENDIF
+
+#IFDEF WELL_TO_PG_CHECK
+// ptap connect to power 
+ppvdd49 { @ ptap connected to POWER
+  NET ptap POWER_NAME
+}
+#ENDIF
+#IFDEF LVSDMY4_CHECK
+LVSDMY4_DNW_CHECK { @ The LVSDMY4 layer is used in LVS deck to identify logic N-Type MOS within the DNW only. Not recommend that LVSDMY4 layer is used without DNW layer
+    nmos_gates_1 = all_mos_gates  NOT PP
+    nmos_gates_2 = nmos_gates_1  NOT SRAMDMY
+    nmos_gates_3 = nmos_gates_2  NOT VAR
+    nmos_gates   = nmos_gates_3  NOT PODE_GATE
+    LVSDMY4_not_DNW = LVSDMY4 NOT DNW
+    LVSDMY4_not_DNW INTERACT nmos_gates
+}
+ERC SELECT CHECK LVSDMY4_DNW_CHECK
+#ENDIF
+
+#ENDIF
+////////////////////////////////////////////////////////////////////////////////
+// STRAINED SILICON SEARCH DISTANCES
+////////////////////////////////////////////////////////////////////////////////
+}
+
+package require CalibreDFM_DEVICE
+tvf::SETLAYER lod_PROP = [
+   device::enclosure_measurements -base gate_mac -measurement OD -orient all_sd -max_par 0  -max_per 60 
+]
