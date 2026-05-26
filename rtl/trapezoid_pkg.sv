@@ -1,0 +1,71 @@
+// =============================================================================
+// trapezoid_pkg.sv — Group 13 共用參數 (Single Source of Truth)
+// =============================================================================
+// Owner: 黃妍心 (Iris)
+// 規則: 改任何 parameter 前必須在 group chat 知會,因為每個人的模組都會 import 進來
+// =============================================================================
+
+package trapezoid_pkg;
+
+  // ==========================================================================
+  // PE Array 尺寸
+  // ==========================================================================
+  parameter int N_PE_ROW    = 16;                          // PE row 數
+  parameter int N_MUL_ROW   = 16;                          // 每 row 的 multiplier 數
+  parameter int N_TOTAL_MAC = N_PE_ROW * N_MUL_ROW;        // 256
+
+  // ==========================================================================
+  // 資料寬度 (依 proposal: INT8 量化)
+  // ==========================================================================
+  parameter int DATA_W      = 8;     // INT8 input
+  parameter int PROD_W      = 16;    // INT8 × INT8 = INT16
+  parameter int ACC_W       = 32;    // INT32 accumulator (proposal 確定)
+
+  // ==========================================================================
+  // Tiling (proposal 4.4: 32×32 tile)
+  // ==========================================================================
+  parameter int TILE_M      = 32;
+  parameter int TILE_N      = 32;
+  parameter int TILE_K      = 32;
+
+  // ==========================================================================
+  // Memory (proposal 4.2: ADFP 16×1KB SRAM)
+  // ==========================================================================
+  parameter int N_BANK      = 16;
+  parameter int BANK_DEPTH  = 128;                          // 128 words
+  parameter int BANK_W_BITS = 64;                           // 64 bits / word
+  parameter int BANK_BYTES  = BANK_DEPTH * BANK_W_BITS / 8; // 1024 B = 1 KB
+  parameter int TOTAL_SRAM  = N_BANK * BANK_BYTES;          // 16 KB
+
+  // ==========================================================================
+  // Sparse 結構 (TrIP fiber packing)
+  // ==========================================================================
+  parameter int N_A_FIBER   = 4;     // 同時 pack 4 列 A
+  parameter int N_B_FIBER   = 4;     // 同時 stream 4 行 B
+  // 4 × 4 = 16 個 intersection candidate / cycle = 1 個 PE row 寬度
+
+  // ==========================================================================
+  // Dataflow mode encoding
+  // ==========================================================================
+  parameter logic [1:0] MODE_DENSE_IP = 2'b00;   // baseline
+  parameter logic [1:0] MODE_TRIP     = 2'b01;   // 主要目標
+  parameter logic [1:0] MODE_TRGT     = 2'b10;   // stretch goal
+  parameter logic [1:0] MODE_TRGS     = 2'b11;   // stretch goal
+
+  // ==========================================================================
+  // Quantization scheme (討論結果寫進來)
+  // ==========================================================================
+  // Symmetric: zero-point = 0,INT8 的 0 就是真實 0,bitmask sparsity 才成立
+  // 若改 asymmetric,bitmask 邏輯需重做 (見 docs/spec_open_questions.md #1)
+  parameter bit USE_SYMMETRIC_QUANT = 1'b1;
+
+  // ==========================================================================
+  // Pipeline 階段數 (依 dataflow,黃妍心 設計)
+  // 對齊 PPTX p.13/p.14:
+  //   Dense IP (7):  latch_b(1) → mul(1) → tree(4) → acc/out(1)
+  //   TrIP     (9):  latch_b(1) → MFIU intersect+prefix(2) → mul(1) → tree(4) → acc/out(1)
+  // ==========================================================================
+  parameter int IP_STAGES   = 7;
+  parameter int TRIP_STAGES = 9;
+
+endpackage : trapezoid_pkg
