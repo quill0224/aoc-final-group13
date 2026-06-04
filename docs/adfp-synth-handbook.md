@@ -227,13 +227,43 @@ ls .../IP/<lib>/<macro>/NLDM/        # 看有哪些 corner
 - **output 腳**(如 `PUDELAY`)→ **留空**(`.PUDELAY()`)。input 腳**不能浮空**,一定要給值。
 - 包一層 **wrapper**(`` `ifdef `` 切換 macro / behavioral)→ 上層不用碰醜腳位,模擬合成同一份碼(見 §4)。
 
-### 完整實例(今晚這顆,對照著看)
+### 完整實例:今晚實際打過的指令(換顆 / 換課照抄改路徑)
+
+```bash
+SRAM=/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM   # 先存成變數省打字
+
+# ── Step 1:確認 .v 在哪 + 看 view 資料夾 ──
+find /usr/cad/CBDK -name "N16ADFP_SRAM_100a.v" 2>/dev/null
+#   → $SRAM/VERILOG/N16ADFP_SRAM_100a.v
+ls $SRAM/
+#   → GDS  LEF  NLDM  PGV  SPICE  VERILOG     (NLDM=時序庫,合成要用;VERILOG=.v 模擬)
+
+# ── Step 2:列出這個 .v 裡有哪些 macro,挑要的那顆 ──
+grep -n "^module" $SRAM/VERILOG/N16ADFP_SRAM_100a.v
+#   → 17213:module TS6N16ADFPCLLLVTA128X32M4FWSHOD (    ← TS6=雙埠、128X32,要這顆;記下行號 17213
+
+# ── Step 3:抓那顆的 port(名稱 + 寬度 + 方向)──
+sed -n '17213,17255p' $SRAM/VERILOG/N16ADFP_SRAM_100a.v                       # port 名稱(module 宣告那段)
+awk 'NR>=17213 && NR<=17400' $SRAM/VERILOG/N16ADFP_SRAM_100a.v | grep -iE "^[[:space:]]*(input|output|inout)"
+#   → input [M-1:0] AA;   // Address WRITE bus   ← comment 直接說角色!
+#     input [N-1:0] D;  input [N-1:0] BWEB;  input WEB; input CLKW;
+#     input [M-1:0] AB;   // Address READ bus
+#     input REB; input CLKR; input [1:0] RCT; input [1:0] WCT; input [2:0] KP;
+#     input SLP; input DSLP; input SD; output PUDELAY; output [N-1:0] Q;
+
+# ── Step 4:找合成用的 .db(挑 tt corner)──
+ls $SRAM/NLDM/
+#   → 一堆 .db/.lib,挑 N16ADFP_SRAM_tt0p8v0p8v25c_100a.db   (tt=typical)
+# 標準 cell 的 .db 同樣方法:
+find /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell -name "*tt*.db" 2>/dev/null
+#   → .../N16ADFP_StdCell/NLDM/N16ADFP_StdCelltt0p8v25c.db
 ```
-找到:TS6N16ADFPCLLLVTA128X32M4FWSHOD(TS6=雙埠, 128X32)
-port :AA=寫址 / AB=讀址 / D=寫資料 / Q=讀資料 / BWEB,WEB,REB=active-low 致能 / CLKW,CLKR=讀寫時鐘
-.db  :NLDM/N16ADFP_SRAM_tt0p8v0p8v25c_100a.db(tt corner)
-tie  :SLP/DSLP/SD/RCT/WCT/KP=0,PUDELAY 留空
-```
+
+**結果(填進 wrapper §4b + synth.tcl §4c):**
+- macro:`TS6N16ADFPCLLLVTA128X32M4FWSHOD`(雙埠 128×32)
+- port:`AA`=寫址 `AB`=讀址 `D`=寫 `Q`=讀;`WEB`/`REB`/`BWEB`=active-low(取反);`CLKW`/`CLKR`=讀寫時鐘
+- tie:`SLP`/`DSLP`/`SD`/`RCT`/`WCT`/`KP`=0,`PUDELAY` 留空
+- .db:`N16ADFP_SRAM_tt0p8v0p8v25c_100a.db`(SRAM)、`N16ADFP_StdCelltt0p8v25c.db`(stdcell)
 
 > 換別顆 SRAM(例如要 512 深、或單埠)→ 同樣 Step 1~5,只是 Step 2 挑不同名字、Step 3 重抓 port。
 > 別堂課別的 PDK → 結構一樣(view 資料夾 / `^module` 列名 / `.db` corner / active-low + tie-off 慣例),照搬即可。
