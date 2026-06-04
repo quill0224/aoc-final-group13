@@ -9,13 +9,13 @@
 #  路徑怎麼找 → docs/adfp-synth-handbook.md §3。
 #==============================================================================
 
-# ---------- ★現場填★ 標準 cell library(這 2 個一定要填) ----------
-set STDCELL_DB_DIR "<標準cell .db 所在目錄>"     ;# find /usr/cad/CBDK -name "*.db" | grep -i tt
-set STDCELL_DB     "<標準cell tt corner>.db"      ;# 上面挑一個 typical/tt 的檔名
+# ---------- 標準 cell library(superdome1 / N16ADFP,已填好)----------
+set STDCELL_DB_DIR "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM"
+set STDCELL_DB     "N16ADFP_StdCelltt0p8v25c.db"   ;# typical, 0.8V, 25C
 
-# ---------- ★之後才填★ SRAM macro(buffer 改成 macro 後,取消下面註解) ----
-# set SRAM_DB_DIR  "<SRAM macro .db 所在目錄>"
-# set SRAM_DB      "<sram macro>.db"
+# ---------- SRAM macro(第二步:local_buffer 改成 macro 後,取消下面 2 行註解)----------
+# set SRAM_DB_DIR  "/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/NLDM"
+# set SRAM_DB      "N16ADFP_SRAM_tt0p8v0p8v25c_100a.db"
 
 #==============================================================================
 # 以下不用改

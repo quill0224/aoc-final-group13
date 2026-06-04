@@ -11,8 +11,8 @@
 - [ ] 8 個 unit testbench 全綠(`make tb_mac / tb_tree_flexagon / tb_lbuf / tb_mfiu_row / tb_dist_net / tb_pe_row_full / tb_pe_array`)
 - [ ] RTL 已 commit + push(工作站直接 `git clone` 最省事)
 - [ ] 手邊有 ADFP hard macro 規格表(7.5 那張)
-- [ ] 知道助教給的 SRAM 路徑:
-      `/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/N16ADFP_SRAM/VERILOG/N16ADFP_SRAM_100a.v`
+- [ ] 知道 SRAM 模擬模型路徑(實際只有一層 `N16ADFP_SRAM`):
+      `/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/VERILOG/N16ADFP_SRAM_100a.v`
 
 ---
 
@@ -115,10 +115,10 @@ N16ADFP_SRAM_512x45 u_sram (
 | 工作目錄(可寫的 scratch) | `<...>` |
 | EDA 工具(DC / Genus)+ setup script | `<...>` |
 | license server | `<...>` |
-| **SRAM macro module 名稱** | `<...>` |
-| **SRAM macro port**(CLK/CEN/WEN/A/D/Q…/極性) | `<...>` |
-| SRAM `.db` / `.lib` 路徑 | `<...>` |
-| 標準 cell `.db` 路徑(target_library) | `<...>` |
+| **SRAM macro module 名稱** | `<待查:grep ^module …VERILOG/N16ADFP_SRAM_100a.v>` |
+| **SRAM macro port**(CLK/CEN/WEN/A/D/Q…/極性) | `<待查>` |
+| SRAM `.db`(NLDM, typical) | `…/IP/sram/N16ADFP_SRAM/NLDM/N16ADFP_SRAM_tt0p8v0p8v25c_100a.db` |
+| 標準 cell `.db`(NLDM, typical, target_library) | `…/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCelltt0p8v25c.db` |
 
 ---
 
