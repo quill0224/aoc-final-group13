@@ -16,6 +16,7 @@ RTL_SRCS := $(PKG) \
             $(RTL_DIR)/mfiu/mfiu_top.sv \
             $(RTL_DIR)/dist/merge_tree_radix16.sv \
             $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv \
+            $(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
             $(RTL_DIR)/dist/distribution_net.sv \
             $(RTL_DIR)/mem/global_buffer.sv \
             $(RTL_DIR)/ctrl/dataflow_ctrl.sv \
@@ -24,7 +25,7 @@ RTL_SRCS := $(PKG) \
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_tree tb_tree_sliced tb_pe_row tb_pe_array tb_dist lint clean help
+.PHONY: all tb_mac tb_tree tb_tree_sliced tb_tree_flexagon tb_lbuf tb_mfiu_row tb_dist_net tb_pe_row tb_pe_row_full tb_pe_array tb_dist lint clean help
 
 all: help
 
@@ -32,7 +33,11 @@ help:
 	@echo "Targets:"
 	@echo "  make tb_mac          — 跑 mac_unit 單元測試 (iverilog)"
 	@echo "  make tb_tree         — 跑 merge_tree_radix16 單元測試 (single-tree mode)"
-	@echo "  make tb_tree_sliced  — 跑 merge_tree_radix16_sliced 單元測試 (TrIP sub-tree slicing)"
+	@echo "  make tb_tree_sliced  — 跑 merge_tree_radix16_sliced 單元測試 (TrIP sub-tree slicing,Kogge-Stone variant)"
+	@echo "  make tb_tree_flexagon — 跑 merge_tree_radix16_flexagon 單元測試 (Flexagon-style binary tree,1 cycle combinational)"
+	@echo "  make tb_lbuf         — 跑 local_buffer_row 單元測試 (4-bank scatter buffer)"
+	@echo "  make tb_mfiu_row     — 跑 mfiu_row 單元測試 (Dense IP pass-through)"
+	@echo "  make tb_dist_net     — 跑 dist_net_row 單元測試 (Dense identity + TrIP routing)"
 	@echo "  make tb_pe_row       — 跑 pe_row 單元測試 (iverilog)"
 	@echo "  make tb_dist         — 跑 distribution_net Phase 1 pass-through 測試 (iverilog)"
 	@echo "  make tb_pe_array     — 跑 pe_array 單元測試 (Dense IP + B chain)"
@@ -66,6 +71,45 @@ tb_tree_sliced: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv $(TB_DIR)/tb
 		$(TB_DIR)/tb_merge_tree_sliced.sv
 	vvp tb_tree_sliced.vvp
 
+# ── merge_tree_radix16_flexagon 單元測試 (iverilog) ──
+# 測 Flexagon-style binary tree(1 cycle combinational + output register)
+# 對應 ASPLOS 2023 Flexagon paper Fig 4(b) node 設計 + Trapezoid §III.B sub-tree slicing
+tb_tree_flexagon: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv $(TB_DIR)/tb_merge_tree_flexagon.sv
+	$(IVERILOG) -g2012 -o tb_tree_flexagon.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
+		$(TB_DIR)/tb_merge_tree_flexagon.sv
+	vvp tb_tree_flexagon.vvp
+
+# ── local_buffer_row 單元測試 (iverilog) ──
+tb_lbuf: $(PKG) $(RTL_DIR)/pe/local_buffer_row.sv $(TB_DIR)/tb_local_buffer.sv
+	$(IVERILOG) -g2012 -o tb_lbuf.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/pe/local_buffer_row.sv \
+		$(TB_DIR)/tb_local_buffer.sv
+	vvp tb_lbuf.vvp
+
+# ── mfiu_row 單元測試 (iverilog) ──
+# 介面 owner 黃妍心,Dense IP pass-through;TrIP body owner 劉偉健
+tb_mfiu_row: $(PKG) $(RTL_DIR)/mfiu/mfiu_row.sv $(TB_DIR)/tb_mfiu_row.sv
+	$(IVERILOG) -g2012 -o tb_mfiu_row.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/mfiu/mfiu_row.sv \
+		$(TB_DIR)/tb_mfiu_row.sv
+	vvp tb_mfiu_row.vvp
+
+# ── dist_net_row 單元測試 (iverilog) ──
+tb_dist_net: $(PKG) $(RTL_DIR)/dist/dist_net_row.sv $(TB_DIR)/tb_dist_net_row.sv
+	$(IVERILOG) -g2012 -o tb_dist_net.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/dist_net_row.sv \
+		$(TB_DIR)/tb_dist_net_row.sv
+	vvp tb_dist_net.vvp
+
 # ── pe_row 單元測試 (iverilog) ──
 # 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16 + pe_row
 tb_pe_row: $(PKG) \
@@ -92,6 +136,28 @@ tb_dist: $(PKG) $(RTL_DIR)/dist/distribution_net.sv $(TB_DIR)/tb_distribution_ne
 		$(RTL_DIR)/dist/distribution_net.sv \
 		$(TB_DIR)/tb_distribution_net.sv
 	vvp tb_dist.vvp
+
+# ── pe_row_full 端到端測試 (iverilog) ──
+# 完整 PE row:A latch + MFIU + dist net + mul×16 + flexagon tree + local buffer
+tb_pe_row_full: $(PKG) \
+                $(RTL_DIR)/pe/mac_unit.sv \
+                $(RTL_DIR)/mfiu/mfiu_row.sv \
+                $(RTL_DIR)/dist/dist_net_row.sv \
+                $(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
+                $(RTL_DIR)/pe/local_buffer_row.sv \
+                $(RTL_DIR)/pe/pe_row_full.sv \
+                $(TB_DIR)/tb_pe_row_full.sv
+	$(IVERILOG) -g2012 -o tb_pe_row_full.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/pe/mac_unit.sv \
+		$(RTL_DIR)/mfiu/mfiu_row.sv \
+		$(RTL_DIR)/dist/dist_net_row.sv \
+		$(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
+		$(RTL_DIR)/pe/local_buffer_row.sv \
+		$(RTL_DIR)/pe/pe_row_full.sv \
+		$(TB_DIR)/tb_pe_row_full.sv
+	vvp tb_pe_row_full.vvp
 
 # ── pe_array 單元測試 (iverilog) ──
 # 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16(舊版 single tree)+ pe_row + pe_array

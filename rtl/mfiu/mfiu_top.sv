@@ -1,12 +1,10 @@
 // =============================================================================
-// mfiu_top.sv — Multi-Fiber Intersection Unit (Bitmask AND + Prefix Sum)
+// mfiu_top.sv — (legacy stub,已被 rtl/mfiu/mfiu_row.sv 取代)
 // =============================================================================
-// Owner: 劉偉健 (per 2026-05-12 新分工:model pruning + MFIU + 稀疏性判斷)
+// Owner: 楊承豫
 //
-// === STUB ===
-// 這份是空殼,讓 top.sv 可以 elaborate / lint pass。
-// 真實邏輯由 劉偉健 之後填(Phase 2 TrIP 啟動時)。
-// 改 port 之前,請先在 docs/interfaces.md 更新並通知 黃妍心 (top 對接者)。
+// 舊的 global MFIU 空殼,只給舊 top.sv lint pass 用。完整 PE row 改用 per-row
+// 的 mfiu_row.sv(對齊 paper Fig 6)。本檔保留只為不破壞舊 top.sv,可刪。
 // =============================================================================
 
 
@@ -15,7 +13,6 @@ module mfiu_top
 (
     input  clk,
     input  rst_n
-    // TODO 劉偉健: bitmask in, intersection result out, prefix sum out
 );
 
     // stub: 啥都不做
