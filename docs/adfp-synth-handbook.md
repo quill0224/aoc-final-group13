@@ -185,3 +185,55 @@ analyze -format sverilog -define {USE_SRAM_MACRO} $RTL_FILES   ;# ← 關鍵:定
 - [ ] **pe_row 整合**:把 tree 的 16-lane 輸出**壓成 4 筆 banked write** 餵 buffer(`clear`→`first_pass`);接真 MFIU/dist 時要對齊 latency
 - [ ] 接真 MFIU(楊承豫)/ dist(QuillQ):確認 port + **latency 幾拍**(pe_row 延遲對齊要用)
 - [ ] 整條 pe_row → 16 條 array(hierarchical,不用 16 條各合)
+
+---
+
+## 9. 附錄:怎麼「找一顆 macro + 確認怎麼用」(通用流程,可帶到別堂課)
+
+任何 PDK 的 hard macro 都長得差不多:有一個 `.v`(模擬模型)、一個 `.db/.lib`(時序庫)、`.lef`(P&R)。找一顆陌生 macro,照這 5 步:
+
+### Step 1 — 找 library 在哪 + 有哪些 view(用 `ls` 一層層看,別用大範圍 `find` 會卡)
+```bash
+ls <PDK根>/.../Collaterals/IP/            # 看有哪些 IP:sram / stdcell / io / pll ...
+ls <PDK根>/.../IP/sram/<某顆>/             # 看 view 資料夾
+```
+**view 對照**:`VERILOG`=`.v` 模擬模型 · `NLDM`(或 `DB`)=`.lib`/`.db` 時序庫(**合成用**)· `LEF`=P&R · `GDS`=layout · `SPICE`=電晶體。
+
+### Step 2 — 列出 `.v` 裡有哪些 macro(挑你要的尺寸 / 埠數)
+```bash
+grep -n "^module" .../VERILOG/<lib>.v
+```
+看名字挑(TSMC 命名解碼):
+- `TS1...` = **單埠** · `TS6...` = **雙埠(1R1W)**
+- 名字裡 `...A128X32M...` = **128 字 × 32 bit**(深度 × 位寬)
+- 行號(grep 給的)→ 下一步要用
+
+### Step 3 — 抓那顆 macro 的 port + 寬度 + 方向(寫 instantiate 一定要)
+```bash
+awk 'NR>=<module行號> && NR<=<+60>' .../VERILOG/<lib>.v | grep -iE "input|output|inout"
+```
+→ 印出像 `input [6:0] AA;  // Address write bus`。**看 comment + 寬度**就知道每根腳幹嘛、幾 bit。
+
+### Step 4 — 找合成用的 `.db`(挑 corner)
+```bash
+ls .../IP/<lib>/<macro>/NLDM/        # 看有哪些 corner
+```
+**corner 解碼**:`tt`=typical(最常用) · `ss`=slow-slow(setup 最壞情況) · `ff`=fast-fast(hold);
+`.db` 名 `tt0p8v25c` = typical 製程、0.8V、25°C。
+
+### Step 5 — 接腳慣例(寫 instance 時)
+- **名字帶 `B`**(`WEB`/`REB`/`BWEB`/`CEB`/`CSB`)= **active-low** → 通常要 **取反**(`~wen`)。
+- **電源/睡眠腳**(`SLP`/`DSLP`/`SD`/`PD`)→ 綁 `0`(正常運作);**margin/test 腳**(`RCT`/`WCT`/`KP`)→ 綁 `0`(預設)。
+- **output 腳**(如 `PUDELAY`)→ **留空**(`.PUDELAY()`)。input 腳**不能浮空**,一定要給值。
+- 包一層 **wrapper**(`` `ifdef `` 切換 macro / behavioral)→ 上層不用碰醜腳位,模擬合成同一份碼(見 §4)。
+
+### 完整實例(今晚這顆,對照著看)
+```
+找到:TS6N16ADFPCLLLVTA128X32M4FWSHOD(TS6=雙埠, 128X32)
+port :AA=寫址 / AB=讀址 / D=寫資料 / Q=讀資料 / BWEB,WEB,REB=active-low 致能 / CLKW,CLKR=讀寫時鐘
+.db  :NLDM/N16ADFP_SRAM_tt0p8v0p8v25c_100a.db(tt corner)
+tie  :SLP/DSLP/SD/RCT/WCT/KP=0,PUDELAY 留空
+```
+
+> 換別顆 SRAM(例如要 512 深、或單埠)→ 同樣 Step 1~5,只是 Step 2 挑不同名字、Step 3 重抓 port。
+> 別堂課別的 PDK → 結構一樣(view 資料夾 / `^module` 列名 / `.db` corner / active-low + tie-off 慣例),照搬即可。
