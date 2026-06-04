@@ -1,165 +1,135 @@
 // =============================================================================
-// tb_local_buffer.sv — local_buffer_row 單元測試
+// tb_local_buffer.sv — 4-bank banked-accumulator local buffer 測試
 // =============================================================================
-// 測 module: rtl/pe/local_buffer_row.sv
+// 測 module: rtl/pe/local_buffer_row.sv(+ rtl/pe/sram_128x32_1r1w.sv)
 // Owner: 黃妍心
 //
 // 跑法: make tb_lbuf
-// 看波形: gtkwave tb_local_buffer.vcd
 //
-// === 測什麼 ===
-//   T1: reset 後 buffer 全 0(dump 任意 addr → 0)
-//   T2: Dense IP 累加 — 單一 sub-tree(pos 15)→ addr 5,連加 4 次 ×3 = 12
-//   T3: clear — 清零後 addr 5 變回 0
-//   T4: TrIP scatter — 1 cycle 3 個 valid sub-tree 寫到不同 addr,各自正確
-//   T5: K-tile 累加 — 同 addr 跨 cycle 累加不同值(100+50=150)
-//   T6: 多 addr 獨立性 — 不同 addr 互不干擾
+// === 驗什麼 ===
+//   T1: first_pass 寫 4 個不同 bank(col 0/1/2/3)→ 覆蓋
+//   T2: 非 first_pass 累加同 4 col → RMW(讀舊+加)→ dump 比對
+//   T3: offset≠0 的 column(col 8 = bank0/off2)覆蓋→累加→dump
+//   T4: 只有單一 lane valid(col 5 = bank1/off1)覆蓋→累加→dump
+//
+// === pipeline 時序 ===
+//   RMW 2 拍:request@t → read@t → write@t+1 → mem 在 t+2 更新
+//   ★同一 column 連續寫要間隔 ≥2 拍(穿插 dataflow 自然成立);tb 用 drain 拉開
+//   dump:dump_en@t → c_valid/c_out 在 t+2
 // =============================================================================
-
 `timescale 1ns/1ps
 
 module tb_local_buffer;
     import trapezoid_pkg::*;
 
-    logic                                         clk = 0;
-    logic                                         rst_n;
-    logic                                         en;
-    logic signed [N_MUL_ROW-1:0][ACC_W-1:0]       subtree_sums;
-    logic        [N_MUL_ROW-1:0]                  subtree_valid;
-    logic        [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] out_addr;
-    logic                                         clear;
-    logic                                         acc_en;
-    logic                                         dump_en;
-    logic        [LOCAL_BUF_AW-1:0]               dump_addr;
-    logic                                         c_valid;
-    logic signed [ACC_W-1:0]                      c_out;
+    logic                                            clk = 0;
+    logic                                            rst_n;
+    logic                                            en;
+    logic        [N_BANK_LBUF-1:0]                   wr_valid;
+    logic signed [N_BANK_LBUF-1:0][ACC_W-1:0]        wr_sum;
+    logic        [N_BANK_LBUF-1:0][LOCAL_BUF_AW-1:0] wr_addr;
+    logic                                            first_pass;
+    logic                                            acc_en;
+    logic                                            dump_en;
+    logic        [LOCAL_BUF_AW-1:0]                  dump_addr;
+    logic                                            c_valid;
+    logic signed [ACC_W-1:0]                         c_out;
 
     int fails;
-    integer i;
 
     always #1 clk = ~clk;
 
     local_buffer_row dut (
-        .clk           (clk),
-        .rst_n         (rst_n),
-        .en            (en),
-        .subtree_sums  (subtree_sums),
-        .subtree_valid (subtree_valid),
-        .out_addr      (out_addr),
-        .clear         (clear),
-        .acc_en        (acc_en),
-        .dump_en       (dump_en),
-        .dump_addr     (dump_addr),
-        .c_valid       (c_valid),
-        .c_out         (c_out)
+        .clk(clk), .rst_n(rst_n), .en(en),
+        .wr_valid(wr_valid), .wr_sum(wr_sum), .wr_addr(wr_addr),
+        .first_pass(first_pass), .acc_en(acc_en),
+        .dump_en(dump_en), .dump_addr(dump_addr),
+        .c_valid(c_valid), .c_out(c_out)
     );
 
-    // ── helpers ──────────────────────────────────────────────
-    // 清空所有 sub-tree 輸入
-    task clear_in;
-        for (i = 0; i < N_MUL_ROW; i = i + 1) begin
-            subtree_valid[i] = 1'b0;
-            subtree_sums[i]  = '0;
-            out_addr[i]      = '0;
-        end
+    // 發一筆「4-lane」accumulate/overwrite request
+    task automatic do_acc(
+        input bit fp, input [N_BANK_LBUF-1:0] vmask,
+        input signed [ACC_W-1:0] s0, input signed [ACC_W-1:0] s1v,
+        input signed [ACC_W-1:0] s2, input signed [ACC_W-1:0] s3,
+        input [LOCAL_BUF_AW-1:0] a0, input [LOCAL_BUF_AW-1:0] a1,
+        input [LOCAL_BUF_AW-1:0] a2, input [LOCAL_BUF_AW-1:0] a3
+    );
+        @(negedge clk);
+        wr_valid = vmask;
+        wr_sum[0]=s0; wr_sum[1]=s1v; wr_sum[2]=s2; wr_sum[3]=s3;
+        wr_addr[0]=a0; wr_addr[1]=a1; wr_addr[2]=a2; wr_addr[3]=a3;
+        first_pass = fp; acc_en = 1'b1;
+        @(negedge clk);
+        acc_en = 1'b0; wr_valid = '0; first_pass = 1'b0;
     endtask
 
-    // 設一個 valid sub-tree:position p → addr a,值 v
-    task set_st(input integer p,
-                input [LOCAL_BUF_AW-1:0] a,
-                input signed [ACC_W-1:0] v);
-        subtree_valid[p] = 1'b1;
-        out_addr[p]      = a;
-        subtree_sums[p]  = v;
-    endtask
+    task automatic drain; repeat (3) @(negedge clk); endtask
 
-    // 累加 k 個 cycle(inputs 已設好)
-    task do_acc(input integer k);
-        integer n;
-        @(negedge clk); acc_en = 1; dump_en = 0; clear = 0;
-        for (n = 0; n < k; n = n + 1) @(posedge clk);
-        @(negedge clk); acc_en = 0;
-        #0.1;
-    endtask
-
-    // 清零整個 buffer
-    task do_clear;
-        @(negedge clk); clear = 1; acc_en = 0; dump_en = 0;
-        @(posedge clk); #0.1;
-        @(negedge clk); clear = 0;
-    endtask
-
-    // 讀某 addr,比對期望值
-    task check_dump(input [LOCAL_BUF_AW-1:0] a,
-                    input signed [ACC_W-1:0] exp,
-                    input string msg);
-        @(negedge clk); dump_en = 1; dump_addr = a; acc_en = 0; clear = 0;
-        @(posedge clk); #0.1;
+    // 讀某 column 比對
+    task automatic do_dump(input [LOCAL_BUF_AW-1:0] col,
+                           input signed [ACC_W-1:0] exp, input string msg);
+        @(negedge clk); dump_en = 1'b1; dump_addr = col;
+        @(negedge clk); dump_en = 1'b0;
+        @(negedge clk);   // t+2:c_valid/c_out 已 settle
         if (c_valid !== 1'b1) begin
-            $display("[FAIL] %s: c_valid=%b (expected 1)", msg, c_valid);
-            fails = fails + 1;
+            $display("[FAIL] %s: c_valid=%b", msg, c_valid); fails++;
         end else if (c_out !== exp) begin
-            $display("[FAIL] %s: addr=%0d c_out=%0d (expected %0d)", msg, a, c_out, exp);
-            fails = fails + 1;
+            $display("[FAIL] %s: col %0d c_out=%0d (expected %0d)", msg, col, c_out, exp); fails++;
         end else begin
-            $display("[PASS] %s: addr=%0d c_out=%0d", msg, a, c_out);
+            $display("[PASS] %s: col %0d = %0d", msg, col, c_out);
         end
-        @(negedge clk); dump_en = 0;
     endtask
 
-    // ── 主流程 ────────────────────────────────────────────────
     initial begin
         $dumpfile("tb_local_buffer.vcd");
         $dumpvars(0, tb_local_buffer);
         fails = 0;
-
-        rst_n = 0; en = 0;
-        clear = 0; acc_en = 0; dump_en = 0; dump_addr = 0;
-        clear_in;
+        rst_n=0; en=1; wr_valid='0; wr_sum='0; wr_addr='0;
+        first_pass=0; acc_en=0; dump_en=0; dump_addr=0;
         repeat (3) @(posedge clk);
-        @(negedge clk); rst_n = 1; en = 1;
+        @(negedge clk); rst_n = 1;
 
-        // T1: reset 後全 0
-        check_dump(9'd5, 32'sd0, "T1 reset addr5=0");
+        // ── T1:first_pass 覆蓋 col 0/1/2/3(banks 0/1/2/3,off 0)──
+        do_acc(1'b1, 4'b1111, 32'sd100, 32'sd200, 32'sd300, 32'sd400,
+               9'd0, 9'd1, 9'd2, 9'd3);
+        drain;
+        // ── T2:累加同 4 col(+1/+2/+3/+4)→ 101/202/303/404 ──
+        do_acc(1'b0, 4'b1111, 32'sd1, 32'sd2, 32'sd3, 32'sd4,
+               9'd0, 9'd1, 9'd2, 9'd3);
+        drain;
+        do_dump(9'd0, 32'sd101, "T2 col0 (100+1)");
+        do_dump(9'd1, 32'sd202, "T2 col1 (200+2)");
+        do_dump(9'd2, 32'sd303, "T2 col2 (300+3)");
+        do_dump(9'd3, 32'sd404, "T2 col3 (400+4)");
 
-        // T2: Dense IP 累加 — pos 15 → addr 5,連加 4 次,每次 +3 → 12
-        clear_in;
-        set_st(15, 9'd5, 32'sd3);
-        do_acc(4);
-        check_dump(9'd5, 32'sd12, "T2 dense accumulate 4x3=12");
+        // ── T3:offset≠0(col 8 = bank0/off2)50 → +5 → 55 ──
+        do_acc(1'b1, 4'b0001, 32'sd50, 0,0,0, 9'd8, 0,0,0); drain;
+        do_acc(1'b0, 4'b0001, 32'sd5,  0,0,0, 9'd8, 0,0,0); drain;
+        do_dump(9'd8, 32'sd55, "T3 col8 off2 (50+5)");
 
-        // T3: clear → addr 5 回 0
-        do_clear;
-        check_dump(9'd5, 32'sd0, "T3 after clear addr5=0");
+        // ── T4:單一 lane(col 5 = bank1/off1)70 → +7 → 77 ──
+        do_acc(1'b1, 4'b0010, 0, 32'sd70, 0,0, 0, 9'd5, 0,0); drain;
+        do_acc(1'b0, 4'b0010, 0, 32'sd7,  0,0, 0, 9'd5, 0,0); drain;
+        do_dump(9'd5, 32'sd77, "T4 col5 bank1 (70+7)");
 
-        // T4: TrIP scatter — 1 cycle,3 個 sub-tree 寫不同 addr
-        clear_in;
-        set_st(0, 9'd1, 32'sd10);
-        set_st(2, 9'd2, 32'sd20);
-        set_st(3, 9'd3, 32'sd4);
-        do_acc(1);
-        check_dump(9'd1, 32'sd10, "T4 scatter addr1=10");
-        check_dump(9'd2, 32'sd20, "T4 scatter addr2=20");
-        check_dump(9'd3, 32'sd4,  "T4 scatter addr3=4");
+        // ── 確認 col0~3 不受 T3/T4 影響 ──
+        do_dump(9'd0, 32'sd101, "T5 col0 still 101");
+        do_dump(9'd3, 32'sd404, "T5 col3 still 404");
 
-        // T5: K-tile 累加 — 同 addr 7 跨 cycle 累加 100 + 50 = 150
-        do_clear;
-        clear_in;
-        set_st(15, 9'd7, 32'sd100);
-        do_acc(1);
-        clear_in;
-        set_st(15, 9'd7, 32'sd50);
-        do_acc(1);
-        check_dump(9'd7, 32'sd150, "T5 K-tile 100+50=150");
+        // ── T6:N=1 連續累加(測 RMW bypass)──
+        //    對同一個 col 12,連續 4 拍不 drain:first_pass=10 → +5 → +3 → +2 = 20
+        //    沒有 bypass 的話,讀到的會是慢半拍的舊值 → 算錯
+        @(negedge clk);
+        wr_valid = 4'b0001; wr_addr[0] = 9'd12; wr_sum[0] = 32'sd10;
+        first_pass = 1'b1; acc_en = 1'b1;          // 覆蓋 = 10
+        @(negedge clk); wr_sum[0] = 32'sd5; first_pass = 1'b0;  // +5(連續,不 drain)
+        @(negedge clk); wr_sum[0] = 32'sd3;                     // +3
+        @(negedge clk); wr_sum[0] = 32'sd2;                     // +2
+        @(negedge clk); acc_en = 1'b0; wr_valid = '0;
+        drain;
+        do_dump(9'd12, 32'sd20, "T6 N=1 連續累加 10+5+3+2 (RMW bypass)");
 
-        // T6: 多 addr 獨立性(承 T5,addr 7=150;新寫 addr 8=77,addr7 不變)
-        clear_in;
-        set_st(15, 9'd8, 32'sd77);
-        do_acc(1);
-        check_dump(9'd8, 32'sd77,  "T6 addr8=77 (independent)");
-        check_dump(9'd7, 32'sd150, "T6 addr7 still 150 (untouched)");
-
-        // 結束
         $display("");
         if (fails == 0) begin
             $display("==============================");
@@ -173,10 +143,6 @@ module tb_local_buffer;
         $finish;
     end
 
-    initial begin
-        #100000;
-        $display("[ERR] timeout");
-        $finish;
-    end
+    initial begin #100000; $display("[ERR] timeout"); $finish; end
 
 endmodule

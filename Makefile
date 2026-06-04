@@ -83,10 +83,11 @@ tb_tree_flexagon: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv $(TB_DIR
 	vvp tb_tree_flexagon.vvp
 
 # ── local_buffer_row 單元測試 (iverilog) ──
-tb_lbuf: $(PKG) $(RTL_DIR)/pe/local_buffer_row.sv $(TB_DIR)/tb_local_buffer.sv
+tb_lbuf: $(PKG) $(RTL_DIR)/pe/sram_128x32_1r1w.sv $(RTL_DIR)/pe/local_buffer_row.sv $(TB_DIR)/tb_local_buffer.sv
 	$(IVERILOG) -g2012 -o tb_lbuf.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
+		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
 		$(RTL_DIR)/pe/local_buffer_row.sv \
 		$(TB_DIR)/tb_local_buffer.sv
 	vvp tb_lbuf.vvp

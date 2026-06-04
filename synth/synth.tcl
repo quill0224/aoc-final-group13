@@ -39,6 +39,7 @@ set RTL_FILES [list \
     rtl/mfiu/mfiu_row.sv \
     rtl/dist/dist_net_row.sv \
     rtl/dist/merge_tree_radix16_flexagon.sv \
+    rtl/pe/sram_128x32_1r1w.sv \
     rtl/pe/local_buffer_row.sv \
     rtl/pe/pe_row_full.sv ]
 analyze -format sverilog $RTL_FILES
