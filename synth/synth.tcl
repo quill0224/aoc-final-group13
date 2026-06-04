@@ -13,22 +13,19 @@
 set STDCELL_DB_DIR "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM"
 set STDCELL_DB     "N16ADFP_StdCelltt0p8v25c.db"   ;# typical, 0.8V, 25C
 
-# ---------- SRAM macro(第二步:local_buffer 改成 macro 後,取消下面 2 行註解)----------
-# set SRAM_DB_DIR  "/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/NLDM"
-# set SRAM_DB      "N16ADFP_SRAM_tt0p8v0p8v25c_100a.db"
+# ---------- SRAM macro(local_buffer 用真 macro 時要打開)----------
+set SRAM_DB_DIR  "/usr/cad/CBDK/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/NLDM"
+set SRAM_DB      "N16ADFP_SRAM_tt0p8v0p8v25c_100a.db"
 
 #==============================================================================
 # 以下不用改
 #==============================================================================
-set TOP pe_row_full          ;# 先合單一 module;整顆要合時改成 top
+set TOP local_buffer_row     ;# 要合別的就改這裡(mac_unit / merge_tree_radix16_flexagon / pe_row_full)
 
-# ---------- library ----------
-set search_path    [concat "." $STDCELL_DB_DIR]
+# ---------- library(含 SRAM macro 的 .db)----------
+set search_path    [concat "." $STDCELL_DB_DIR $SRAM_DB_DIR]
 set target_library $STDCELL_DB
-set link_library   "* $STDCELL_DB"
-# 改用 SRAM macro 後改成下面這兩行:
-#   set search_path  [concat "." $STDCELL_DB_DIR $SRAM_DB_DIR]
-#   set link_library "* $STDCELL_DB $SRAM_DB"
+set link_library   "* $STDCELL_DB $SRAM_DB"
 
 # ---------- 讀 RTL ----------
 # 只讀 pe_row_full 需要的 6 個檔(package 先);不 glob 整個資料夾,
@@ -42,7 +39,7 @@ set RTL_FILES [list \
     rtl/pe/sram_128x32_1r1w.sv \
     rtl/pe/local_buffer_row.sv \
     rtl/pe/pe_row_full.sv ]
-analyze -format sverilog $RTL_FILES
+analyze -format sverilog -define {USE_SRAM_MACRO} $RTL_FILES
 elaborate $TOP
 current_design $TOP
 link

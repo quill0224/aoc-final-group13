@@ -25,23 +25,29 @@ module sram_128x32_1r1w (
 
 `ifdef USE_SRAM_MACRO
     // =========================================================================
-    // 合成用:接真實 macro。pin name 依工作站 port list 填:
-    //   sed -n '17213,17255p' .../VERILOG/N16ADFP_SRAM_100a.v
-    // 典型 1R1W macro 會有:CLK / 寫致能 / AW(寫址) / D(資料入) / BW(bit-write)
-    //                      / 讀致能 / AR(讀址) / Q(資料出)
-    // -------------------------------------------------------------------------
-    // TS6N16ADFPCLLLVTA128X32M4FWSHOD u_macro (
-    //     .CLK   (clk),
-    //     .AW    (waddr),
-    //     .D     (wdata),
-    //     .BW    ({32{1'b1}}),   // 全 bit 寫
-    //     .???   (wen),          // 寫致能(看實際 pin)
-    //     .AR    (raddr),
-    //     .Q     (rdata),
-    //     .???   (ren)           // 讀致能(看實際 pin)
-    //     // ... 其餘 test/sleep pin 依 datasheet 綁固定值
-    // );
+    // 合成用:接真實 ADFP macro(1R1W 兩埠 128×32)
+    //   寫埠:AA=寫址 / D=資料 / BWEB=逐位元寫遮罩(active-low,0=寫) / WEB=寫致能(active-low) / CLKW
+    //   讀埠:AB=讀址 / REB=讀致能(active-low) / CLKR / Q=資料出
+    //   測試/電源腳綁正常運作值;PUDELAY 是 output 不接
     // =========================================================================
+    TS6N16ADFPCLLLVTA128X32M4FWSHOD u_macro (
+        .AA      (waddr),        // 寫址 [6:0]
+        .D       (wdata),        // 寫資料 [31:0]
+        .BWEB    ({32{1'b0}}),   // 全位元寫(active-low → 0=寫;若 sim 不寫入則改 32'hFFFFFFFF)
+        .WEB     (~wen),         // 寫致能 active-low
+        .CLKW    (clk),
+        .AB      (raddr),        // 讀址 [6:0]
+        .REB     (~ren),         // 讀致能 active-low
+        .CLKR    (clk),
+        .RCT     (2'b00),
+        .WCT     (2'b00),
+        .KP      (3'b000),
+        .SLP     (1'b0),
+        .DSLP    (1'b0),
+        .SD      (1'b0),
+        .PUDELAY (  ),           // output,不使用
+        .Q       (rdata)         // 讀資料出 [31:0]
+    );
 `else
     // =========================================================================
     // 模擬用:behavioral 1R1W(read latency = 1 cycle)
