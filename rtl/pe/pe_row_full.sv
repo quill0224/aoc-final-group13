@@ -29,7 +29,8 @@
 // === 對外控制(由 dataflow_ctrl 提供;Phase 1 由 tb 驅動)===
 //   - cur_n      : 當前 output column(Dense IP:單一 C 寫 buffer[cur_n])
 //   - in_valid   : a/b 此 cycle 有效
-//   - buf_clear  : 清整個 local buffer(新 output region 開始,pipeline 空時拉)
+//   - first_pass : 該 column 的「第一段 K」→ buffer 覆蓋(等效清零);後續 K → 累加
+//                  (取代舊 buf_clear;會在 pe_row 內延遲對齊到 buffer 寫入時點)
 //   - dump_en/dump_addr : 某 column 的 K-tile 全累加完,讀出寫回
 //     ⚠️ dump_en 必須等該 column 最後一拍 in_valid 之後 (PE_ROW_STAGES+1) 拍才拉
 //        (dataflow_ctrl 依 PE_ROW_STAGES 算 timing)
@@ -45,7 +46,7 @@ module pe_row_full
     input  logic [1:0]                              dataflow_sel,
     input  logic                                    in_valid,
     input  logic [LOCAL_BUF_AW-1:0]                 cur_n,
-    input  logic                                    buf_clear,
+    input  logic                                    first_pass,
     input  logic                                    dump_en,
     input  logic [LOCAL_BUF_AW-1:0]                 dump_addr,
 
@@ -74,6 +75,7 @@ module pe_row_full
     localparam int DLY_AB   = MFIU_STAGES;                            // 3
     localparam int DLY_CUT  = DIST_STAGES + MUL_STAGES;               // 2
     localparam int DLY_ADDR = DIST_STAGES + MUL_STAGES + TREE_STAGES; // 3
+    localparam int DLY_FP   = 1 + MFIU_STAGES + DIST_STAGES + MUL_STAGES + TREE_STAGES; // 7:first_pass 從 input 對齊到 acc_en
 
     // =====================================================================
     // S1:輸入打拍(A-reg / B-FIFO 的 latch 功能)
@@ -232,22 +234,82 @@ module pe_row_full
     end
     wire [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] addr_aligned = addr_dly[DLY_ADDR-1];
 
+    // ── first_pass 從 input 延 DLY_FP 拍,對齊到 buffer 寫入(= acc_en/tree_out_vld 時點)──
+    logic fp_dly [DLY_FP];
+    integer df;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (df = 0; df < DLY_FP; df = df + 1) fp_dly[df] <= 1'b0;
+        end else if (en) begin
+            fp_dly[0] <= first_pass;
+            for (df = 1; df < DLY_FP; df = df + 1) fp_dly[df] <= fp_dly[df-1];
+        end
+    end
+    wire fp_aligned = fp_dly[DLY_FP-1];
+
     // =====================================================================
-    // S8:Local Buffer scatter-accumulate + C out
+    // S8a:16→4 壓縮(tree 16 個 sub-tree → 最多 4 筆 banked write request)
+    // =====================================================================
+    //   v1:依序收前 4 個 valid(Dense 只有 1 個 → trivially 對)
+    //   假設:同拍 ≤4 個 valid 且落不同 bank;TrIP >4 / 同 bank 序列化 → TODO
+    logic                    ts_v    [N_MUL_ROW];
+    logic signed [ACC_W-1:0] ts_sum  [N_MUL_ROW];
+    logic [LOCAL_BUF_AW-1:0] ts_addr [N_MUL_ROW];
+    genvar gt;
+    generate
+        for (gt = 0; gt < N_MUL_ROW; gt = gt + 1) begin : g_un_tree
+            assign ts_v[gt]    = tree_valid_pos[gt];
+            assign ts_sum[gt]  = tree_sums[gt];
+            assign ts_addr[gt] = addr_aligned[gt];
+        end
+    endgenerate
+
+    logic                    wr_v_u    [N_BANK_LBUF];
+    logic signed [ACC_W-1:0] wr_sum_u  [N_BANK_LBUF];
+    logic [LOCAL_BUF_AW-1:0] wr_addr_u [N_BANK_LBUF];
+    integer ci, lane;
+    always_comb begin
+        for (ci = 0; ci < N_BANK_LBUF; ci = ci + 1) begin
+            wr_v_u[ci] = 1'b0; wr_sum_u[ci] = '0; wr_addr_u[ci] = '0;
+        end
+        lane = 0;
+        for (ci = 0; ci < N_MUL_ROW; ci = ci + 1) begin
+            if (ts_v[ci] && (lane < N_BANK_LBUF)) begin
+                wr_v_u[lane]    = 1'b1;
+                wr_sum_u[lane]  = ts_sum[ci];
+                wr_addr_u[lane] = ts_addr[ci];
+                lane = lane + 1;
+            end
+        end
+    end
+
+    logic        [N_BANK_LBUF-1:0]                   wr_valid;
+    logic signed [N_BANK_LBUF-1:0][ACC_W-1:0]        wr_sum;
+    logic        [N_BANK_LBUF-1:0][LOCAL_BUF_AW-1:0] wr_addr;
+    generate
+        for (gt = 0; gt < N_BANK_LBUF; gt = gt + 1) begin : g_pack
+            assign wr_valid[gt] = wr_v_u[gt];
+            assign wr_sum[gt]   = wr_sum_u[gt];
+            assign wr_addr[gt]  = wr_addr_u[gt];
+        end
+    endgenerate
+
+    // =====================================================================
+    // S8b:Local Buffer(4-bank banked accumulator)+ C out
     // =====================================================================
     local_buffer_row u_buf (
-        .clk           (clk),
-        .rst_n         (rst_n),
-        .en            (en),
-        .subtree_sums  (tree_sums),
-        .subtree_valid (tree_valid_pos),
-        .out_addr      (addr_aligned),
-        .clear         (buf_clear),
-        .acc_en        (tree_out_vld),
-        .dump_en       (dump_en),
-        .dump_addr     (dump_addr),
-        .c_valid       (c_valid),
-        .c_out         (c_out)
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .en         (en),
+        .wr_valid   (wr_valid),
+        .wr_sum     (wr_sum),
+        .wr_addr    (wr_addr),
+        .first_pass (fp_aligned),
+        .acc_en     (tree_out_vld),
+        .dump_en    (dump_en),
+        .dump_addr  (dump_addr),
+        .c_valid    (c_valid),
+        .c_out      (c_out)
     );
 
     // =====================================================================

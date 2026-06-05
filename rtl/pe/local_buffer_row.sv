@@ -219,6 +219,9 @@ module local_buffer_row
 
     // ── 設計假設檢查(合成略過)──
     // synthesis translate_off
+    // 此 block 為 sim-only assertion;rst_n 在此僅作同步條件 gate(非真 reset),
+    // 與其他 flop 的 async rst_n 並用會觸發 verilator SYNCASYNCNET,故局部關閉。
+    /* verilator lint_off SYNCASYNCNET */
     always @(posedge clk) if (rst_n && en && acc_en) begin
         for (int ai = 0; ai < NB; ai = ai + 1)
             for (int aj = ai + 1; aj < NB; aj = aj + 1)
@@ -228,6 +231,7 @@ module local_buffer_row
         if (dump_en)
             $display("[ASSERT-FAIL] %0t: dump_en 不可與 acc_en 同拍", $time);
     end
+    /* verilator lint_on SYNCASYNCNET */
     // synthesis translate_on
 
 endmodule

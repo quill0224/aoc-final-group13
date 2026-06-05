@@ -145,6 +145,7 @@ tb_pe_row_full: $(PKG) \
                 $(RTL_DIR)/mfiu/mfiu_row.sv \
                 $(RTL_DIR)/dist/dist_net_row.sv \
                 $(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
+                $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
                 $(RTL_DIR)/pe/local_buffer_row.sv \
                 $(RTL_DIR)/pe/pe_row_full.sv \
                 $(TB_DIR)/tb_pe_row_full.sv
@@ -155,6 +156,7 @@ tb_pe_row_full: $(PKG) \
 		$(RTL_DIR)/mfiu/mfiu_row.sv \
 		$(RTL_DIR)/dist/dist_net_row.sv \
 		$(RTL_DIR)/dist/merge_tree_radix16_flexagon.sv \
+		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
 		$(RTL_DIR)/pe/local_buffer_row.sv \
 		$(RTL_DIR)/pe/pe_row_full.sv \
 		$(TB_DIR)/tb_pe_row_full.sv
