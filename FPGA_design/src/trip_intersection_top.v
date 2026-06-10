@@ -57,7 +57,11 @@ module trip_intersection_top #(
     output wire [LANES*COL_IDX_W-1:0]   b_col_sel_o,
     output wire [LANES*K_IDX_W-1:0]     k_sel_o,
     output wire [CNT_W-1:0]             match_count_o,
-    output wire                          overflow_o
+    output wire                          overflow_o,
+
+    // Captured fixed-slot values, valid when done_o = 1.
+    output wire [NUM_ROWS*K_BITS*DATA_WIDTH-1:0] a_values_o,
+    output wire [NUM_COLS*K_BITS*DATA_WIDTH-1:0] b_values_o
 );
 
     // ── FSM ──────────────────────────────────────────────────────────────────
@@ -71,14 +75,18 @@ module trip_intersection_top #(
     // ── Buffer read-side signals ──────────────────────────────────────────────
     reg  [ADDR_W_A-1:0]           rd_addr_a;
     wire [K_BITS-1:0]             buf_a_mask;
-    // (rd_id_o, rd_values_o, k_value_o unused in this version)
+    wire [K_BITS*DATA_WIDTH-1:0]  buf_a_values;
+    // (rd_id_o, k_value_o unused in this version)
 
     reg  [ADDR_W_B-1:0]           rd_addr_b;
     wire [K_BITS-1:0]             buf_b_mask;
+    wire [K_BITS*DATA_WIDTH-1:0]  buf_b_values;
 
     // Captured mask registers fed to MFIU
     reg  [K_BITS-1:0]             a_mask_reg [0:NUM_ROWS-1];
     reg  [K_BITS-1:0]             b_mask_reg [0:NUM_COLS-1];
+    reg  [K_BITS*DATA_WIDTH-1:0]  a_value_reg [0:NUM_ROWS-1];
+    reg  [K_BITS*DATA_WIDTH-1:0]  b_value_reg [0:NUM_COLS-1];
 
     // Packed mask buses for MFIU: fiber r at [r*K_BITS +: K_BITS]
     wire [NUM_ROWS*K_BITS-1:0]    a_masks_mfiu;
@@ -104,7 +112,7 @@ module trip_intersection_top #(
         .rd_addr_i   (rd_addr_a),
         .rd_id_o     (),
         .rd_mask_o   (buf_a_mask),
-        .rd_values_o (),
+        .rd_values_o (buf_a_values),
         .k_sel_i     ({K_IDX_W{1'b0}}),
         .k_value_o   ()
     );
@@ -126,19 +134,25 @@ module trip_intersection_top #(
         .rd_addr_i   (rd_addr_b),
         .rd_id_o     (),
         .rd_mask_o   (buf_b_mask),
-        .rd_values_o (),
+        .rd_values_o (buf_b_values),
         .k_sel_i     ({K_IDX_W{1'b0}}),
         .k_value_o   ()
     );
 
     // ── Mask assembly for MFIU ────────────────────────────────────────────────
-    genvar ga, gb;
+    genvar ga, gb, gva, gvb;
     generate
         for (ga = 0; ga < NUM_ROWS; ga = ga + 1) begin : gen_a
             assign a_masks_mfiu[ga*K_BITS +: K_BITS] = a_mask_reg[ga];
         end
         for (gb = 0; gb < NUM_COLS; gb = gb + 1) begin : gen_b
             assign b_masks_mfiu[gb*K_BITS +: K_BITS] = b_mask_reg[gb];
+        end
+        for (gva = 0; gva < NUM_ROWS; gva = gva + 1) begin : gen_a_values
+            assign a_values_o[gva*K_BITS*DATA_WIDTH +: K_BITS*DATA_WIDTH] = a_value_reg[gva];
+        end
+        for (gvb = 0; gvb < NUM_COLS; gvb = gvb + 1) begin : gen_b_values
+            assign b_values_o[gvb*K_BITS*DATA_WIDTH +: K_BITS*DATA_WIDTH] = b_value_reg[gvb];
         end
     endgenerate
 
@@ -171,6 +185,8 @@ module trip_intersection_top #(
             rd_addr_b <= {ADDR_W_B{1'b0}};
             for (ri = 0; ri < NUM_ROWS; ri = ri + 1) a_mask_reg[ri] <= {K_BITS{1'b0}};
             for (ri = 0; ri < NUM_COLS; ri = ri + 1) b_mask_reg[ri] <= {K_BITS{1'b0}};
+            for (ri = 0; ri < NUM_ROWS; ri = ri + 1) a_value_reg[ri] <= {(K_BITS*DATA_WIDTH){1'b0}};
+            for (ri = 0; ri < NUM_COLS; ri = ri + 1) b_value_reg[ri] <= {(K_BITS*DATA_WIDTH){1'b0}};
         end else begin
             done_o <= 1'b0;  // default: pulse is low
 
@@ -195,10 +211,16 @@ module trip_intersection_top #(
                 // then prefetch the fiber after the one already in flight.
                 S_READ: begin
                     for (ri = 0; ri < NUM_ROWS; ri = ri + 1) begin
-                        if (fiber_cnt == ri[FC_W-1:0]) a_mask_reg[ri] <= buf_a_mask;
+                        if (fiber_cnt == ri[FC_W-1:0]) begin
+                            a_mask_reg[ri]  <= buf_a_mask;
+                            a_value_reg[ri] <= buf_a_values;
+                        end
                     end
                     for (ri = 0; ri < NUM_COLS; ri = ri + 1) begin
-                        if (fiber_cnt == ri[FC_W-1:0]) b_mask_reg[ri] <= buf_b_mask;
+                        if (fiber_cnt == ri[FC_W-1:0]) begin
+                            b_mask_reg[ri]  <= buf_b_mask;
+                            b_value_reg[ri] <= buf_b_values;
+                        end
                     end
 
                     fiber_cnt <= fiber_cnt + 1'b1;
