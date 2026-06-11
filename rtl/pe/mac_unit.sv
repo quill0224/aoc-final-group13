@@ -1,23 +1,34 @@
 // =============================================================================
-// mac_unit.sv — INT8 × INT8 → INT16 multiplier (registered output)
+// mac_unit.sv — Signed INT8 × INT8 registered multiplier for PE row
 // =============================================================================
-// Owner: 黃妍心
-// 用在: pe_row.sv 內,16 個並排
+// 功能:
+//   計算 signed INT8 運算元 a、b 的乘積,結果暫存於 signed INT16 product。
+//   本模組只做 multiplication,不含 accumulation:product 為單一 A/B pair
+//   的 partial product。
 //
-// === 重要架構決定 (對齊 ISCA 2024 paper Fig 6) ===
-// mac_unit 只做「乘法」,不做累加。
-// 累加 (acc) 與化簡 (reduction tree) 在 pe_row 內處理:
-//   16 個 mul → merge-reduction tree (radix-16) → row-level accumulator
-// 這跟 paper Fig 6 一致;之前版本把 acc 放在 mac_unit 是錯的,
-// 那種設計 (per-mul acc) 在 TrIP 模式下無法支援動態 (a_row, b_col) 重新映射。
+// 資料路徑位置:
+//   上游:operand dispatch / distribution stage —— 送入配對完成的 A/B
+//        運算元;en 由上層 valid pipeline 產生,表示本拍輸入有效。
+//   本級:PE row 乘法 stage,16 顆並排,同拍產生 16 個 partial product。
+//   下游:merge-reduction tree 做分組加總;local buffer 做後續累加與暫存;
+//        output valid 的最終對齊由上層 pipeline 管理。
 //
-// Pipeline: 1 cycle latency
-//   product 在下個 cycle 出現在輸出。500 MHz @ ADFP 對 INT8×INT8 輕鬆。
+// 介面:
+//   clk      : 時脈,上升緣觸發
+//   rst_n    : 非同步 reset,active-low;reset 時 product 清 0
+//   en       : output register enable;en=1 寫入 a*b,en=0 保持原值
+//   a, b     : signed [7:0],二補數 INT8
+//   product  : signed [15:0],registered partial product
 //
-// 不會處理的事:
-//   - 累加 (在 pe_row 的 acc register)
-//   - dataflow mode 切換 (那是 dataflow_ctrl 的事)
-//   - 輸出 valid / 對齊 (由 pe_row 的 stage register 處理)
+// 時序:
+//   latency    : 1 cycle ; product 對應 input_valid 延遲 1 拍
+//   throughput : en 恆為 1 時每拍更新一筆乘積;en=0 時 product 保持上一筆,
+//                下游須依 valid pipe 判斷該值是否有效
+//
+// 數值範圍:
+//   signed INT8 範圍 [-128, 127];INT8 × INT8 完整乘積範圍
+//   [-16256, +16384],可完整表示於 signed INT16,
+//   故不需截斷、飽和或溢位處理。
 // =============================================================================
 
 module mac_unit (

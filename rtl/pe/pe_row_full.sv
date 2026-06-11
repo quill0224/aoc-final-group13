@@ -1,39 +1,63 @@
 // =============================================================================
-// pe_row_full.sv — 完整 PE Row(paper Fig 6 全包版,8-stage 單一物理 pipeline)
+// pe_row_full.sv — 完整 PE Row(8-stage pipeline)
 // =============================================================================
-// === 模組 OWNER: 黃妍心 ===
+// 功能:
+//   單一條 PE row 的完整資料路徑:每拍接收 16 對 A/B 運算元與 bitmask,
+//   依序經 MFIU(交集 metadata)、distribution(運算元路由)、16 顆乘法器、
+//   merge-reduction tree(分段加總),最後累加至 local buffer;column 累加
+//   完成後由 dump 介面讀出 C 值。另含 B 縱向 forwarding(b_vec_in 延 1 拍
+//   轉發給下一條 row)。所有 dataflow 模式共用同一條物理 pipeline。
 //
-// 用途:
-//   paper Fig 6 完整 PE row,包進所有 per-row 硬體:
-//     S1     輸入打拍 (A-reg / B-FIFO 的 latch 功能)
-//     S2-S4  MFIU (mfiu_row,楊承豫 multi-fiber body)→ effectual_idx / cut_after / out_addr
-//     S5     A/B Distribution network (dist_net_row,Benes,NoC)
-//     S6     Mul × 16 (mac_unit)
-//     S7     Merge-Reduction Tree (merge_tree_radix16_flexagon)
-//     S8     Local Buffer (local_buffer_row) scatter-accumulate + C out
-//   + B 跨 row vertical forwarding (Fig 7 step ④)
+// Pipeline(PE_ROW_STAGES = 8):
+//   S1     輸入打拍(A reg / B FIFO latch)
+//   S2-S4  MFIU → effectual_idx / cut_after / out_addr(MFIU_STAGES = 3)
+//   S5     A/B distribution(依 effectual_idx 路由運算元)
+//   S6     Mul × 16(mac_unit)
+//   S7     merge-reduction tree(依 cut_after 分段加總)
+//   S8     16→4 壓縮 + local buffer 寫入(RMW 完成另需 2 拍)
 //
-//   詳見 docs/pe-row-full-architecture.md
+// 控制訊號對齊(本模組的核心職責):
+//   MFIU 的 metadata 於 S4 產出、由不同 stage 消費,模組內以 delay line
+//   對齊至各消費點:
+//     effectual_idx → S5 直接使用
+//     cut_after     → S7,延 DIST+MUL 拍
+//     out_addr      → S8,延 DIST+MUL+TREE 拍
+//     first_pass    → S8,自輸入端延 1+MFIU+DIST+MUL+TREE 拍對齊寫入時點
+//   A/B 值於 S1 latch 後延 MFIU_STAGES 拍,與 metadata 同拍進入 S5。
+//   各 stage 數定義於 trapezoid_pkg;上游模組 latency 改變時調整該處即可,
+//   本模組結構不變。
 //
-// === 單一物理 pipeline(Δ5 Option A)===
-//   Dense IP 也走 MFIU + dist(pass-through),latency = PE_ROW_STAGES = 8。
-//   組員 MFIU / dist 真實 body 一到位,TrIP 直接亮,本檔不用改。
+// 介面(控制):
+//   dataflow_sel [2]    dataflow 模式選擇
+//   in_valid            此拍 a/b 輸入有效
+//   cur_n        [9]    當前 output column(Dense IP:C 寫往 buffer[cur_n])
+//   first_pass          該 column 第一段 K 時與 in_valid 同拍拉 1(buffer
+//                       覆蓋寫入,等效清零);後續 K-tile 為 0(累加)
+//   dump_en / dump_addr 讀出某 column 的 C 值。須於該 column 最後一筆
+//                       in_valid 之後至少 PE_ROW_STAGES+1 拍才可發;
+//                       c_valid / c_out 於 dump_en 後第 2 拍有效
 //
-// === 控制訊號對齊(本檔的核心難點)===
-//   MFIU metadata 在 S4 算出,但被不同 stage 消費,所以要 delay 對齊資料路徑:
-//     - effectual_idx → S5 dist 立即用(對齊)
-//     - cut_after     → S7 tree 用,延 DIST+MUL = 2 拍
-//     - out_addr      → S8 buffer 用,延 DIST+MUL+TREE = 3 拍
-//   A/B 值在 S1 latch 後,延 MFIU_STAGES 拍對齊 MFIU 輸出,再進 dist。
+// 介面(資料):
+//   a_vec / a_bitmask         [16] A 運算元與 bitmask(row-stationary)
+//   b_vec_in / b_bitmask_in   [16] B 運算元與 bitmask(自上一條 row)
+//   b_vec_out / b_bitmask_out / b_valid_out  B 縱向轉發(延 1 拍)
+//   c_valid / c_out           dump 輸出(signed INT32)
 //
-// === 對外控制(由 dataflow_ctrl 提供;Phase 1 由 tb 驅動)===
-//   - cur_n      : 當前 output column(Dense IP:單一 C 寫 buffer[cur_n])
-//   - in_valid   : a/b 此 cycle 有效
-//   - first_pass : 該 column 的「第一段 K」→ buffer 覆蓋(等效清零);後續 K → 累加
-//                  (取代舊 buf_clear;會在 pe_row 內延遲對齊到 buffer 寫入時點)
-//   - dump_en/dump_addr : 某 column 的 K-tile 全累加完,讀出寫回
-//     ⚠️ dump_en 必須等該 column 最後一拍 in_valid 之後 (PE_ROW_STAGES+1) 拍才拉
-//        (dataflow_ctrl 依 PE_ROW_STAGES 算 timing)
+// 系統位置:
+//   上游:GLB / memory 載入路徑供應 A/B tile 與 bitmask;控制訊號
+//        (in_valid / cur_n / first_pass / dump_*)由 dataflow 控制器
+//        產生(現階段由 testbench 驅動)。
+//   下游:c_out → GLB 寫回;b_vec_out → 下一條 PE row(B 縱向鏈)。
+//
+// S8a 壓縮(tree 16 lane → 4 筆 banked write):
+//   依序收集 tree 輸出的前 4 個 valid 段,連同對應 out_addr 送入 buffer。
+//   假設同一拍 ≤4 段且落在互異 bank(Dense IP 恆為 1 段,自然滿足);
+//   超出的段會被捨棄,須由上游 dataflow 保證不發生。
+//
+// 現況:
+//   MFIU(mfiu_row)與 distribution(dist_net_row)為介面相容的 Dense
+//   pass-through 實作;接入真實 sparse 版本時更新 trapezoid_pkg 的對應
+//   *_STAGES 參數即可重新對齊。架構細節見 docs/pe-row-full-architecture.md。
 // =============================================================================
 
 module pe_row_full

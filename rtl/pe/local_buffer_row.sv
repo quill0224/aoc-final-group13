@@ -1,42 +1,50 @@
 // =============================================================================
-// local_buffer_row.sv — Per-PE-row 輸出累加 buffer(4-bank SRAM-macro 版)
+// local_buffer_row.sv — per-PE-row 輸出累加 buffer(4-bank,SRAM-based)
 // =============================================================================
-// Owner: 黃妍心 | Paper: Trapezoid ISCA'24 §III.B banked local buffer
+// 功能:
+//   儲存一條 PE row(固定 m)所有 output column n 的 C 部分和,容量
+//   512 column × INT32(4 bank × 128 × 32-bit)。每拍接受最多 4 筆
+//   write request(sum + column 位址),依位址路由至對應 bank:
+//     first_pass=1 → 覆蓋寫入(該 column 的第一段 K,等效清零,不發讀)
+//     first_pass=0 → 累加(read-modify-write:讀舊值 + sum 寫回)
+//   另提供 dump 介面讀出單一 column 的最終值(寫回 GLB 用)。
 //
-// === 關鍵設計 ===
+// 位址映射:
+//   column 位址 addr[8:0] → bank = addr[1:0],bank 內 offset = addr[8:2]。
+//   同一拍多筆 request 落在互異 bank 時並行寫入。
 //
-// [用途] 每條 PE row 一個。存「這一列 m 的所有 output column n 的部分和」,
-//        跨 K-tile pass 累加;整列算完後 dump 寫回 GLB。
+// 介面:
+//   clk / rst_n / en         時脈;非同步 reset(active-low);pipeline 致能
+//   wr_valid   [4]      in   各 lane 此拍是否有 request
+//   wr_sum     [4][32]  in   各 lane 的部分和(signed)
+//   wr_addr    [4][9]   in   各 lane 的 column 位址
+//   first_pass          in   1 = 覆蓋寫入;0 = RMW 累加
+//   acc_en              in   此拍 wr_* 有效(與上游資料 valid 同拍)
+//   dump_en / dump_addr in   讀出請求 / column 位址
+//   c_valid             out  dump 結果有效(dump_en 後第 2 拍)
+//   c_out      [32]     out  dump 結果(signed)
 //
-// [為何要存全部 column] dataflow = A stationary + B streaming + tree 對 K reduce:
-//        每拍 B 流進不同 column → 算不同 C[m][n] 的部分和;掃完一輪所有 column
-//        後才換下一段 K、再掃一遍、累加回同一個 column。
-//        → 必須同時存住所有 column 的部分和 → 深度 = 512 (= max N)。
+// 時序:
+//   累加 RMW = 2 拍 pipeline:T 拍發讀,T+1 拍「舊值 + sum」寫回;
+//   每拍可接受新 request(fully pipelined)。
+//   連續兩拍寫同一 column 時,SRAM 讀值尚未更新(讀延遲 1 拍)→
+//   以 write-forward bypass 改用前一拍的寫回值,結果仍正確。
+//   dump:dump_en 於 T 拍 → c_valid / c_out 於 T+2 拍有效。
 //
-// [存取型態:穿插] 同一個 column 隔「一整輪 B」(~N 拍)才再被寫一次,遠大於
-//        SRAM 讀寫延遲 → 不會發生 same-address RMW hazard → RMW = 乾淨 2 拍 pipeline。
-//        ★隱含假設:上游不會「連續兩拍寫同一個 column」(穿插 dataflow 自然成立)。
+// 假設與限制:
+//   - 同一拍的有效 request 須落在互異 bank(wr_addr[1:0] 互異);
+//     同 bank 衝突不序列化(模擬期 assertion 檢查)。上游 pe_row 負責
+//     把 tree 的 16-lane 輸出壓縮為符合此條件的 ≤4 筆。
+//   - dump_en 不可與 acc_en 同拍(共用讀埠)。
+//   - ACC_W = 32,對齊 bank(128×32 SRAM)資料寬度。
 //
-// [介面] 吃「最多 4 筆 banked write request」(不是 16-lane tree 原始輸出)。
-//        上游 pe_row 負責把 16-lane tree 壓成 ≤4 筆;此處只做 4-bank RMW + dump。
-//
-// [Banking] N_BANK_LBUF=4 banks,每 bank 128 深 × 32-bit(= sram_128x32_1r1w)。
-//        column c → bank = c[1:0],bank 內 offset = c[高位]。
-//
-// [初始化:first_pass 取代 bulk clear] SRAM 無法一拍清零:
-//        first_pass=1(第一段 K)→ 直接「寫入」sum(覆蓋舊值=等效清零,不讀)
-//        first_pass=0(後續 K) → RMW「累加」(讀舊 + 加 + 寫回)
-//
-// [RMW 2 拍 pipeline] cycle t  : 發 read 位址(該 bank 的 offset)
-//                     cycle t+1: 舊值回來 → 加 sum(或覆蓋)→ 寫回
-//
-// [dump] dump_en/dump_addr:讀某 column 最終值 → c_out(2 拍後 c_valid)。
-//        ★限制:dump_en 不可與 acc_en 同拍(共用 read port)。
-//
-// [v1 假設 / future work] 同一拍 ≤4 筆且落在「不同」bank(addr[1:0] 互異);
-//        同 bank 衝突的序列化留待 future work(下方有 assertion 抓違規)。
-//
-// 註:此版假設 ACC_W = 32(對齊 128×32 macro 寬度)。
+// 資料路徑位置:
+//   上游:pe_row 的 16→4 壓縮層送入 ≤4 筆 banked write request(wr_*),
+//        acc_en 與 tree 輸出 valid 同拍;first_pass / dump_* 由 dataflow
+//        控制邏輯(經 pe_row 延遲對齊)給入。
+//   本級:pe_row_full 的 S8(輸出累加)。
+//   下游:c_out → GLB 寫回路徑。
+//   bank 為 sram_128x32_1r1w wrapper,合成時定義 USE_SRAM_MACRO 接真實 macro。
 // =============================================================================
 
 module local_buffer_row

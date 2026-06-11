@@ -1,23 +1,46 @@
 // =============================================================================
-// merge_tree_radix16_flexagon.sv — radix-16 reduction tree with sub-tree slicing
+// merge_tree_radix16_flexagon.sv — radix-16 reduction tree(sub-tree slicing)
 // =============================================================================
-// Owner: 黃妍心
-// Paper: Trapezoid (ISCA'24) §III.B + Flexagon (ASPLOS'23) Fig 4 MRN
+// 功能:
+//   將 16 個 partial product 依 cut_after 劃分為若干「連續區段」(sub-tree),
+//   並於單一拍內並行算出每一段的總和。cut_after[i]=1 表示 lane i 與 i+1
+//   之間為段邊界;cut_after=0 時整列為一段(16→1 全加總),最多可切成
+//   16 段(每 lane 自成一段)。partial 先符號延伸至 ACC_W 再相加,
+//   中間結果不溢位。
 //
-// 把 16 個 partial products 化簡。依 cut_after 把 tree 切成多棵 contiguous
-// sub-tree,每棵產出一個 C 元素(TrIP MS×MS);cut_after=0 時退化成單一 16→1
-// 加總(Dense IP)。
+// 輸出語意:
+//   subtree_valid[p]=1 表示位置 p 是某一段的最後一個 lane;
+//   subtree_sums[p] = 該段所有 partial 的總和。其餘位置 valid=0、sums=0。
+//   各段段尾位置互異,故每個輸出位置至多承載一段結果。
 //
 // 介面:
-//   cut_after[14:0]   來自 MFIU,標 sub-tree 邊界(cut_after[i]=1 → 切在 i/i+1 間)
-//   subtree_sums[16]  每個位置的 sub-tree 加總(INT32)
-//   subtree_valid[16] 該位置是某 sub-tree 終點 → 1
+//   clk / rst_n / en           時脈;非同步 reset(active-low);en=0 輸出保持
+//   partials  [16][PROD_W] in  16 個 partial product(signed)
+//   cut_after [14:0]       in  段邊界,與 partials 同拍對齊
+//   subtree_sums  [16][ACC_W] out  各段總和(signed,registered)
+//   subtree_valid [16]        out  段尾位置標記(registered)
 //
-// 實作:binary tree,每 node 帶 7 個 state(val_l/r, mask_l/r, pos_l/r,
-//   is_single),boundary 8 個 case 決定「合併 / pass / dump」。各 stage 的
-//   dump 直接寫 subtree_sums(multi-tap,對齊 paper「each subtree writes
-//   directly to local buffer」)。組合邏輯 + 1 個 output register(1 cycle)。
-//   不含 comparator / merge mode(TrGT/TrGS 不做);不含 FAN(radix-16 不需要)。
+// 時序:
+//   全組合計算 + 輸出暫存器:latency = 1 cycle,throughput = 每拍一組
+//   (cut_after 可逐拍不同,各拍互不影響)。
+//
+// 結構:
+//   1) leaf_mask:對 cut_after 做 prefix-sum,為每個 lane 標記所屬段編號。
+//   2) 4 層 binary 合併(8→4→2→1 node):每 node 維護左右兩端的 running
+//      state(val / mask / pos / is_single),依「左右段編號相同與否 ×
+//      兩側是否已封閉」共 8 種 case 決定合併、傳遞或 dump。
+//   3) 一段在樹中被完全包住時,即於該層 dump:總和直接寫到段尾位置
+//      (multi-tap 輸出);root 之後 final flush 輸出最左、最右兩段。
+//
+// 範圍:
+//   僅做 reduce(分段加總)。TrGT / TrGS 的 comparator / merge 模式
+//   不在本模組。
+//
+// 資料路徑位置:
+//   上游:mul 陣列送入 16 個 partial product;cut_after 來自 MFIU,
+//        由上層延遲對齊至與 partials 同拍。
+//   本級:pe_row_full 的 S7(分段加總)。
+//   下游:16→4 壓縮層 → local_buffer_row(分段結果按段尾位置交付)。
 // =============================================================================
 
 module merge_tree_radix16_flexagon
