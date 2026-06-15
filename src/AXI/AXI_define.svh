@@ -1,5 +1,5 @@
-`ifndef AXI_DEFINE
-`define AXI_DEFINE
+`ifndef AXI_define
+`define AXI_define
 
 `define AXI_ID_BITS 4
 `define AXI_IDS_BITS 8

@@ -1,8 +1,8 @@
-`ifndef ASIC_DEFINE
-`define ASIC_DEFINE
+`ifndef ASIC
+`define ASIC
 
 // ============================================================================
-// ASIC_define.svh — Trapezoid Sparse CNN Accelerator
+// ASIC.svh — Trapezoid Sparse CNN Accelerator
 //
 // Worst-case target: VGG8 conv3-512
 //   IP=512, OP=512, H=W=28, R=S=3
@@ -71,8 +71,8 @@
 `define PE_NUMS                 256     // 16 x 16
 `define XID_BITS                4       // 2^4 = 16
 `define YID_BITS                4       // 2^4 = 16
-`define DEFAULT_XID             ((1 << `XID_BITS) - 1)  // 4'hF
-`define DEFAULT_YID             ((1 << `YID_BITS) - 1)  // 4'hF
+`define DEFAULT_XID             4'hF
+`define DEFAULT_YID             4'hF
 
 // Filter spatial dimensions
 `define FILT_R                  3
@@ -208,4 +208,4 @@
 // [R] Status
 `define ASIC_DONE_OFFSET                (`ADDR_MMIO + 32'h3C)
 
-`endif // ASIC_DEFINE
+`endif // ASIC

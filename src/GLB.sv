@@ -1,5 +1,5 @@
 `include "AXI/AXI_define.svh"
-`include "ASIC_define.svh"
+`include "ASIC.svh"
 
 // =============================================================================
 // GLB.sv — Global Buffer (16 KB)
@@ -9,6 +9,7 @@
 
 module GLB (
     input  logic                      clk,
+    input  logic                      rst,    // Active High Reset
     input  logic                      EN,     // Active High (來自 Controller 的致能)
     input  logic                      WEB,    // Active Low  (0=Write, 1=Read)
     input  logic [3:0]                WSTRB,  // Active High (4-bit Byte Enable, 1=Write)
@@ -100,7 +101,10 @@ module GLB (
     logic       read_half_idx_q;
 
     always_ff @(posedge clk) begin
-        if (EN && WEB) begin // 讀取模式
+        if (rst) begin
+            read_bank_idx_q <= 4'd0;
+            read_half_idx_q <= 1'b0;
+        end else if (EN && WEB) begin
             read_bank_idx_q <= A[13:10];
             read_half_idx_q <= A[2];
         end
