@@ -10,6 +10,7 @@ module trip_reduction_tree #(
     parameter DATA_WIDTH    = 16,
     parameter PRODUCT_WIDTH = DATA_WIDTH * 2,
     parameter ACC_WIDTH     = PRODUCT_WIDTH + $clog2(LANES + 1),
+    parameter SIGNED_DATA   = 0,
     // derived
     parameter ROW_IDX_W     = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter COL_IDX_W     = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1
@@ -44,7 +45,9 @@ module trip_reduction_tree #(
 
                     if (lane_valid_i[l] && (lane_row == r[ROW_IDX_W-1:0]) &&
                         (lane_col == c[COL_IDX_W-1:0])) begin
-                        sum = sum + {{(ACC_WIDTH-PRODUCT_WIDTH){1'b0}}, lane_product};
+                        sum = sum + (SIGNED_DATA ?
+                            {{(ACC_WIDTH-PRODUCT_WIDTH){lane_product[PRODUCT_WIDTH-1]}}, lane_product} :
+                            {{(ACC_WIDTH-PRODUCT_WIDTH){1'b0}}, lane_product});
                     end
                 end
 

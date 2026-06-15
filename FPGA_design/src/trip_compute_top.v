@@ -12,6 +12,7 @@ module trip_compute_top #(
     parameter ID_WIDTH      = 4,
     parameter PRODUCT_WIDTH = DATA_WIDTH * 2,
     parameter ACC_WIDTH     = PRODUCT_WIDTH + $clog2(LANES + 1),
+    parameter SIGNED_DATA   = 0,
     // derived
     parameter ADDR_W_A      = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter ADDR_W_B      = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,
@@ -116,7 +117,8 @@ module trip_compute_top #(
         for (gl = 0; gl < LANES; gl = gl + 1) begin : gen_lanes
             pe_lane #(
                 .DATA_WIDTH    (DATA_WIDTH),
-                .PRODUCT_WIDTH (PRODUCT_WIDTH)
+                .PRODUCT_WIDTH (PRODUCT_WIDTH),
+                .SIGNED_DATA   (SIGNED_DATA)
             ) u_lane (
                 .valid_i   (dist_valid[gl]),
                 .a_i       (dist_a[gl*DATA_WIDTH +: DATA_WIDTH]),
@@ -133,7 +135,8 @@ module trip_compute_top #(
         .LANES         (LANES),
         .DATA_WIDTH    (DATA_WIDTH),
         .PRODUCT_WIDTH (PRODUCT_WIDTH),
-        .ACC_WIDTH     (ACC_WIDTH)
+        .ACC_WIDTH     (ACC_WIDTH),
+        .SIGNED_DATA   (SIGNED_DATA)
     ) u_reduce (
         .lane_valid_i   (product_valid),
         .a_row_sel_i    (a_row_sel),

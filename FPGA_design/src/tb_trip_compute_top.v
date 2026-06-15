@@ -210,7 +210,10 @@ module tb_trip_compute_top;
 
         $display("\n------------------------------------------");
         $display("Result: %0d passed, %0d failed", pass_cnt, fail_cnt);
-        $display(fail_cnt == 0 ? "ALL PASS" : "SOME FAILURES");
+        if (fail_cnt == 0)
+            $display("ALL PASS");
+        else
+            $display("SOME FAILURES");
         $display("------------------------------------------");
         $finish;
     end

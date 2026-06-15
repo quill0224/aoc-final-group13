@@ -12,7 +12,8 @@ module bitmask_buffer #(
     parameter K_BITS     = 4,          // fiber dimension (nonzero slot count)
     parameter DATA_WIDTH = 16,         // value bit width
     parameter ID_WIDTH   = 4,          // fiber ID bit width
-    parameter ADDR_WIDTH = $clog2(NUM_FIBERS)
+    parameter ADDR_WIDTH = (NUM_FIBERS > 1) ? $clog2(NUM_FIBERS) : 1,
+    parameter K_IDX_W    = (K_BITS > 1) ? $clog2(K_BITS) : 1
 ) (
     input  wire                               clk,
     input  wire                               reset,
@@ -32,7 +33,7 @@ module bitmask_buffer #(
 
     // Convenience: indexed value read
     // Given rd_addr_i and k_sel_i, returns the single value at slot k
-    input  wire [$clog2(K_BITS)-1:0]          k_sel_i,
+    input  wire [K_IDX_W-1:0]                 k_sel_i,
     output wire [DATA_WIDTH-1:0]               k_value_o
 );
 
