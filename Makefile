@@ -25,7 +25,7 @@ RTL_SRCS := $(PKG) \
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_tree tb_tree_sliced tb_tree_flexagon tb_lbuf tb_mfiu_row tb_dist_net tb_pe_row tb_pe_row_full tb_pe_array tb_dist lint clean help
+.PHONY: all tb_mac tb_tree tb_tree_sliced tb_tree_flexagon tb_lbuf tb_mfiu_row tb_dist_net tb_dist_net_trip tb_pe_row tb_pe_row_full tb_pe_array tb_dist lint clean help
 
 all: help
 
@@ -110,6 +110,15 @@ tb_dist_net: $(PKG) $(RTL_DIR)/dist/dist_net_row.sv $(TB_DIR)/tb_dist_net_row.sv
 		$(RTL_DIR)/dist/dist_net_row.sv \
 		$(TB_DIR)/tb_dist_net_row.sv
 	vvp tb_dist_net.vvp
+
+# ── dist_net_row_trip 單元測試 (TrIP multi-fiber 2D gather, iverilog) ──
+tb_dist_net_trip: $(PKG) $(RTL_DIR)/dist/dist_net_row_trip.sv $(TB_DIR)/tb_dist_net_row_trip.sv
+	$(IVERILOG) -g2012 -o tb_dist_net_trip.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/dist_net_row_trip.sv \
+		$(TB_DIR)/tb_dist_net_row_trip.sv
+	vvp tb_dist_net_trip.vvp
 
 # ── pe_row 單元測試 (iverilog) ──
 # 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16 + pe_row
