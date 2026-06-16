@@ -50,11 +50,11 @@ module reduction_tree_radix16
     input  logic                                    rst_n,
     input  logic                                    en,
 
-    // ── 資料輸入 ──
+    // ── Data inputs ──
     input  logic signed [N_MUL_ROW-1:0][PROD_W-1:0] partials,
     input  logic        [N_MUL_ROW-2:0]             cut_after,
 
-    // ── 輸出(registered)──
+    // ── Outputs (registered) ──
     output logic signed [N_MUL_ROW-1:0][ACC_W-1:0]  subtree_sums,
     output logic        [N_MUL_ROW-1:0]             subtree_valid
 );
@@ -64,9 +64,9 @@ module reduction_tree_radix16
     // ============================================================
     //   leaf_mask[i] = sum(cut_after[0..i-1])
     //   leaf_mask[0] = 0
-    //   每 cut_after[i]=1 把後續所有 leaf 的 mask 加 1
+    //   Each cut_after[i]=1 increments the mask of all subsequent leaves by 1
 
-    /* verilator lint_off UNOPTFLAT */   // leaf_mask 是 prefix-sum 鏈,非真組合迴路
+    /* verilator lint_off UNOPTFLAT */   // leaf_mask is a prefix-sum chain, not a true combinational loop
     logic [3:0]              leaf_mask    [N_MUL_ROW];
     /* verilator lint_on UNOPTFLAT */
     logic signed [ACC_W-1:0] partials_ext [N_MUL_ROW];
@@ -79,7 +79,7 @@ module reduction_tree_radix16
         end
     endgenerate
 
-    // leaf_mask 用 carry-chain 計算(combinational running sum)
+    // leaf_mask computed via carry-chain (combinational running sum)
     assign leaf_mask[0] = 4'd0;
     genvar gm;
     generate
@@ -89,10 +89,10 @@ module reduction_tree_radix16
     endgenerate
 
     // ============================================================
-    // Stage 1:8 nodes,每個合併 2 個 leaf(無 dump)
+    // Stage 1: 8 nodes, each merges 2 leaves (no dump)
     // ============================================================
-    //   Case 1: mask 相同 → is_single,val_l = val_r = vl + vr
-    //   Case 2: mask 不同 → not single,val_l = vl, val_r = vr
+    //   Case 1: same mask    → is_single, val_l = val_r = vl + vr
+    //   Case 2: different mask → not single, val_l = vl, val_r = vr
 
     logic signed [ACC_W-1:0] s1_val_l     [8];
     logic signed [ACC_W-1:0] s1_val_r     [8];
@@ -103,7 +103,7 @@ module reduction_tree_radix16
     logic                    s1_is_single [8];
 
     integer s1_i;
-    /* verilator lint_off WIDTHTRUNC */  // pos = 2*i(+1),值 0..15,塞 4-bit 安全
+    /* verilator lint_off WIDTHTRUNC */  // pos = 2*i(+1), range 0..15, fits in 4 bits safely
     always_comb begin
         for (s1_i = 0; s1_i < 8; s1_i = s1_i + 1) begin
             if (leaf_mask[2*s1_i] == leaf_mask[2*s1_i+1]) begin
@@ -130,25 +130,25 @@ module reduction_tree_radix16
     /* verilator lint_on WIDTHTRUNC */
 
     // ============================================================
-    // Combine function 共用邏輯(以「local」方式展開,iverilog 友好)
-    //   8 case:
+    // Combine function shared logic (expanded inline / "local" style, iverilog-friendly)
+    //   8 cases:
     //     Case A (L.mask_r == R.mask_l, boundary merge):
-    //       A1: L 跟 R 都 single → 合成 single
-    //       A2: L single, R not single → L 併入 R's leftmost subtree
-    //       A3: L not single, R single → R 併入 L's rightmost subtree
-    //       A4: 都 not single → boundary subtree fully contained,DUMP
+    //       A1: L and R both single → combine into single
+    //       A2: L single, R not single → L merged into R's leftmost subtree
+    //       A3: L not single, R single → R merged into L's rightmost subtree
+    //       A4: both not single → boundary subtree fully contained, DUMP
     //     Case B (L.mask_r != R.mask_l, boundary):
-    //       B1: 都 single → 兩邊都可能延伸,不 dump
-    //       B2: L single, R not single → R.val_l contained,dump R.val_l
-    //       B3: L not single, R single → L.val_r contained,dump L.val_r
-    //       B4: 都 not single → L.val_r 跟 R.val_l 都 contained,2 個 dump
+    //       B1: both single → both sides may still extend, no dump
+    //       B2: L single, R not single → R.val_l contained, dump R.val_l
+    //       B3: L not single, R single → L.val_r contained, dump L.val_r
+    //       B4: both not single → L.val_r and R.val_l both contained, 2 dumps
     // ============================================================
-    // 為了在 iverilog 跑(沒有 struct 友善 support),用一群信號表達
-    // 每個 combine 產生:
+    // To run on iverilog (no struct-friendly support), each combine is
+    // expressed with a group of signals producing:
     //   new state (7 fields) + up to 2 dumps (each with valid/pos/val)
 
     // ============================================================
-    // Stage 2:4 nodes,每個合併 2 個 s1 node
+    // Stage 2: 4 nodes, each merges 2 s1 nodes
     // ============================================================
     logic signed [ACC_W-1:0] s2_val_l         [4];
     logic signed [ACC_W-1:0] s2_val_r         [4];
@@ -168,7 +168,7 @@ module reduction_tree_radix16
     integer s2_i;
     always_comb begin
         for (s2_i = 0; s2_i < 4; s2_i = s2_i + 1) begin : combine_s2
-            // 預設清空
+            // Default clear
             s2_dmp1_valid[s2_i] = 1'b0;
             s2_dmp1_pos[s2_i]   = 4'd0;
             s2_dmp1_val[s2_i]   = '0;
@@ -179,7 +179,7 @@ module reduction_tree_radix16
             if (s1_mask_r[2*s2_i] == s1_mask_l[2*s2_i+1]) begin
                 // === Case A: boundary merge ===
                 if (s1_is_single[2*s2_i] && s1_is_single[2*s2_i+1]) begin
-                    // A1: 都 single → 整段 single
+                    // A1: both single → whole segment single
                     s2_val_l[s2_i]     = s1_val_l[2*s2_i] + s1_val_l[2*s2_i+1];
                     s2_val_r[s2_i]     = s1_val_l[2*s2_i] + s1_val_l[2*s2_i+1];
                     s2_mask_l[s2_i]    = s1_mask_l[2*s2_i];
@@ -188,7 +188,7 @@ module reduction_tree_radix16
                     s2_pos_r[s2_i]     = s1_pos_r[2*s2_i+1];
                     s2_is_single[s2_i] = 1'b1;
                 end else if (s1_is_single[2*s2_i] && !s1_is_single[2*s2_i+1]) begin
-                    // A2: L single → L 併入 R 的 leftmost
+                    // A2: L single → L merged into R's leftmost
                     s2_val_l[s2_i]     = s1_val_l[2*s2_i] + s1_val_l[2*s2_i+1];
                     s2_val_r[s2_i]     = s1_val_r[2*s2_i+1];
                     s2_mask_l[s2_i]    = s1_mask_l[2*s2_i];
@@ -197,7 +197,7 @@ module reduction_tree_radix16
                     s2_pos_r[s2_i]     = s1_pos_r[2*s2_i+1];
                     s2_is_single[s2_i] = 1'b0;
                 end else if (!s1_is_single[2*s2_i] && s1_is_single[2*s2_i+1]) begin
-                    // A3: R single → R 併入 L 的 rightmost
+                    // A3: R single → R merged into L's rightmost
                     s2_val_l[s2_i]     = s1_val_l[2*s2_i];
                     s2_val_r[s2_i]     = s1_val_r[2*s2_i] + s1_val_r[2*s2_i+1];
                     s2_mask_l[s2_i]    = s1_mask_l[2*s2_i];
@@ -206,7 +206,7 @@ module reduction_tree_radix16
                     s2_pos_r[s2_i]     = s1_pos_r[2*s2_i+1];
                     s2_is_single[s2_i] = 1'b0;
                 end else begin
-                    // A4: 都 not single → boundary subtree DUMP
+                    // A4: both not single → boundary subtree DUMP
                     s2_dmp1_valid[s2_i] = 1'b1;
                     s2_dmp1_pos[s2_i]   = s1_pos_l[2*s2_i+1];
                     s2_dmp1_val[s2_i]   = s1_val_r[2*s2_i] + s1_val_l[2*s2_i+1];
@@ -219,9 +219,9 @@ module reduction_tree_radix16
                     s2_is_single[s2_i]  = 1'b0;
                 end
             end else begin
-                // === Case B: boundary 不同 ===
+                // === Case B: boundary differs ===
                 if (s1_is_single[2*s2_i] && s1_is_single[2*s2_i+1]) begin
-                    // B1: 都 single → 兩邊都可能延伸,不 dump
+                    // B1: both single → both sides may still extend, no dump
                     s2_val_l[s2_i]     = s1_val_l[2*s2_i];
                     s2_val_r[s2_i]     = s1_val_r[2*s2_i+1];
                     s2_mask_l[s2_i]    = s1_mask_l[2*s2_i];
@@ -254,7 +254,7 @@ module reduction_tree_radix16
                     s2_pos_r[s2_i]      = s1_pos_r[2*s2_i+1];
                     s2_is_single[s2_i]  = 1'b0;
                 end else begin
-                    // B4: 都 not single → 2 dumps
+                    // B4: both not single → 2 dumps
                     s2_dmp1_valid[s2_i] = 1'b1;
                     s2_dmp1_pos[s2_i]   = s1_pos_r[2*s2_i];
                     s2_dmp1_val[s2_i]   = s1_val_r[2*s2_i];
@@ -274,7 +274,7 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Stage 3:2 nodes,每個合併 2 個 s2 node(同樣 8-case)
+    // Stage 3: 2 nodes, each merges 2 s2 nodes (same 8-case)
     // ============================================================
     logic signed [ACC_W-1:0] s3_val_l         [2];
     logic signed [ACC_W-1:0] s3_val_r         [2];
@@ -398,7 +398,7 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Stage 4:1 root node,合併 2 個 s3 node(同樣 8-case)
+    // Stage 4: 1 root node, merges 2 s3 nodes (same 8-case)
     // ============================================================
     logic signed [ACC_W-1:0] s4_val_l;
     logic signed [ACC_W-1:0] s4_val_r;
@@ -512,9 +512,9 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Final flush:root 之後,把 root.val_l 跟 root.val_r dump 出去
-    //   - 如果 is_single,val_l == val_r,只 dump 一次
-    //   - 不 single,dump 兩次(位置不同)
+    // Final flush: after root, dump out root.val_l and root.val_r
+    //   - if is_single, val_l == val_r, dump only once
+    //   - if not single, dump twice (different positions)
     // ============================================================
     logic                    final_dmp_l_valid;
     logic [3:0]              final_dmp_l_pos;
@@ -539,9 +539,9 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // 把所有 stage 的 dumps 收進 subtree_sums[16] / subtree_valid[16]
-    //   每個 position 最多會有一個 dump source(因為 sub-tree 結束位置唯一)
-    //   用 priority OR 收集
+    // Collect dumps from all stages into subtree_sums[16] / subtree_valid[16]
+    //   Each position has at most one dump source (sub-tree end position is unique)
+    //   Gathered via priority OR
     // ============================================================
     logic signed [ACC_W-1:0] sums_comb  [N_MUL_ROW];
     logic                    valid_comb [N_MUL_ROW];
@@ -550,13 +550,13 @@ module reduction_tree_radix16
     integer ks2, ks3;
 
     always_comb begin
-        // 預設 0
+        // Default 0
         for (ic = 0; ic < N_MUL_ROW; ic = ic + 1) begin
             sums_comb[ic]  = '0;
             valid_comb[ic] = 1'b0;
         end
 
-        // Stage 2 dumps (8 個 potential dumps from 4 nodes × 2 dump slots)
+        // Stage 2 dumps (8 potential dumps from 4 nodes × 2 dump slots)
         for (ks2 = 0; ks2 < 4; ks2 = ks2 + 1) begin
             if (s2_dmp1_valid[ks2]) begin
                 sums_comb[s2_dmp1_pos[ks2]]  = s2_dmp1_val[ks2];
