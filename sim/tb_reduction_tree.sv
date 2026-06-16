@@ -1,11 +1,10 @@
 // =============================================================================
-// tb_merge_tree_flexagon.sv — Flexagon-style binary tree with sub-tree slicing 單元測試
+// tb_reduction_tree.sv — Flexagon-style binary tree with sub-tree slicing 單元測試
 // =============================================================================
-// 測試 module: rtl/dist/merge_tree_radix16_flexagon.sv
-// Owner: 黃妍心
+// 測試 module: rtl/dist/reduction_tree_radix16.sv
 //
-// 跑法: make tb_tree_flexagon
-// 看波形: gtkwave tb_merge_tree_flexagon.vcd
+// 跑法: make tb_reduction_tree
+// 看波形: gtkwave tb_reduction_tree.vcd
 //
 // === 測什麼(對應 paper §III.B sub-tree slicing 基本驗證) ===
 //   T1: Reset 後輸出全 0
@@ -37,7 +36,7 @@
 
 `timescale 1ns/1ps
 
-module tb_merge_tree_flexagon;
+module tb_reduction_tree;
     import trapezoid_pkg::*;
 
     logic                                    clk = 0;
@@ -54,7 +53,7 @@ module tb_merge_tree_flexagon;
     // 500 MHz period
     always #1 clk = ~clk;
 
-    merge_tree_radix16_flexagon dut (
+    reduction_tree_radix16 dut (
         .clk            (clk),
         .rst_n          (rst_n),
         .en             (en),
@@ -131,8 +130,8 @@ module tb_merge_tree_flexagon;
     // 主測試流程
     // ============================================================
     initial begin
-        $dumpfile("tb_merge_tree_flexagon.vcd");
-        $dumpvars(0, tb_merge_tree_flexagon);
+        $dumpfile("tb_reduction_tree.vcd");
+        $dumpvars(0, tb_reduction_tree);
         fails = 0;
 
         // 初始化

@@ -1,5 +1,5 @@
 // =============================================================================
-// merge_tree_radix16_flexagon.sv — radix-16 reduction tree(sub-tree slicing)
+// reduction_tree_radix16.sv — radix-16 reduction tree(sub-tree slicing)
 // =============================================================================
 // 功能:
 //   將 16 個 partial product 依 cut_after 劃分為若干「連續區段」(sub-tree),
@@ -43,7 +43,7 @@
 //   下游:16→4 壓縮層 → local_buffer_row(分段結果按段尾位置交付)。
 // =============================================================================
 
-module merge_tree_radix16_flexagon
+module reduction_tree_radix16
     import trapezoid_pkg::*;
 (
     input  logic                                    clk,

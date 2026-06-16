@@ -10,7 +10,7 @@
 //   上游:operand dispatch / distribution stage —— 送入配對完成的 A/B
 //        運算元;en 由上層 valid pipeline 產生,表示本拍輸入有效。
 //   本級:PE row 乘法 stage,16 顆並排,同拍產生 16 個 partial product。
-//   下游:merge-reduction tree 做分組加總;local buffer 做後續累加與暫存;
+//   下游:reduction tree 做分組加總;local buffer 做後續累加與暫存;
 //        output valid 的最終對齊由上層 pipeline 管理。
 //
 // 介面:

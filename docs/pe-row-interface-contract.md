@@ -27,7 +27,7 @@
 | **A2** | 一拍最多幾個 `out_addr` 有效(= 幾個 sub-tree 結果)? | 見上方關鍵數字;> 4 必須序列化 |
 | **A3** | 同一拍的有效 `out_addr`,會不會落在**同一個 bank**(`addr[1:0]` 相同)? | 撞 bank → 1 個寫埠寫不完 → 要序列化,或改 bank 映射保證不撞 |
 | **A4** | `out_addr[i]` 跟 tree 的 `subtree_valid[i]` 是否**位置對齊**(第 i 個 sub-tree 的結果寫到 `out_addr[i]`)? | 壓縮層假設位置對齊(`ts_addr[i] = addr_aligned[i]`),不對齊就要改 |
-| **A5** | `cut_after[i]=1` = 「位置 i 之後是子樹邊界」(Flexagon color/boundary)嗎? | 對齊 `merge_tree_radix16_flexagon` 的 cut 語意 |
+| **A5** | `cut_after[i]=1` = 「位置 i 之後是子樹邊界」(Flexagon color/boundary)嗎? | 對齊 `reduction_tree_radix16` 的 cut 語意 |
 | **A6** | `out_addr` 寬度 / 範圍 = output column index(0~511)? | 對齊 `LOCAL_BUF_AW` 與 buffer column |
 | **A7** | `dataflow_sel` 編碼(IP / TrIP / TrGS / TrGT 的值)跟 `trapezoid_pkg` 一致? | 模式解碼正確 |
 

@@ -2,7 +2,6 @@
 // tb_mfiu_row.sv — mfiu_row 單元測試
 // =============================================================================
 // 測 module: rtl/mfiu/mfiu_row.sv
-// 介面 owner: 黃妍心   ·   multi-fiber body owner: 楊承豫
 //
 // 測 intersection + prefix-sum 壓縮(延 MFIU_STAGES 拍後):
 //   T1 reset

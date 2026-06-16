@@ -2,7 +2,6 @@
 // tb_dist_net_row.sv — dist_net_row 單元測試
 // =============================================================================
 // 測 module: rtl/dist/dist_net_row.sv
-// Owner: NoC(黃妍心 + QuillQ)
 //
 // 跑法: make tb_dist_net
 //

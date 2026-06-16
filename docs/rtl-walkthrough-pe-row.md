@@ -1,7 +1,7 @@
 # PE Row RTL 程式碼導讀
 
 > 對象:修過數位電路 / Verilog 的人(知道 register、mux、adder、FSM、pipeline)。
-> 目的:把 `local_buffer_row.sv`、`merge_tree_radix16_flexagon.sv`、`pe_row_full.sv`
+> 目的:把 `local_buffer_row.sv`、`reduction_tree_radix16.sv`、`pe_row_full.sv`
 > 三個檔的**功能、結構、用到的 SystemVerilog 語法、以及「為什麼這樣寫」**講清楚。
 >
 > 三個檔的關係(由小到大):
@@ -10,7 +10,7 @@
 > pe_row_full.sv  ── instantiate ──┬─ mac_unit.sv              (×16,乘法)
 >  (8-stage 組裝)                  ├─ mfiu_row.sv              (交集,介面)
 >                                  ├─ dist_net_row.sv          (routing, Benes)
->                                  ├─ merge_tree_radix16_flexagon.sv  (化簡)★
+>                                  ├─ reduction_tree_radix16.sv  (化簡)★
 >                                  └─ local_buffer_row.sv      (輸出緩衝)★
 > ```
 >
@@ -173,7 +173,7 @@ end
 
 ---
 
-## 2. `merge_tree_radix16_flexagon.sv` — 化簡樹(這份最難)
+## 2. `reduction_tree_radix16.sv` — 化簡樹(這份最難)
 
 ### 2.1 功能
 
@@ -278,7 +278,7 @@ tree 只算 1 個 stage(`TREE_STAGES = 1`)。
 
 ### 2.6 驗證 / timing
 
-- `sim/tb_merge_tree_flexagon.sv`:17 個 sub-check(含 Fig 10、全切、不切、號數、邊界值)全過。
+- `sim/tb_reduction_tree.sv`:17 個 sub-check(含 Fig 10、全切、不切、號數、邊界值)全過。
 - Timing:組合 1-cycle,估 critical path ~3.5 ns → ~285 MHz,**撐不過 500 MHz**。
   synth 後若 fail,再把樹切成 2 個 pipeline stage(這是預留的退路)。
 
@@ -364,7 +364,7 @@ v_q (S1) ── MFIU 內部延 3 ──▶ mfiu_vld
 | S5 | `dist_net_row u_dist(...)` | 依 idx gather a/b |
 | S6 | `generate … mac_unit u_mul` ×16 | 16 個乘法 |
 | (對齊) | `cut_dly` shift | cut_after 延 2 拍 |
-| S7 | `merge_tree_radix16_flexagon u_tree(...)` | 化簡 |
+| S7 | `reduction_tree_radix16 u_tree(...)` | 化簡 |
 | (對齊) | `addr_dly` shift | out_addr 延 3 拍 |
 | S8 | `local_buffer_row u_buf(...)` | scatter-accumulate + C out |
 | 旁路 | 最後 `always_ff`(`b_vec_out`)| B 延 1 拍 forward 給下一條 row |
@@ -395,13 +395,13 @@ S1 latch(1) + MFIU(3) + dist(1) + mul(1) + tree(1) + buffer(1) = 8 = PE_ROW_STAG
  bitmask ──────────────────┴─S2-4─▶ mfiu_row ─idx/cut/addr─┐     │
                                                             │     │
  a/b 值 ─(延3)─────────────────────────────▶ dist ─S5─▶ mul ×16 ─S6─▶
-   merge_tree_radix16_flexagon ─S7─▶ local_buffer_row ─S8─▶ c_out
+   reduction_tree_radix16 ─S7─▶ local_buffer_row ─S8─▶ c_out
                     └────────────────────────────────────────────┘
 ```
 
 | 檔 | 角色 | 一句話 |
 |---|---|---|
-| `merge_tree_radix16_flexagon` | S7 | binary tree + node 帶狀態,做 sub-tree slicing |
+| `reduction_tree_radix16` | S7 | binary tree + node 帶狀態,做 sub-tree slicing |
 | `local_buffer_row` | S8 | scatter-accumulate,跨 K-tile 累加後 dump |
 | `pe_row_full` | 組裝 | instantiate 全部 + 用 delay line 把控制訊號對齊資料路徑 |
 
@@ -409,12 +409,12 @@ S1 latch(1) + MFIU(3) + dist(1) + mul(1) + tree(1) + buffer(1) = 8 = PE_ROW_STAG
 
 | TB | 數量 |
 |---|---|
-| `tb_merge_tree_flexagon` | 17 sub-check ✅ |
+| `tb_reduction_tree` | 17 sub-check ✅ |
 | `tb_local_buffer` | 9 sub-check ✅ |
 | `tb_pe_row_full`(端到端 vs 手算 dot product)| 7 sub-check ✅ |
 
 ### 讀程式的順序建議
 
 1. 先讀 `local_buffer_row`(最短、概念單純)。
-2. 再讀 `merge_tree_radix16_flexagon` 的 §2.2 觀念 + Fig 10 trace,再回去看 8-case。
+2. 再讀 `reduction_tree_radix16` 的 §2.2 觀念 + Fig 10 trace,再回去看 8-case。
 3. 最後讀 `pe_row_full`,重點放 §3.3 的對齊表 + §3.4 的 delay line。

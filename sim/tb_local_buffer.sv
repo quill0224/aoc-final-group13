@@ -2,7 +2,7 @@
 // tb_local_buffer.sv — 4-bank banked-accumulator local buffer 測試
 // =============================================================================
 // 測 module: rtl/pe/local_buffer_row.sv(+ rtl/pe/sram_128x32_1r1w.sv)
-// Owner: 黃妍心
+// local_buffer_row 單元測試
 //
 // 跑法: make tb_lbuf
 //

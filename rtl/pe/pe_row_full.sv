@@ -4,7 +4,7 @@
 // 功能:
 //   單一條 PE row 的完整資料路徑:每拍接收 16 對 A/B 運算元與 bitmask,
 //   依序經 MFIU(交集 metadata)、distribution(運算元路由)、16 顆乘法器、
-//   merge-reduction tree(分段加總),最後累加至 local buffer;column 累加
+//   reduction tree(分段加總),最後累加至 local buffer;column 累加
 //   完成後由 dump 介面讀出 C 值。另含 B 縱向 forwarding(b_vec_in 延 1 拍
 //   轉發給下一條 row)。所有 dataflow 模式共用同一條物理 pipeline。
 //
@@ -13,7 +13,7 @@
 //   S2-S4  MFIU → effectual_idx / cut_after / out_addr(MFIU_STAGES = 3)
 //   S5     A/B distribution(依 effectual_idx 路由運算元)
 //   S6     Mul × 16(mac_unit)
-//   S7     merge-reduction tree(依 cut_after 分段加總)
+//   S7     reduction tree(依 cut_after 分段加總)
 //   S8     16→4 壓縮 + local buffer 寫入(RMW 完成另需 2 拍)
 //
 // 控制訊號對齊(本模組的核心職責):
@@ -121,7 +121,7 @@ module pe_row_full
     end
 
     // =====================================================================
-    // S2-S4:MFIU(介面 黃妍心;multi-fiber body 楊承豫)
+    // S2-S4:MFIU(mfiu_row;multi-fiber 核心見 mfiu.v)
     // =====================================================================
     logic [N_MUL_ROW-1:0][4:0]              mfiu_idx;
     logic [4:0]                             mfiu_cnt;
@@ -224,12 +224,12 @@ module pe_row_full
     wire [N_MUL_ROW-2:0] cut_aligned = cut_dly[DLY_CUT-1];
 
     // =====================================================================
-    // S7:Merge-Reduction Tree(flexagon)
+    // S7:reduction tree(flexagon)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][ACC_W-1:0] tree_sums;
     logic        [N_MUL_ROW-1:0]            tree_valid_pos;
 
-    merge_tree_radix16_flexagon u_tree (
+    reduction_tree_radix16 u_tree (
         .clk           (clk),
         .rst_n         (rst_n),
         .en            (en),

@@ -1,7 +1,7 @@
 // =============================================================================
 // mfiu_row.sv — Per-PE-row Multi-Fiber Intersection Unit
 // =============================================================================
-// 介面 owner: 黃妍心   ·   TrIP multi-fiber body owner: 楊承豫
+// TrIP 交集介面;multi-fiber 核心見 mfiu.v / mfiu_trip.sv
 //
 // 對應 paper Fig 11/12:吃 A/B bitmask,算出 multiplier 該算哪些 effectual 運算,
 // 以及結果怎麼路由 / 切 sub-tree。
@@ -12,7 +12,7 @@
 //   - effectual_count : effectual lane 總數
 //   Dense IP(bitmask 全 1)時壓縮退化成 identity,count=16。
 //
-// 留給楊承豫(multi-fiber TrIP):
+// 留給 multi-fiber TrIP(見 mfiu_trip.sv):
 //   - cut_after  : 4×4 fiber packing 時,哪些 lane 屬於同一 C → sub-tree 邊界
 //                  (目前單一 sub-tree,cut=0)
 //   - out_addr   : 每個 sub-tree 結果的 C column(目前 Dense:單一 C 在 cur_n)
@@ -71,7 +71,7 @@ module mfiu_row
     endgenerate
 
     logic [N_MUL_ROW-2:0] cut_comb;
-    assign cut_comb = '0;   // 單一 sub-tree;multi-fiber 切法 → 楊承豫
+    assign cut_comb = '0;   // 單一 sub-tree;multi-fiber 切法見 mfiu_trip.sv
 
     // ── delay MFIU_STAGES 拍對齊資料路徑 ──
     logic [N_MUL_ROW-1:0][4:0]              idx_pipe  [MFIU_STAGES];
@@ -109,7 +109,7 @@ module mfiu_row
     assign out_addr        = addr_pipe[MFIU_STAGES-1];
     assign meta_valid      = vld_pipe[MFIU_STAGES-1];
 
-    // dataflow_sel 保留給 multi-fiber TrIP body(楊承豫)
+    // dataflow_sel 保留給 multi-fiber TrIP body
     wire _unused = &{1'b0, dataflow_sel};
 
 endmodule

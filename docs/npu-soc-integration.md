@@ -79,7 +79,7 @@
 
 ## 6. 我(妍心)目前狀態 + 剩下的
 
-- ✅ **完成 + 合成過 500MHz**:`mac_unit`(88µm²)、`merge_tree_radix16_flexagon`(2034µm²)、`local_buffer_row` + `sram_128x32_1r1w`(macro 版 13733µm²,Macro Count 4)
+- ✅ **完成 + 合成過 500MHz**:`mac_unit`(88µm²)、`reduction_tree_radix16`(2034µm²)、`local_buffer_row` + `sram_128x32_1r1w`(macro 版 13733µm²,Macro Count 4)
 - ⬜ **剩下**:`pe_row_full` 整合(tree 16-lane → buffer 4-lane 的壓縮 + `clear→first_pass`)、PE array(16× pe_row + B 縱向鏈)
 - ⏳ 接真 MFIU(楊承豫)/ dist(QuillQ)時:對齊 latency(改 `trapezoid_pkg::MFIU_STAGES`)
 

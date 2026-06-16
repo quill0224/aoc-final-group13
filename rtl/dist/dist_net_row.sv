@@ -1,7 +1,7 @@
 // =============================================================================
 // dist_net_row.sv — Per-PE-row A/B Distribution network
 // =============================================================================
-// Owner: NoC(黃妍心 + QuillQ)
+// NoC distribution network
 // Paper: Trapezoid (ISCA'24) Fig 6「A/B Distribution」(Benes network)
 //
 // 依 MFIU 的 effectual_idx 把 a/b 路由到對的 multiplier:
@@ -15,7 +15,7 @@
 // Pipeline:組合 routing + 1 output register(DIST_STAGES=1)。
 //
 // 簡化:A/B 共用同一條 effectual_idx(Dense 下都 identity,等價)。若 TrIP
-//   需要 A/B 分開路由,再加 b_idx port(對齊 MFIU 輸出,楊承豫 + QuillQ)。
+//   需要 A/B 分開路由,再加 b_idx port(對齊 MFIU 輸出)。
 // =============================================================================
 
 module dist_net_row
