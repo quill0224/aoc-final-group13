@@ -66,7 +66,7 @@ module pe_row_full
     input  logic                                    clk,
     input  logic                                    rst_n,
 
-    // ── 控制 ──
+    // ── control ──
     input  logic [1:0]                              dataflow_sel,
     input  logic                                    in_valid,
     input  logic [LOCAL_BUF_AW-1:0]                 cur_n,
@@ -74,35 +74,35 @@ module pe_row_full
     input  logic                                    dump_en,
     input  logic [LOCAL_BUF_AW-1:0]                 dump_addr,
 
-    // ── A:row-stationary + bitmask ──
+    // ── A: row-stationary + bitmask ──
     input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_vec,
     input  logic        [N_MUL_ROW-1:0]             a_bitmask,
 
-    // ── B:從上一條 row 進 + bitmask ──
+    // ── B: from previous row + bitmask ──
     input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_in,
     input  logic        [N_MUL_ROW-1:0]             b_bitmask_in,
 
-    // ── B forwarding 給下一條 row ──
+    // ── B forwarding to next row ──
     output logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_out,
     output logic        [N_MUL_ROW-1:0]             b_bitmask_out,
     output logic                                    b_valid_out,
 
-    // ── C 輸出 ──
+    // ── C output ──
     output logic                                    c_valid,
     output logic signed [ACC_W-1:0]                 c_out
 );
 
-    // 內部 pipeline 自由推進
+    // internal pipeline advances freely
     wire en = 1'b1;
 
-    // delay 深度(控制訊號對齊資料路徑)
+    // delay depths (align control signals to the data path)
     localparam int DLY_AB   = MFIU_STAGES;                            // 3
     localparam int DLY_CUT  = DIST_STAGES + MUL_STAGES;               // 2
     localparam int DLY_ADDR = DIST_STAGES + MUL_STAGES + TREE_STAGES; // 3
-    localparam int DLY_FP   = 1 + MFIU_STAGES + DIST_STAGES + MUL_STAGES + TREE_STAGES; // 7:first_pass 從 input 對齊到 acc_en
+    localparam int DLY_FP   = 1 + MFIU_STAGES + DIST_STAGES + MUL_STAGES + TREE_STAGES; // 7: align first_pass from input to acc_en
 
     // =====================================================================
-    // S1:輸入打拍(A-reg / B-FIFO 的 latch 功能)
+    // S1: input latch (A-reg / B-FIFO latch function)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_q, b_q;
     logic        [N_MUL_ROW-1:0]             a_bm_q, b_bm_q;
@@ -121,7 +121,7 @@ module pe_row_full
     end
 
     // =====================================================================
-    // S2-S4:MFIU(mfiu_row;multi-fiber 核心見 mfiu.v)
+    // S2-S4: MFIU (mfiu_row; multi-fiber core see mfiu.v)
     // =====================================================================
     logic [N_MUL_ROW-1:0][4:0]              mfiu_idx;
     logic [4:0]                             mfiu_cnt;
@@ -145,7 +145,7 @@ module pe_row_full
         .meta_valid      (mfiu_vld)
     );
 
-    // ── A/B 值延 MFIU_STAGES 拍,對齊 MFIU 輸出 ──
+    // ── delay A/B values by MFIU_STAGES cycles to align with MFIU output ──
     logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_dly [DLY_AB];
     logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_dly [DLY_AB];
     integer da;
@@ -166,7 +166,7 @@ module pe_row_full
     wire signed [N_MUL_ROW-1:0][DATA_W-1:0] b_aligned = b_dly[DLY_AB-1];
 
     // =====================================================================
-    // S5:A/B Distribution network(Benes,NoC)
+    // S5: A/B Distribution network (Benes, NoC)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][DATA_W-1:0] dist_a, dist_b;
     logic                                    dist_vld;
@@ -186,7 +186,7 @@ module pe_row_full
     );
 
     // =====================================================================
-    // S6:Mul × 16(mac_unit)
+    // S6: Mul × 16 (mac_unit)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][PROD_W-1:0] partials;
 
@@ -210,7 +210,7 @@ module pe_row_full
         else if (en) mul_vld <= dist_vld;
     end
 
-    // ── cut_after 延 DLY_CUT 拍,對齊 partials 進 tree ──
+    // ── delay cut_after by DLY_CUT cycles to align with partials entering tree ──
     logic [N_MUL_ROW-2:0] cut_dly [DLY_CUT];
     integer dc;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -224,7 +224,7 @@ module pe_row_full
     wire [N_MUL_ROW-2:0] cut_aligned = cut_dly[DLY_CUT-1];
 
     // =====================================================================
-    // S7:reduction tree(flexagon)
+    // S7: reduction tree (flexagon)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][ACC_W-1:0] tree_sums;
     logic        [N_MUL_ROW-1:0]            tree_valid_pos;
@@ -245,7 +245,7 @@ module pe_row_full
         else if (en) tree_out_vld <= mul_vld;
     end
 
-    // ── out_addr 延 DLY_ADDR 拍,對齊 tree 輸出進 buffer ──
+    // ── delay out_addr by DLY_ADDR cycles to align with tree output entering buffer ──
     logic [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] addr_dly [DLY_ADDR];
     integer dd;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -258,7 +258,7 @@ module pe_row_full
     end
     wire [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] addr_aligned = addr_dly[DLY_ADDR-1];
 
-    // ── first_pass 從 input 延 DLY_FP 拍,對齊到 buffer 寫入(= acc_en/tree_out_vld 時點)──
+    // ── delay first_pass from input by DLY_FP cycles to align with buffer write (= acc_en/tree_out_vld instant) ──
     logic fp_dly [DLY_FP];
     integer df;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -272,10 +272,10 @@ module pe_row_full
     wire fp_aligned = fp_dly[DLY_FP-1];
 
     // =====================================================================
-    // S8a:16→4 壓縮(tree 16 個 sub-tree → 最多 4 筆 banked write request)
+    // S8a: 16→4 compaction (16 tree sub-trees → up to 4 banked write requests)
     // =====================================================================
-    //   v1:依序收前 4 個 valid(Dense 只有 1 個 → trivially 對)
-    //   假設:同拍 ≤4 個 valid 且落不同 bank;TrIP >4 / 同 bank 序列化 → TODO
+    //   v1: collect the first 4 valid in order (Dense has only 1 → trivially correct)
+    //   assumption: ≤4 valid per cycle landing in distinct banks; TrIP >4 / same-bank serialization → TODO
     logic                    ts_v    [N_MUL_ROW];
     logic signed [ACC_W-1:0] ts_sum  [N_MUL_ROW];
     logic [LOCAL_BUF_AW-1:0] ts_addr [N_MUL_ROW];
@@ -319,7 +319,7 @@ module pe_row_full
     endgenerate
 
     // =====================================================================
-    // S8b:Local Buffer(4-bank banked accumulator)+ C out
+    // S8b: Local Buffer (4-bank banked accumulator) + C out
     // =====================================================================
     local_buffer_row u_buf (
         .clk        (clk),
@@ -337,7 +337,7 @@ module pe_row_full
     );
 
     // =====================================================================
-    // B forwarding:b_vec_in 延 1 cycle 給下一條 row(Fig 7 ④)
+    // B forwarding: delay b_vec_in by 1 cycle to next row (Fig 7 ④)
     // =====================================================================
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
@@ -347,7 +347,7 @@ module pe_row_full
         end
     end
 
-    // effectual_count 在 Dense IP 沒用到(=16),抑制 lint
+    // effectual_count unused in Dense IP (=16), suppress lint
     wire _unused = &{1'b0, mfiu_cnt};
 
 endmodule

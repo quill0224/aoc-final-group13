@@ -40,11 +40,11 @@ module mfiu_row
     output logic                                   meta_valid
 );
 
-    // ── intersection + prefix-sum 壓縮(組合)──
+    // ── intersection + prefix-sum compaction (combinational) ──
     logic [N_MUL_ROW-1:0] eff_vec;
     assign eff_vec = a_bitmask & b_bitmask;
 
-    logic [4:0] idx_arr [N_MUL_ROW];   // 壓縮後的原始位置
+    logic [4:0] idx_arr [N_MUL_ROW];   // compacted original positions
     logic [4:0] cnt_c;
     integer k, pos;
     always_comb begin
@@ -71,9 +71,9 @@ module mfiu_row
     endgenerate
 
     logic [N_MUL_ROW-2:0] cut_comb;
-    assign cut_comb = '0;   // 單一 sub-tree;multi-fiber 切法見 mfiu_trip.sv
+    assign cut_comb = '0;   // single sub-tree; multi-fiber cut scheme see mfiu_trip.sv
 
-    // ── delay MFIU_STAGES 拍對齊資料路徑 ──
+    // ── delay MFIU_STAGES cycles to align with the data path ──
     logic [N_MUL_ROW-1:0][4:0]              idx_pipe  [MFIU_STAGES];
     logic [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] addr_pipe [MFIU_STAGES];
     logic [N_MUL_ROW-2:0]                   cut_pipe  [MFIU_STAGES];
@@ -109,7 +109,7 @@ module mfiu_row
     assign out_addr        = addr_pipe[MFIU_STAGES-1];
     assign meta_valid      = vld_pipe[MFIU_STAGES-1];
 
-    // dataflow_sel 保留給 multi-fiber TrIP body
+    // dataflow_sel reserved for the multi-fiber TrIP body
     wire _unused = &{1'b0, dataflow_sel};
 
 endmodule

@@ -47,19 +47,19 @@ module sram_128x32_1r1w (
 
 `ifdef USE_SRAM_MACRO
     // =========================================================================
-    // 合成用:接真實 ADFP macro(1R1W 兩埠 128×32)
-    //   寫埠:AA=寫址 / D=資料 / BWEB=逐位元寫遮罩(active-low,0=寫) / WEB=寫致能(active-low) / CLKW
-    //   讀埠:AB=讀址 / REB=讀致能(active-low) / CLKR / Q=資料出
-    //   測試/電源腳綁正常運作值;PUDELAY 是 output 不接
+    // Synthesis: connect the real ADFP macro (1R1W two-port 128×32)
+    //   Write port: AA=write addr / D=data / BWEB=per-bit write mask (active-low, 0=write) / WEB=write enable (active-low) / CLKW
+    //   Read port:  AB=read addr / REB=read enable (active-low) / CLKR / Q=data out
+    //   Test/power pins tied to normal-operation values; PUDELAY is an output, left unconnected
     // =========================================================================
     TS6N16ADFPCLLLVTA128X32M4FWSHOD u_macro (
-        .AA      (waddr),        // 寫址 [6:0]
-        .D       (wdata),        // 寫資料 [31:0]
-        .BWEB    ({32{1'b0}}),   // 全位元寫(active-low → 0=寫;若 sim 不寫入則改 32'hFFFFFFFF)
-        .WEB     (~wen),         // 寫致能 active-low
+        .AA      (waddr),        // write addr [6:0]
+        .D       (wdata),        // write data [31:0]
+        .BWEB    ({32{1'b0}}),   // write all bits (active-low → 0=write; if sim does not write, change to 32'hFFFFFFFF)
+        .WEB     (~wen),         // write enable, active-low
         .CLKW    (clk),
-        .AB      (raddr),        // 讀址 [6:0]
-        .REB     (~ren),         // 讀致能 active-low
+        .AB      (raddr),        // read addr [6:0]
+        .REB     (~ren),         // read enable, active-low
         .CLKR    (clk),
         .RCT     (2'b00),
         .WCT     (2'b00),
@@ -67,17 +67,17 @@ module sram_128x32_1r1w (
         .SLP     (1'b0),
         .DSLP    (1'b0),
         .SD      (1'b0),
-        .PUDELAY (  ),           // output,不使用
-        .Q       (rdata)         // 讀資料出 [31:0]
+        .PUDELAY (  ),           // output, unused
+        .Q       (rdata)         // read data out [31:0]
     );
 `else
     // =========================================================================
-    // 模擬用:behavioral 1R1W(read latency = 1 cycle)
+    // Simulation: behavioral 1R1W (read latency = 1 cycle)
     // =========================================================================
     logic [31:0] mem [0:127];
     always_ff @(posedge clk) begin
         if (wen) mem[waddr] <= wdata;     // write port
-        if (ren) rdata      <= mem[raddr]; // read port,下一拍出
+        if (ren) rdata      <= mem[raddr]; // read port, data out next cycle
     end
 `endif
 

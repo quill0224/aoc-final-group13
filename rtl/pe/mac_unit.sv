@@ -34,16 +34,16 @@
 module mac_unit (
     input                       clk,
     input                       rst_n,
-    input                       en,         // 此 cycle 把 a*b 寫進 product
+    input                       en,         // when set, write a*b into product this cycle
     input  signed [7:0]         a,          // INT8 operand A
     input  signed [7:0]         b,          // INT8 operand B
-    output logic signed [15:0]  product     // INT16 = a * b,registered
+    output logic signed [15:0]  product     // INT16 = a * b, registered
 );
 
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n)    product <= 16'sd0;
         else if (en)   product <= a * b;
-        // else: 保持 (downstream stage 會用 valid pipe 判斷有效)
+        // else: hold (downstream stage uses the valid pipe to determine validity)
     end
 
 endmodule
