@@ -55,7 +55,7 @@
 //   超出的段會被捨棄,須由上游 dataflow 保證不發生。
 //
 // 現況:
-//   MFIU(mfiu_row)與 distribution(dist_net_row)為介面相容的 Dense
+//   MFIU(mfiu_adapter)與 distribution(dist_net_row)為介面相容的 Dense
 //   pass-through 實作;接入真實 sparse 版本時更新 trapezoid_pkg 的對應
 //   *_STAGES 參數即可重新對齊。架構細節見 docs/pe-row-full-architecture.md。
 // =============================================================================
@@ -121,7 +121,7 @@ module pe_row_full
     end
 
     // =====================================================================
-    // S2-S4: MFIU (mfiu_row; multi-fiber core see mfiu.v)
+    // S2-S4: MFIU (mfiu_adapter; multi-fiber core see mfiu.v)
     // =====================================================================
     logic [N_MUL_ROW-1:0][4:0]              mfiu_idx;
     logic [4:0]                             mfiu_cnt;
@@ -129,7 +129,7 @@ module pe_row_full
     logic [N_MUL_ROW-1:0][LOCAL_BUF_AW-1:0] mfiu_addr;
     logic                                   mfiu_vld;
 
-    mfiu_row u_mfiu (
+    mfiu_adapter u_mfiu (
         .clk             (clk),
         .rst_n           (rst_n),
         .en              (en),
@@ -166,7 +166,7 @@ module pe_row_full
     wire signed [N_MUL_ROW-1:0][DATA_W-1:0] b_aligned = b_dly[DLY_AB-1];
 
     // =====================================================================
-    // S5: A/B Distribution network (Benes, NoC)
+    // S5: A/B distribution network (crossbar)
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][DATA_W-1:0] dist_a, dist_b;
     logic                                    dist_vld;

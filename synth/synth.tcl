@@ -44,12 +44,13 @@ set link_library   "* $STDCELL_DB $SRAM_DB"
 
 # ---------- 讀 RTL ----------
 #   只讀 pe_row_full 需要的檔(package 先);不 glob 整資料夾,避免掃到 WIP。
-#   ⚠️ mfiu_row / dist_net_row 目前是 stand-in(Dense IP pass-through);
-#      真版到了把這兩行換成楊承豫 / QuillQ 的檔即可,其餘不動。
+#   mfiu_adapter 內含交集核心 mfiu.v(楊承豫);dist_net_row 為 Dense identity
+#      crossbar(QuillQ 真版 NoC 到位後替換),其餘不動。
 set RTL_FILES [list \
     rtl/trapezoid_pkg.sv \
     rtl/pe/mac_unit.sv \
-    rtl/mfiu/mfiu_row.sv \
+    rtl/mfiu/mfiu.v \
+    rtl/mfiu/mfiu_adapter.sv \
     rtl/dist/dist_net_row.sv \
     rtl/dist/reduction_tree_radix16.sv \
     rtl/pe/sram_128x32_1r1w.sv \

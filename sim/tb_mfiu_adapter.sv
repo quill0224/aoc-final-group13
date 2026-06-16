@@ -1,7 +1,7 @@
 // =============================================================================
-// tb_mfiu_row.sv — mfiu_row 單元測試
+// tb_mfiu_adapter.sv — mfiu_adapter 單元測試
 // =============================================================================
-// 測 module: rtl/mfiu/mfiu_row.sv
+// 測 module: rtl/mfiu/mfiu_adapter.sv
 //
 // 測 intersection + prefix-sum 壓縮(延 MFIU_STAGES 拍後):
 //   T1 reset
@@ -12,7 +12,7 @@
 
 `timescale 1ns/1ps
 
-module tb_mfiu_row;
+module tb_mfiu_adapter;
     import trapezoid_pkg::*;
 
     logic                                   clk = 0;
@@ -34,7 +34,7 @@ module tb_mfiu_row;
 
     always #1 clk = ~clk;
 
-    mfiu_row dut (
+    mfiu_adapter dut (
         .clk(clk), .rst_n(rst_n), .en(en), .in_valid(in_valid),
         .dataflow_sel(dataflow_sel), .cur_n(cur_n),
         .a_bitmask(a_bitmask), .b_bitmask(b_bitmask),
@@ -81,8 +81,8 @@ module tb_mfiu_row;
     endtask
 
     initial begin
-        $dumpfile("tb_mfiu_row.vcd");
-        $dumpvars(0, tb_mfiu_row);
+        $dumpfile("tb_mfiu_adapter.vcd");
+        $dumpvars(0, tb_mfiu_adapter);
         fails = 0;
 
         rst_n = 0; en = 0; in_valid = 0;

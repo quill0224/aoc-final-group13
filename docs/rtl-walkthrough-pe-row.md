@@ -8,7 +8,7 @@
 >
 > ```
 > pe_row_full.sv  ── instantiate ──┬─ mac_unit.sv              (×16,乘法)
->  (8-stage 組裝)                  ├─ mfiu_row.sv              (交集,介面)
+>  (8-stage 組裝)                  ├─ mfiu_adapter.sv              (交集,介面)
 >                                  ├─ dist_net_row.sv          (routing, Benes)
 >                                  ├─ reduction_tree_radix16.sv  (化簡)★
 >                                  └─ local_buffer_row.sv      (輸出緩衝)★
@@ -359,7 +359,7 @@ v_q (S1) ── MFIU 內部延 3 ──▶ mfiu_vld
 | Stage | 程式 | 在做什麼 |
 |---|---|---|
 | S1 | 第一個 `always_ff`(`a_q`/`b_q`/`a_bm_q`…)| 輸入打一拍對齊 |
-| S2-4 | `mfiu_row u_mfiu(...)` | 交集 + 壓縮,輸出 metadata + `mfiu_vld` |
+| S2-4 | `mfiu_adapter u_mfiu(...)` | 交集 + 壓縮,輸出 metadata + `mfiu_vld` |
 | (對齊) | `a_dly`/`b_dly` shift | A/B 值延 3 拍 |
 | S5 | `dist_net_row u_dist(...)` | 依 idx gather a/b |
 | S6 | `generate … mac_unit u_mul` ×16 | 16 個乘法 |
@@ -392,7 +392,7 @@ S1 latch(1) + MFIU(3) + dist(1) + mul(1) + tree(1) + buffer(1) = 8 = PE_ROW_STAG
 ```
                     ┌─────────────── pe_row_full ───────────────┐
  a_vec/b_vec ─S1──▶ latch ─┐                                     │
- bitmask ──────────────────┴─S2-4─▶ mfiu_row ─idx/cut/addr─┐     │
+ bitmask ──────────────────┴─S2-4─▶ mfiu_adapter ─idx/cut/addr─┐     │
                                                             │     │
  a/b 值 ─(延3)─────────────────────────────▶ dist ─S5─▶ mul ×16 ─S6─▶
    reduction_tree_radix16 ─S7─▶ local_buffer_row ─S8─▶ c_out

@@ -81,7 +81,7 @@
 - 假設同 cycle 內不同 valid position 的 `out_addr` 互異(TrIP 不同 sub-tree → 不同 C,成立)。
 - 容量 `LOCAL_BUF_DEPTH=512`(VGG-16 max output channels N)。
 
-### S2-S4 MFIU(`mfiu_row.sv`,介面黃妍心定 / body 楊承豫)Block 2
+### S2-S4 MFIU(`mfiu_adapter.sv`,介面黃妍心定 / body 楊承豫)Block 2
 
 | 訊號 | 方向 | 寬度 | 說明 |
 |------|------|------|------|
@@ -114,7 +114,7 @@
 
 - [x] Block 0:flexagon tree(17 tests pass)
 - [ ] Block 1:`local_buffer_row` + tb
-- [ ] Block 2:`mfiu_row`(Dense pass-through)+ tb
+- [ ] Block 2:`mfiu_adapter`(Dense pass-through)+ tb
 - [ ] Block 3:`dist_net_row`(Dense identity)+ tb
 - [ ] Block 4:`a_reg_file` + `b_fifo` + tb
 - [ ] Block 5:`pe_row` v2(全組起來)+ tb_pe_row(vs numpy)

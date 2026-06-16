@@ -7,11 +7,12 @@ TB_DIR   := sim
 PKG      := $(RTL_DIR)/trapezoid_pkg.sv
 
 # 最終 PE row stack(lint 用;各單元測試 target 自列依賴)
-# mfiu_row / dist_net_row 目前為介面相容的 Dense pass-through,
-# 等真版(楊承豫 / QuillQ)到位後替換。
+# mfiu_adapter 內含交集核心 mfiu.v(楊承豫);dist_net_row 為 Dense identity crossbar,
+# QuillQ 真版 NoC 到位後替換。
 RTL_SRCS := $(PKG) \
             $(RTL_DIR)/pe/mac_unit.sv \
-            $(RTL_DIR)/mfiu/mfiu_row.sv \
+            $(RTL_DIR)/mfiu/mfiu.v \
+            $(RTL_DIR)/mfiu/mfiu_adapter.sv \
             $(RTL_DIR)/dist/dist_net_row.sv \
             $(RTL_DIR)/dist/reduction_tree_radix16.sv \
             $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
@@ -21,7 +22,7 @@ RTL_SRCS := $(PKG) \
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_reduction_tree tb_lbuf tb_mfiu_row tb_mfiu_trip tb_dist_net tb_pe_row_full tb_pe_array lint clean help
+.PHONY: all tb_mac tb_reduction_tree tb_lbuf tb_mfiu_adapter tb_dist_net tb_pe_row_full tb_pe_array lint clean help
 
 all: help
 
@@ -30,8 +31,7 @@ help:
 	@echo "  make tb_mac           — mac_unit 單元測試 (iverilog)"
 	@echo "  make tb_reduction_tree — reduction_tree_radix16 單元測試 (sub-tree slicing)"
 	@echo "  make tb_lbuf          — local_buffer_row 單元測試 (4-bank accumulator)"
-	@echo "  make tb_mfiu_row      — mfiu_row 單元測試 (Dense IP pass-through)"
-	@echo "  make tb_mfiu_trip     — mfiu_trip 轉換層單元測試 (包楊的 mfiu.v 核心)"
+	@echo "  make tb_mfiu_adapter      — mfiu_adapter 單元測試 (包 mfiu.v 交集核心; Dense + TrIP)"
 	@echo "  make tb_dist_net      — dist_net_row 單元測試 (Dense identity)"
 	@echo "  make tb_pe_row_full   — pe_row_full 端到端測試 (8-stage PE row)"
 	@echo "  make tb_pe_array      — pe_array 端到端測試 (16×16, Dense IP vs A×B)"
@@ -66,26 +66,16 @@ tb_lbuf: $(PKG) $(RTL_DIR)/pe/sram_128x32_1r1w.sv $(RTL_DIR)/pe/local_buffer_row
 		$(TB_DIR)/tb_local_buffer.sv
 	vvp tb_lbuf.vvp
 
-# ── mfiu_row 單元測試 (iverilog) ──
-# 介面 stand-in:Dense IP pass-through;真版 body 由楊承豫提供
-tb_mfiu_row: $(PKG) $(RTL_DIR)/mfiu/mfiu_row.sv $(TB_DIR)/tb_mfiu_row.sv
-	$(IVERILOG) -g2012 -o tb_mfiu_row.vvp \
-		-I$(RTL_DIR) \
-		$(PKG) \
-		$(RTL_DIR)/mfiu/mfiu_row.sv \
-		$(TB_DIR)/tb_mfiu_row.sv
-	vvp tb_mfiu_row.vvp
-
-# ── mfiu_trip 轉換層單元測試 (iverilog) ──
-# 包楊承豫的組合核心 mfiu.v(Verilog-2001),轉成後段要的 cut_after/out_addr/idx
-tb_mfiu_trip: $(PKG) $(RTL_DIR)/mfiu/mfiu.v $(RTL_DIR)/mfiu/mfiu_trip.sv $(TB_DIR)/tb_mfiu_trip.sv
-	$(IVERILOG) -g2012 -o tb_mfiu_trip.vvp \
+# ── mfiu_adapter 單元測試 (iverilog) ──
+# 交集核心採用 mfiu.v(楊承豫);設為單 fiber pair × K=16,涵蓋 Dense + TrIP
+tb_mfiu_adapter: $(PKG) $(RTL_DIR)/mfiu/mfiu.v $(RTL_DIR)/mfiu/mfiu_adapter.sv $(TB_DIR)/tb_mfiu_adapter.sv
+	$(IVERILOG) -g2012 -o tb_mfiu_adapter.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
 		$(RTL_DIR)/mfiu/mfiu.v \
-		$(RTL_DIR)/mfiu/mfiu_trip.sv \
-		$(TB_DIR)/tb_mfiu_trip.sv
-	vvp tb_mfiu_trip.vvp
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
+		$(TB_DIR)/tb_mfiu_adapter.sv
+	vvp tb_mfiu_adapter.vvp
 
 # ── dist_net_row 單元測試 (iverilog) ──
 # 介面 stand-in:Dense identity;真版 body 由 QuillQ 提供
@@ -102,7 +92,8 @@ tb_dist_net: $(PKG) $(RTL_DIR)/dist/dist_net_row.sv $(TB_DIR)/tb_dist_net_row.sv
 #             + 16→4 壓縮 + 4-bank local buffer(SRAM wrapper)
 tb_pe_row_full: $(PKG) \
                 $(RTL_DIR)/pe/mac_unit.sv \
-                $(RTL_DIR)/mfiu/mfiu_row.sv \
+                $(RTL_DIR)/mfiu/mfiu.v \
+                $(RTL_DIR)/mfiu/mfiu_adapter.sv \
                 $(RTL_DIR)/dist/dist_net_row.sv \
                 $(RTL_DIR)/dist/reduction_tree_radix16.sv \
                 $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
@@ -113,7 +104,8 @@ tb_pe_row_full: $(PKG) \
 		-I$(RTL_DIR) \
 		$(PKG) \
 		$(RTL_DIR)/pe/mac_unit.sv \
-		$(RTL_DIR)/mfiu/mfiu_row.sv \
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
 		$(RTL_DIR)/dist/dist_net_row.sv \
 		$(RTL_DIR)/dist/reduction_tree_radix16.sv \
 		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
@@ -126,7 +118,8 @@ tb_pe_row_full: $(PKG) \
 # 16× pe_row_full + B 縱向鏈;Dense IP 對 A×B 驗證
 tb_pe_array: $(PKG) \
              $(RTL_DIR)/pe/mac_unit.sv \
-             $(RTL_DIR)/mfiu/mfiu_row.sv \
+             $(RTL_DIR)/mfiu/mfiu.v \
+             $(RTL_DIR)/mfiu/mfiu_adapter.sv \
              $(RTL_DIR)/dist/dist_net_row.sv \
              $(RTL_DIR)/dist/reduction_tree_radix16.sv \
              $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
@@ -138,7 +131,8 @@ tb_pe_array: $(PKG) \
 		-I$(RTL_DIR) \
 		$(PKG) \
 		$(RTL_DIR)/pe/mac_unit.sv \
-		$(RTL_DIR)/mfiu/mfiu_row.sv \
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
 		$(RTL_DIR)/dist/dist_net_row.sv \
 		$(RTL_DIR)/dist/reduction_tree_radix16.sv \
 		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
