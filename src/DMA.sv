@@ -14,7 +14,7 @@
 // Re-trigger : DMA only accepts new DMA_en in IDLE state
 // =============================================================================
 
-module dma (
+module DMA (
     input  logic                        clk,
     input  logic                        rst,
 
@@ -254,7 +254,9 @@ module dma (
                 if (RVALID && RREADY) begin
                     cur_glb_addr  <= cur_glb_addr  + `GLB_ADDR_BITS'd4;
                     cur_dram_addr <= cur_dram_addr + 32'd4;
-                    if (RLAST) rem_bytes <= rem_bytes - burst_bytes;
+                    if (RLAST && (rem_bytes != burst_bytes)) begin
+                        rem_bytes <= rem_bytes - burst_bytes;
+                    end
                 end
             end
 

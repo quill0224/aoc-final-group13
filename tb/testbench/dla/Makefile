@@ -1,6 +1,6 @@
 # =============================================================================
 # tb/testbench/dla/Makefile
-# Trapezoid-Lite ASIC Unit Test Runner
+# Trapezoid-Lite ASIC Unit Test Runner (Fully Integrated)
 # =============================================================================
 
 CASE ?= case_SRAM
@@ -47,40 +47,71 @@ endef
 ifeq ($(CASE), case_SRAM)
 TOP_MODULE := SRAM_rtl
 V_SRCS := $(SRC_DIR)/SRAM_rtl.sv
+
 else ifeq ($(CASE), case_GLB)
 TOP_MODULE := GLB
-V_SRCS := $(SRC_DIR)/GLB.sv $(SRC_DIR)/SRAM_rtl.sv
+V_SRCS := $(SRC_DIR)/GLB.sv \
+          $(SRC_DIR)/SRAM_rtl.sv
+
 else ifeq ($(CASE), case_DMA)
-TOP_MODULE := dma
-V_SRCS := $(SRC_DIR)/dma.sv $(SRC_DIR)/GLB.sv $(SRC_DIR)/SRAM_rtl.sv
+TOP_MODULE := DMA
+V_SRCS := $(SRC_DIR)/DMA.sv \
+          $(SRC_DIR)/GLB.sv \
+          $(SRC_DIR)/SRAM_rtl.sv
+
 else ifeq ($(CASE), case_CTRL)
 TOP_MODULE := top_controller
 V_SRCS := $(SRC_DIR)/top_controller.sv
+
+else ifeq ($(CASE), case_MC)
+TOP_MODULE := MC
+V_SRCS     := $(SRC_DIR)/MC.sv
+
 else ifeq ($(CASE), case_INTEGRATION)
 TOP_MODULE := top_integration
-V_SRCS := $(SRC_DIR)/top_controller.sv $(SRC_DIR)/dma.sv $(SRC_DIR)/GLB.sv $(SRC_DIR)/SRAM_rtl.sv
+V_SRCS := $(SRC_DIR)/top_integration.sv \
+          $(SRC_DIR)/top_controller.sv \
+          $(SRC_DIR)/DMA.sv \
+          $(SRC_DIR)/GLB.sv \
+          $(SRC_DIR)/SRAM_rtl.sv \
+          $(SRC_DIR)/axi_mem_model.sv \
+          $(SRC_DIR)/MC.sv
+
 else
-$(error Unknown CASE=$(CASE))
+$(error Unknown CASE=$(CASE). Valid: case_SRAM case_GLB case_DMA case_CTRL case_MC case_INTEGRATION)
 endif
 
 # ============================================================
-# Compiler Flags
+# Verilator Flags
 # ============================================================
-VFLAGS := --cc --exe --build -j 0 --trace-fst -Wall -Wno-fatal -DSIMULATION -I$(SRC_DIR)/AXI -I$(SRC_DIR) --top-module $(TOP_MODULE) --Mdir $(OBJ_DIR)
+VFLAGS := \
+    --cc \
+    --exe \
+    --build \
+    -j 0 \
+    --trace-fst \
+    -Wall \
+    -Wno-fatal \
+    -DSIMULATION \
+    -I$(SRC_DIR)/AXI \
+    -I$(SRC_DIR) \
+    --top-module $(TOP_MODULE) \
+    --Mdir $(OBJ_DIR)
 
-# [安全修正] 徹底移除雙引號，改為獨立傳遞 -CFLAGS
-VCFLAGS := -CFLAGS -std=c++17 \
-           -CFLAGS -I$(abspath $(THIS_DIR)) \
-           -CFLAGS -I$(abspath $(CASE_DIR)) \
-           -CFLAGS -I$(OBJ_DIR) \
-           -CFLAGS -D$(CASE)
+# Single -CFLAGS with all options in one quoted group.
+VCFLAGS := -CFLAGS \
+    '-std=c++17 -I$(abspath $(THIS_DIR)) -I$(abspath $(CASE_DIR)) -I$(OBJ_DIR) -D$(CASE) -DRESULT_DIR=\"$(abspath $(RESULT_DIR))\"'
 
-C_SRCS := $(THIS_DIR)/tb.cpp $(CASE_DIR)/workload.c $(CASE_DIR)/main.c
+C_SRCS := \
+    $(THIS_DIR)/tb.cpp \
+    $(CASE_DIR)/workload.c \
+    $(CASE_DIR)/main.c
 
 # ============================================================
 # Targets
 # ============================================================
-.PHONY: all build run clean help run_SRAM run_GLB run_DMA run_CTRL run_INTEGRATION run_unit_all
+.PHONY: all build run clean help \
+        run_SRAM run_GLB run_DMA run_CTRL run_MC run_INTEGRATION run_unit_all
 
 all: run
 
@@ -110,6 +141,9 @@ run_DMA:
 run_CTRL:
 	@$(MAKE) --no-print-directory run CASE=case_CTRL
 
+run_MC:
+	@$(MAKE) --no-print-directory run CASE=case_MC
+
 run_INTEGRATION:
 	@$(MAKE) --no-print-directory run CASE=case_INTEGRATION
 
@@ -121,6 +155,7 @@ run_unit_all:
 	@$(MAKE) --no-print-directory run_GLB && echo "" || exit 1
 	@$(MAKE) --no-print-directory run_DMA && echo "" || exit 1
 	@$(MAKE) --no-print-directory run_CTRL && echo "" || exit 1
+	@$(MAKE) --no-print-directory run_MC && echo "" || exit 1
 	@$(MAKE) --no-print-directory run_INTEGRATION && echo "" || exit 1
 	$(call msg_green,[DLA] ALL UNIT TESTS PASSED)
 
@@ -134,3 +169,13 @@ clean:
 
 help:
 	@echo "Usage: make [target]"
+	@echo ""
+	@echo " make run_SRAM        - SRAM_rtl unit test"
+	@echo " make run_GLB         - GLB unit test"
+	@echo " make run_DMA         - DMA fetch/writeback test"
+	@echo " make run_CTRL        - top_controller FSM test"
+	@echo " make run_MC          - MC AGU and latency test"
+	@echo " make run_INTEGRATION - end-to-end system test"
+	@echo " make run_unit_all    - run all cases sequentially"
+	@echo " make run CASE=<name> - run a specific case"
+	@echo " make clean           - remove all build artifacts"

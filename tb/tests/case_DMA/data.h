@@ -1,46 +1,67 @@
 #pragma once
-#include <cstdint>
+#include <stdint.h>
 
-// DMA test case:
-// Fetch: load 20 bytes (5 words = 1 fiber packet) from DRAM→GLB_A
-// Writeback: read 16 bytes (4 words) from GLB_C→DRAM
+// =============================================================================
+// case_DMA/data.h — Test vectors for DMA unit test
+//
+// DRAM layout (simulated by AXI slave stub in workload.c):
+// Address 0x1000_0000 : A tile data (fetch test)
+// Address 0x2000_0000 : B tile data (fetch test)
+// Address 0x3000_0000 : C tile writeback destination
+//
+// All lengths must be 4B-aligned (AXI_DATA_BITS=32).
+// Each packet is 20 bytes; one tile = 16 packets = 320 bytes.
+// =============================================================================
 
-// DRAM layout (word addresses)
-static const uint32_t DRAM_A_BASE = 0x00010000; // DRAM source for A fetch
-static const uint32_t DRAM_C_BASE = 0x00020000; // DRAM dest  for C writeback
+// -------------------------------------------------------
+// TC01 — Single fetch A tile (DRAM→GLB), no back-pressure
+// -------------------------------------------------------
+#define TC01_DRAM_BASE 0x10000000U
+#define TC01_GLB_BASE  0x0000U // GLB_A_BASE
+#define TC01_LEN       320U    // 16 pkts × 20 bytes
+#define TC01_BEATS     80U     // 320 / 4
 
-// GLB targets (byte addresses, from ASIC.svh)
-static const uint16_t GLB_A_BASE  = 0x0000;
-static const uint16_t GLB_C_BASE  = 0x0280;
+// DRAM data pattern: word[i] = base_addr + i*4 (lower 32-bit)
+// AXI slave generates this on the fly; no static array needed.
 
-// Source data in DRAM (5 words = 20 bytes = 1 packet)
-// Layout: [word0]=mode+bitmask_hi, [word1]=bitmask_lo+NZ[0:1],
-//         [word2..4]=NZ values (simplified for test)
-static const int DMA_FETCH_WORDS = 5;
-static const uint32_t dram_a_src[5] = {
-    0x0100FF01,  // mode=01(TrIP), bitmask[15:8]=0xFF, bitmask[7:0]=0x01 (hi word)
-    0x010203FF,  // NZ values packing start
-    0x04050607,
-    0x08090A0B,
-    0x0C0D0E0F
-};
+// -------------------------------------------------------
+// TC02 — Fetch B tile with ARREADY back-pressure (5-cycle delay)
+// -------------------------------------------------------
+#define TC02_DRAM_BASE 0x20000000U
+#define TC02_GLB_BASE  0x0140U // GLB_B_BASE
+#define TC02_LEN       320U
+#define TC02_BEATS     80U
+#define TC02_AR_DELAY  5       // cycles before ARREADY
 
-// Expected GLB_A content after fetch
-static const uint32_t glb_a_expected[5] = {
-    0x0100FF01, 0x010203FF, 0x04050607, 0x08090A0B, 0x0C0D0E0F
-};
+// -------------------------------------------------------
+// TC03 — Fetch requiring chunking (>1024B = 2 bursts)
+// -------------------------------------------------------
+#define TC03_DRAM_BASE  0x10000000U
+#define TC03_GLB_BASE   0x0000U
+#define TC03_LEN        1280U  // 1024 + 256 → 2 bursts
+#define TC03_BEATS      320U
+#define TC03_BURST0_LEN 1024U  // first chunk
+#define TC03_BURST1_LEN 256U   // second chunk
 
-// Content to place in GLB_C for writeback test (4 words = 16 bytes)
-static const int DMA_WB_WORDS = 4;
-static const uint32_t glb_c_src[4] = {
-    0xAABBCCDD, 0x11223344, 0x55667788, 0x99AABBCC
-};
+// -------------------------------------------------------
+// TC04 — Writeback C tile (GLB→DRAM), no back-pressure
+// GLB is pre-filled with a known pattern before writeback.
+// -------------------------------------------------------
+#define TC04_DRAM_BASE 0x30000000U
+#define TC04_GLB_BASE  0x0280U // GLB_C_BASE
+#define TC04_LEN       256U    // 16×16 × 1 byte
+#define TC04_BEATS     64U     // 256 / 4
 
-// Expected DRAM content after writeback
-static const uint32_t dram_c_expected[4] = {
-    0xAABBCCDD, 0x11223344, 0x55667788, 0x99AABBCC
-};
+// GLB data pattern for writeback: word[i] = 0xC0000000 | i
+static inline uint32_t tc04_glb_word(uint32_t beat_idx) {
+    return 0xC0000000U | beat_idx;
+}
 
-// DMA_len values
-static const uint32_t DMA_A_LEN = 20; // 5 words × 4 bytes
-static const uint32_t DMA_C_LEN = 16; // 4 words × 4 bytes
+// -------------------------------------------------------
+// TC05 — Writeback with WREADY stall (every 3rd beat)
+// -------------------------------------------------------
+#define TC05_DRAM_BASE     0x30000000U
+#define TC05_GLB_BASE      0x0280U
+#define TC05_LEN           256U
+#define TC05_BEATS         64U
+#define TC05_WREADY_PERIOD 3 // WREADY=0 for 2 cycles, 1 for 1 cycle

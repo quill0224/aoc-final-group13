@@ -2,7 +2,7 @@
 #include "workload.h"
 
 int main(int argc, char** argv) {
-    tb_init(argc, argv, "INTEGRATION_test");
+    tb_init(argc, argv, "MC_unit_test");
     run_workload();
     tb_close();
     return 0;

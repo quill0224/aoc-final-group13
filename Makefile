@@ -30,7 +30,7 @@ endef
 
 .PHONY: clean help \
         controller0 run_controller \
-        run_SRAM run_GLB run_DMA run_CTRL run_INTEGRATION run_unit_all
+        run_SRAM run_GLB run_DMA run_CTRL run_MC run_INTEGRATION run_unit_all
 
 help:
 	@echo "Usage: make [target]"
@@ -68,6 +68,10 @@ run_DMA:
 run_CTRL:
 	$(call msg_grey,[ROOT] Delegating to DLA testbench for CTRL unit test...)
 	@$(MAKE) -C tb/testbench/dla run_CTRL
+
+run_MC:
+	$(call msg_grey,[ROOT] Delegating to DLA testbench for MC test...)
+	@$(MAKE) -C tb/testbench/dla run_MC
 
 run_INTEGRATION:
 	$(call msg_grey,[ROOT] Delegating to DLA testbench for INTEGRATION test...)
