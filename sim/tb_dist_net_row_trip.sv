@@ -126,9 +126,43 @@ module tb_dist_net_row_trip;
         @(negedge clk);
 
         $display("== dist_net_row_trip TB ==");
-        pulse_and_check();   // T1+T2+T3+T4 一次驗完
+        $display("-- Scenario 1: gather / invalid lane / broadcast / registered --");
+        pulse_and_check();
 
-        if (fails == 0) $display("ALL PASS  (16 lanes: gather / invalid / broadcast / registered)");
+        // ====================================================================
+        // Scenario 2: 多 fiber packing demo —— 4 個輸出塞滿 16 lane (一拍)
+        //   (0,0): k={2,5,9}      → lane 0~2
+        //   (0,1): k={0,3,7,11,14}→ lane 3~7
+        //   (1,0): k={1,6,8}      → lane 8~10
+        //   (1,1): k={4,10,12,13,15} → lane 11~15
+        //   合計 3+5+3+5 = 16,利用率 100%。每 lane 各自 (row,col,k) 不同。
+        // ====================================================================
+        for (l = 0; l < LANES; l = l + 1) exp_vld[l] = 1'b1;
+        // (0,0)
+        exp_row[0]=0; exp_col[0]=0; exp_k[0]=2;
+        exp_row[1]=0; exp_col[1]=0; exp_k[1]=5;
+        exp_row[2]=0; exp_col[2]=0; exp_k[2]=9;
+        // (0,1)
+        exp_row[3]=0; exp_col[3]=1; exp_k[3]=0;
+        exp_row[4]=0; exp_col[4]=1; exp_k[4]=3;
+        exp_row[5]=0; exp_col[5]=1; exp_k[5]=7;
+        exp_row[6]=0; exp_col[6]=1; exp_k[6]=11;
+        exp_row[7]=0; exp_col[7]=1; exp_k[7]=14;
+        // (1,0)
+        exp_row[8]=1;  exp_col[8]=0;  exp_k[8]=1;
+        exp_row[9]=1;  exp_col[9]=0;  exp_k[9]=6;
+        exp_row[10]=1; exp_col[10]=0; exp_k[10]=8;
+        // (1,1)
+        exp_row[11]=1; exp_col[11]=1; exp_k[11]=4;
+        exp_row[12]=1; exp_col[12]=1; exp_k[12]=10;
+        exp_row[13]=1; exp_col[13]=1; exp_k[13]=12;
+        exp_row[14]=1; exp_col[14]=1; exp_k[14]=13;
+        exp_row[15]=1; exp_col[15]=1; exp_k[15]=15;
+
+        $display("-- Scenario 2: 多 fiber packing (4 個輸出塞滿 16 lane, 100%% 利用率) --");
+        pulse_and_check();
+
+        if (fails == 0) $display("ALL PASS  (Scenario 1 + 多 fiber packing 都正確)");
         else            $display("FAILED: %0d 個錯", fails);
         $finish;
     end
