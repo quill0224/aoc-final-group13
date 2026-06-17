@@ -6,8 +6,8 @@
 // cycle when MFIU outputs are valid.
 //
 // Timing for default NUM_ROWS = NUM_COLS = 2 (MAX_FIBERS = 2):
-//   T+0  start_i asserted — buffer already pre-reading addr 0
-//   T+1  S_READ: capture mask[0], set rd_addr = 1
+//   T+0  start_i asserted — buffer already pre-reading addr 0, prefetch addr 1
+//   T+1  S_READ: capture mask[0], prefetch addr 2 if present
 //   T+2  S_READ: capture mask[1] — last fiber
 //   T+3  S_DONE: done_o = 1, MFIU outputs valid
 //
@@ -83,6 +83,9 @@ module trip_intersection_top #(
     // Packed mask buses for MFIU: fiber r at [r*K_BITS +: K_BITS]
     wire [NUM_ROWS*K_BITS-1:0]    a_masks_mfiu;
     wire [NUM_COLS*K_BITS-1:0]    b_masks_mfiu;
+
+    wire [FC_W-1:0] prefetch_addr;
+    assign prefetch_addr = fiber_cnt + 2;
 
     // ── A bitmask_buffer ──────────────────────────────────────────────────────
     bitmask_buffer #(
@@ -175,17 +178,21 @@ module trip_intersection_top #(
 
                 // Hold rd_addr = 0 so the buffer pre-reads fiber 0 every cycle.
                 // The moment start_i fires the output already holds mask[0].
+                // Because bitmask_buffer has registered read outputs, issue
+                // addr 1 here so mask[1] is ready by the second S_READ cycle.
                 S_IDLE: begin
                     rd_addr_a <= {ADDR_W_A{1'b0}};
                     rd_addr_b <= {ADDR_W_B{1'b0}};
                     if (start_i) begin
                         fiber_cnt <= {FC_W{1'b0}};
+                        if (NUM_ROWS > 1) rd_addr_a <= 1'b1;
+                        if (NUM_COLS > 1) rd_addr_b <= 1'b1;
                         state     <= S_READ;
                     end
                 end
 
                 // Each cycle: capture mask[fiber_cnt] from buffer output,
-                // then advance rd_addr for the next fiber.
+                // then prefetch the fiber after the one already in flight.
                 S_READ: begin
                     if (fiber_cnt < NUM_ROWS) a_mask_reg[fiber_cnt] <= buf_a_mask;
                     if (fiber_cnt < NUM_COLS) b_mask_reg[fiber_cnt] <= buf_b_mask;
@@ -195,8 +202,8 @@ module trip_intersection_top #(
                     if (fiber_cnt == MAX_FIBERS - 1) begin
                         state <= S_DONE;
                     end else begin
-                        rd_addr_a <= fiber_cnt[ADDR_W_A-1:0] + 1'b1;
-                        rd_addr_b <= fiber_cnt[ADDR_W_B-1:0] + 1'b1;
+                        if (prefetch_addr < NUM_ROWS) rd_addr_a <= prefetch_addr[ADDR_W_A-1:0];
+                        if (prefetch_addr < NUM_COLS) rd_addr_b <= prefetch_addr[ADDR_W_B-1:0];
                     end
                 end
 
