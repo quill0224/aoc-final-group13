@@ -52,10 +52,14 @@ set RTL_FILES [list \
     rtl/mfiu/mfiu.v \
     rtl/mfiu/mfiu_adapter.sv \
     rtl/dist/dist_net_row.sv \
+    rtl/dist/dist_net_row_trip.sv \
     rtl/dist/reduction_tree_radix16.sv \
     rtl/pe/sram_128x32_1r1w.sv \
     rtl/pe/local_buffer_row.sv \
     rtl/pe/pe_row_full.sv ]
+#   dist_net_row_trip.sv:TrIP multi-fiber 2D gather(純邏輯,對 pe_row_full 無影響)。
+#   單獨驗 timing:  TOP=dist_net_row_trip dc_shell -f synth/synth.tcl | tee synth/trip.log
+#   看 reports/dist_net_row_trip/{violators,timing_setup,qor}.rpt(64-to-1 mux 過不過 500MHz)
 
 # macro 模式:-define USE_SRAM_MACRO → sram wrapper 接真 macro(非 behavioral flop)
 analyze -format sverilog -define {USE_SRAM_MACRO} $RTL_FILES

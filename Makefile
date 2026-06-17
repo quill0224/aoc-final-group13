@@ -36,7 +36,6 @@ endef
 define msg_yellow
 	@printf "$(YELLOW)$(1)$(RESET)\n"
 endef
-
 # =============================================================================
 # Group 13 RTL settings
 # Use G13_* prefix to avoid variable name collisions
@@ -65,8 +64,8 @@ G13_VERILATOR := verilator
         controller0 run_controller \
         run_SRAM run_GLB run_DMA run_CTRL run_MC run_INTEGRATION run_unit_all \
         tb_mac tb_reduction_tree tb_lbuf tb_mfiu_adapter tb_dist_net \
+        tb_dist_net_trip tb_mfiu_mf_chain \
         tb_pe_row_full tb_pe_array lint g13_clean
-
 all: help
 
 # =============================================================================
@@ -94,6 +93,8 @@ help:
 	@echo "  tb_mfiu_adapter                  - mfiu_adapter unit test, Dense + TrIP"
 	@echo "  tb_dist_net                      - dist_net_row unit test, Dense identity"
 	@echo "  tb_pe_row_full                   - pe_row_full end-to-end test"
+	@echo "  tb_dist_net_trip                 - dist_net_row_trip TrIP multi-fiber test"
+	@echo "  tb_mfiu_mf_chain                 - mfiu_adapter_mf to dist_net_row_trip chain test"
 	@echo "  tb_pe_array                      - pe_array end-to-end test, 16x16"
 	@echo "  lint                             - Verilator lint, top = pe_row_full"
 	@echo ""
@@ -234,6 +235,38 @@ tb_dist_net: $(G13_PKG) \
 		$(G13_RTL_DIR)/dist/dist_net_row.sv \
 		$(G13_TB_DIR)/tb_dist_net_row.sv
 	vvp tb_dist_net.vvp
+
+# -----------------------------------------------------------------------------
+# dist_net_row_trip unit test
+# TrIP multi-fiber 2D gather
+# -----------------------------------------------------------------------------
+tb_dist_net_trip: $(G13_PKG) \
+                  $(G13_RTL_DIR)/dist/dist_net_row_trip.sv \
+                  $(G13_TB_DIR)/tb_dist_net_row_trip.sv
+	$(G13_IVERILOG) -g2012 -o tb_dist_net_trip.vvp \
+		-I$(G13_RTL_DIR) \
+		$(G13_PKG) \
+		$(G13_RTL_DIR)/dist/dist_net_row_trip.sv \
+		$(G13_TB_DIR)/tb_dist_net_row_trip.sv
+	vvp tb_dist_net_trip.vvp
+
+# -----------------------------------------------------------------------------
+# Multi-fiber end-to-end chain
+# mfiu_adapter_mf -> dist_net_row_trip
+# -----------------------------------------------------------------------------
+tb_mfiu_mf_chain: $(G13_PKG) \
+                  $(G13_RTL_DIR)/mfiu/mfiu.v \
+                  $(G13_RTL_DIR)/mfiu/mfiu_adapter_mf.sv \
+                  $(G13_RTL_DIR)/dist/dist_net_row_trip.sv \
+                  $(G13_TB_DIR)/tb_mfiu_mf_chain.sv
+	$(G13_IVERILOG) -g2012 -o tb_mfiu_mf_chain.vvp \
+		-I$(G13_RTL_DIR) \
+		$(G13_PKG) \
+		$(G13_RTL_DIR)/mfiu/mfiu.v \
+		$(G13_RTL_DIR)/mfiu/mfiu_adapter_mf.sv \
+		$(G13_RTL_DIR)/dist/dist_net_row_trip.sv \
+		$(G13_TB_DIR)/tb_mfiu_mf_chain.sv
+	vvp tb_mfiu_mf_chain.vvp
 
 # -----------------------------------------------------------------------------
 # pe_row_full end-to-end test
