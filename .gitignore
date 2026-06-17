@@ -59,7 +59,7 @@ xsim.pb
 # --- Build / Sim outputs ---
 build/
 out/
-dist/
+/dist/                                      # anchor to repo root only; otherwise collides with rtl/dist/ (HW module)
 *.o
 *.a
 *.so
@@ -101,6 +101,7 @@ analysis/results/*/
 !analysis/results/.gitkeep
 # Allow committed snapshots (canonical reference runs)
 !analysis/results/baseline/
+*.vvp
 
 obj_dir/
 dla/obj_dir/
