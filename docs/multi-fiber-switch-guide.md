@@ -24,11 +24,11 @@
 - 直接用 `rtl/dist/dist_net_row_trip.sv`（已測：gather / 廣播 / invalid / **4 輸出 packing 100%**，`make tb_dist_net_trip` 全過）。
 - 它吃三條 sel + 2D `a_values`/`b_values`，吐 registered `a_lane_out`/`b_lane_out`。
 
-### ② MFIU adapter（`rtl/mfiu/mfiu_adapter.sv`）—— MFIU owner 改
-- 把內部 `mfiu` 核心從 `NUM_ROWS=1, NUM_COLS=1` 改成 `NUM_ROWS=N_A_FIBER, NUM_COLS=N_B_FIBER`（4×4）。
-- **輸出改成吐三條** `a_row_sel`/`b_col_sel`/`k_sel`（現在被壓成單一 `effectual_idx`）。
-- `cut_after`/`out_addr` 要由 `a_row_sel`/`b_col_sel` 變化推出（相鄰 lane 座標變了就剪 sub-tree）。
-- ⚠️ K_BITS / LANES / overflow 的確切尺寸要 MFIU owner 定（4×4 一拍候選變多，可能要分批）。
+### ② MFIU adapter —— ✅ 已提供 `rtl/mfiu/mfiu_adapter_mf.sv`
+- 多 fiber 版 adapter 已寫好：instantiate 楊 `mfiu` 核心設 4×4、吐三條 `a_row_sel`/`b_col_sel`/`k_sel` + `lane_valid`，flat→多維、補 MFIU_STAGES 延遲。
+- **端到端測過**：`make tb_mfiu_mf_chain`（bitmask → 交集 → 2D gather 值正確）。
+- 依賴楊的 `rtl/mfiu/mfiu.v`（整合分支上有）。
+- ⚠️ 仍待上游定：① a/b bitmask 改成「4 fiber × 16 bit = 64 bit」由 buffer 餵；② overflow（一拍 >16 有效）的 replay 由 ctrl 處理；③ `cut_after`/`out_addr`（多 C 的 sub-tree 邊界）尚未實作。
 
 ### ③ pe_row_full（`rtl/pe/pe_row_full.sv`）—— Iris 改
 - 把 `dist_net_row u_dist` 換成 `dist_net_row_trip`。

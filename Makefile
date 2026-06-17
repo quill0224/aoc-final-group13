@@ -120,6 +120,19 @@ tb_dist_net_trip: $(PKG) $(RTL_DIR)/dist/dist_net_row_trip.sv $(TB_DIR)/tb_dist_
 		$(TB_DIR)/tb_dist_net_row_trip.sv
 	vvp tb_dist_net_trip.vvp
 
+# ── 多 fiber 端到端串接 (mfiu_adapter_mf -> dist_net_row_trip, iverilog) ──
+# 依賴楊的 rtl/mfiu/mfiu.v (整合分支上才有;本機測試需先拉過來)
+tb_mfiu_mf_chain: $(PKG) $(RTL_DIR)/mfiu/mfiu.v $(RTL_DIR)/mfiu/mfiu_adapter_mf.sv \
+                  $(RTL_DIR)/dist/dist_net_row_trip.sv $(TB_DIR)/tb_mfiu_mf_chain.sv
+	$(IVERILOG) -g2012 -o tb_mfiu_mf_chain.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter_mf.sv \
+		$(RTL_DIR)/dist/dist_net_row_trip.sv \
+		$(TB_DIR)/tb_mfiu_mf_chain.sv
+	vvp tb_mfiu_mf_chain.vvp
+
 # ── pe_row 單元測試 (iverilog) ──
 # 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16 + pe_row
 tb_pe_row: $(PKG) \
