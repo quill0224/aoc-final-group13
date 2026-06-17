@@ -23,19 +23,19 @@ using TopModule = VGLB;
 #include "VDMA.h"
 using TopModule = VDMA;
 #elif defined(case_CTRL)
-#include "Vtop_controller.h"
-using TopModule = Vtop_controller;
+#include "Vcontroller.h"       // 已拔除 top_ 前綴
+using TopModule = Vcontroller; // 已拔除 top_ 前綴
 #elif defined(case_MC)
 #include "VMC.h"
 using TopModule = VMC;
 #elif defined(case_INTEGRATION)
-#include "Vtop_integration.h"
-using TopModule = Vtop_integration;
+#include "Vintegration.h"       // 已拔除 top_ 前綴
+using TopModule = Vintegration; // 已拔除 top_ 前綴
 #else
 #error "No CASE defined."
 #endif
 
-static TopModule* top = nullptr;
+static TopModule* top = nullptr; // top 在此僅為 C++ 指標變數名稱，無需更改
 static VerilatedFstC* fst = nullptr;
 uint64_t sim_time = 0;
 int pass_count = 0;
@@ -126,7 +126,7 @@ void tb_init(int argc, char** argv, const char* test_name) {
     delayed_glb_rdata = 0;
     #endif
 
-    // 控制器模組狀態初始化
+    // 模組狀態初始化分流
     #if defined(case_CTRL)
     top->asic_en = 0; top->DMA_done = 0; top->k_done = 0; top->PEA_A_ready = 0; top->PEA_B_ready = 0; top->ppu_done = 0; top->PEA_opsum_valid = 0;
     #elif defined(case_INTEGRATION)

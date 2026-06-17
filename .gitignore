@@ -104,3 +104,4 @@ analysis/results/*/
 
 obj_dir/
 dla/obj_dir/
+tb/testbench/dla/results/

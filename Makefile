@@ -90,17 +90,17 @@ CONTROLLER_BUILD  := $(CONTROLLER_TB_DIR)/build_controller
 controller0:
 	$(call msg_grey,[ROOT] Building controller...)
 	@mkdir -p test/testbench/dla/build_controller $(BUILD_DIR)/controller
-	@verilator -Wall --cc --trace-fst --timing --top-module top_controller \
+	@verilator -Wall --cc --trace-fst --timing --top-module controller \
 		-I$(LAB4_ROOT)/src/hardware/dla -I$(LAB4_ROOT)/src/hardware/dla/include -I$(LAB4_ROOT)/include \
-		$(LAB4_ROOT)/src/hardware/dla/ASIC/top_controller.sv \
+		$(LAB4_ROOT)/src/hardware/dla/ASIC/controller.sv \
 		--exe test/testbench/dla/tb_controller.cpp \
 		-CFLAGS "-O2" --Mdir test/testbench/dla/build_controller -LDFLAGS "-lpthread" > /dev/null 2>&1
-	@$(MAKE) -C test/testbench/dla/build_controller -f Vtop_controller.mk -j > /dev/null
+	@$(MAKE) -C test/testbench/dla/build_controller -f Vcontroller.mk -j > /dev/null
 	$(call msg_green,[ROOT] Controller ready)
 
 run_controller: controller0
 	$(call msg_cyan,[ROOT] Running controller...)
-	@test/testbench/dla/build_controller/Vtop_controller
+	@test/testbench/dla/build_controller/Vcontroller
 	@mv -f controller.fst $(BUILD_DIR)/controller/controller_$$(date +%m%d_%H%M%S).fst 2>/dev/null || true
 	$(call msg_green,[ROOT] Waveform saved)
 

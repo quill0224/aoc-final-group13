@@ -2,11 +2,10 @@
 `include "ASIC.svh"
 
 // =============================================================================
-// top_integration.sv — Sub-system Integration Wrapper (Now with MC!)
-// Includes: top_controller, DMA, GLB, axi_mem_model, and MC
+// integration.sv — Sub-system Integration Wrapper (Controller + DMA + MC + GLB)
 // =============================================================================
 
-module top_integration (
+module integration (
     input  logic                                clk,
     input  logic                                rst,
 
@@ -60,7 +59,7 @@ module top_integration (
     logic [`GLB_ADDR_BITS-1:0]        mc_glb_base_A, mc_glb_base_B;
     logic [`PKT_CNT_BITS-1:0]         mc_packet_count;
 
-    // DMA <-> GLB & AXI ... (省略部分宣告，維持原有 DMA 訊號)
+    // DMA <-> GLB & AXI
     logic                             glb_en, glb_we;
     logic [3:0]                       glb_wstrb;
     logic [`GLB_ADDR_BITS-1:0]        glb_addr;
@@ -77,10 +76,10 @@ module top_integration (
     logic [`AXI_STRB_BITS-1:0] wstrb;
 
     // =========================================================================
-    // 子模組實體化
+    // 子模組實體化 (徹底移除所有的 top_ 前綴)
     // =========================================================================
 
-    top_controller u_ctrl (
+    controller u_ctrl (
         .clk(clk), .rst(rst), .asic_en(asic_en), .asic_done(asic_done),
         .A_fiber_base_addr(A_fiber_base_addr), .B_fiber_base_addr(B_fiber_base_addr),
         .C_tensor_base_addr(C_tensor_base_addr), .GLB_A_base_addr(GLB_A_base_addr),
@@ -93,7 +92,6 @@ module top_integration (
         .DMA_en(dma_en), .DMA_mode(dma_mode), .DMA_DRAM_ADDR(dma_dram_addr), 
         .DMA_GLB_ADDR(dma_glb_addr), .DMA_len(dma_len), .DMA_done(dma_done),
         
-        // MC 連線
         .mc_start(mc_start), .mc_mode(mc_mode), 
         .mc_glb_base_A(mc_glb_base_A), .mc_glb_base_B(mc_glb_base_B),
         .mc_packet_count(mc_packet_count), .k_done(k_done),
@@ -107,7 +105,6 @@ module top_integration (
         .relu_sel(), .Maxpool_en(), .Maxpool_init(), .ppu_done(ppu_done)
     );
 
-    // 真正掛載 MC 模組
     MC u_mc (
         .clk(clk),
         .rst(rst),
@@ -117,7 +114,7 @@ module top_integration (
         .mc_glb_base_B(mc_glb_base_B),
         .mc_packet_count(mc_packet_count),
         .k_done(k_done),
-        .mc_glb_ren_A(),        // 暫不與單埠 GLB 衝突，留待後續 Multi-bank 接線
+        .mc_glb_ren_A(),        
         .mc_glb_addr_A(), 
         .mc_glb_ren_B(), 
         .mc_glb_addr_B(),

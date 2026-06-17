@@ -2,7 +2,7 @@
 `include "ASIC.svh"
 
 // =============================================================================
-// top_controller.sv — Trapezoid-Lite ASIC FSM Controller
+// controller.sv — Trapezoid-Lite ASIC FSM Controller
 //
 // MKN loop (outer→inner): M(spatial) → K(input ch×filter) → N(output ch)
 // A reuse: loaded once per M tile, reused across all K×N iterations
@@ -12,7 +12,7 @@
 // DMA re-trigger prevention: DMA_en deasserts once flag is set
 // =============================================================================
 
-module top_controller (
+module controller (
     // System
     input  logic                                clk,
     input  logic                                rst,

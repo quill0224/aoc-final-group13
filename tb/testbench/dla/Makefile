@@ -60,17 +60,17 @@ V_SRCS := $(SRC_DIR)/DMA.sv \
           $(SRC_DIR)/SRAM_rtl.sv
 
 else ifeq ($(CASE), case_CTRL)
-TOP_MODULE := top_controller
-V_SRCS := $(SRC_DIR)/top_controller.sv
+TOP_MODULE := controller
+V_SRCS := $(SRC_DIR)/controller.sv
 
 else ifeq ($(CASE), case_MC)
 TOP_MODULE := MC
 V_SRCS     := $(SRC_DIR)/MC.sv
 
 else ifeq ($(CASE), case_INTEGRATION)
-TOP_MODULE := top_integration
-V_SRCS := $(SRC_DIR)/top_integration.sv \
-          $(SRC_DIR)/top_controller.sv \
+TOP_MODULE := integration
+V_SRCS := $(SRC_DIR)/integration.sv \
+          $(SRC_DIR)/controller.sv \
           $(SRC_DIR)/DMA.sv \
           $(SRC_DIR)/GLB.sv \
           $(SRC_DIR)/SRAM_rtl.sv \
@@ -173,7 +173,7 @@ help:
 	@echo " make run_SRAM        - SRAM_rtl unit test"
 	@echo " make run_GLB         - GLB unit test"
 	@echo " make run_DMA         - DMA fetch/writeback test"
-	@echo " make run_CTRL        - top_controller FSM test"
+	@echo " make run_CTRL        - controller FSM test"
 	@echo " make run_MC          - MC AGU and latency test"
 	@echo " make run_INTEGRATION - end-to-end system test"
 	@echo " make run_unit_all    - run all cases sequentially"
