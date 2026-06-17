@@ -1,0 +1,512 @@
+current_design "top"
+
+# define your clock
+clock -name "top.cpu_clk"     -domain cpu_clk     -tag cpu_clk    -period 5.0  -edge {0 2.5}
+clock -name "top.axi_clk"     -domain axi_clk     -tag axi_clk    -period 2.5  -edge {0 1.25}
+clock -name "top.dram_clk"    -domain dram_clk    -tag dram_clk   -period 5.0  -edge {0 2.5}
+clock -name "top.rom_clk"     -domain rom_clk     -tag rom_clk    -period 50.1  -edge {0 25.05}
+
+reset -name "cpu_rst"  -value 1 -sync
+reset -name "axi_rst"  -value 1 -sync
+reset -name "rom_rst"  -value 1 -sync
+reset -name "dram_rst"  -value 1 -sync
+
+abstract_port -module TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array -ports  SLP DSLP SD PUDELAY CEB WEB A D BWEB RTSEL WTSEL Q -clock cpu_clk
+abstract_port -module TS1N16ADFPCLLLVTA128X64M4SWSHOD_tag_array -ports  SLP DSLP SD PUDELAY CEB WEB A D BWEB RTSEL WTSEL Q -clock cpu_clk
+abstract_port -module TS1N16ADFPCLLLVTA512X45M4SWSHOD -ports  SLP DSLP SD PUDELAY CEB WEB A D BWEB RTSEL WTSEL Q  -clock cpu_clk
+
+# ---------------- reset register to 0 ---------------- # 
+# ---------------- axi_m0_cdc ---------------- #
+
+
+# AR 
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.w_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.w_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.r_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.r_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_ar.r_ptr2					-value 0
+
+
+# R
+define_tag -tag initState -name top.cpu_wrapper_m0_r.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_r.w_gray						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_r.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_r.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_r.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_r.r_gray						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_r.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m0_r.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m0_r.w_ptr_f2_gray 				-value 0 
+
+
+
+# ---------------- axi_m1_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.w_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.w_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.r_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.r_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_aw.r_ptr2					-value 0
+
+
+# W
+define_tag -tag initState -name top.cpu_wrapper_m1_w.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_w.w_ptr0						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_w.w_ptr1	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_w.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_w.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_w.r_ptr0						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_w.r_ptr1	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_w.r_ptr2						-value 0
+
+# AR 
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.w_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.w_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.r_ptr0					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.r_ptr1	    			-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_ar.r_ptr2					-value 0
+
+
+# R
+define_tag -tag initState -name top.cpu_wrapper_m1_r.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_r.w_gray						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_r.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_r.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_r.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_r.r_gray						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_r.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_r.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_r.w_ptr_f2_gray 				-value 0 
+
+# B
+define_tag -tag initState -name top.cpu_wrapper_m1_b.w_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_b.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_b.r_ptr	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.cpu_wrapper_m1_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.cpu_wrapper_m1_b.r_ptr2						-value 0
+
+
+
+# ---------------- axi_s0_cdc ---------------- #
+
+# AR 
+define_tag -tag initState -name top.rom_wrapper_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.rom_wrapper_ar.w_ptr0						-value 0
+
+define_tag -tag initState -name top.rom_wrapper_ar.w_ptr1	    				-value 0
+define_tag -tag initState -name top.rom_wrapper_ar.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.rom_wrapper_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.rom_wrapper_ar.r_ptr0						-value 0
+	
+define_tag -tag initState -name top.rom_wrapper_ar.r_ptr1	    				-value 0
+define_tag -tag initState -name top.rom_wrapper_ar.r_ptr2						-value 0
+	
+# R
+define_tag -tag initState -name top.rom_wrapper_r.w_ptr	    					-value 0
+define_tag -tag initState -name top.rom_wrapper_r.w_gray						-value 0
+
+define_tag -tag initState -name top.rom_wrapper_r.w_ptr_f0_gray	    			-value 0
+define_tag -tag initState -name top.rom_wrapper_r.w_ptr_f1_gray 				-value 0
+	
+define_tag -tag initState -name top.rom_wrapper_r.r_ptr	    					-value 0
+define_tag -tag initState -name top.rom_wrapper_r.r_gray						-value 0
+
+define_tag -tag initState -name top.rom_wrapper_r.r_ptr_f0_gray	    			-value 0
+define_tag -tag initState -name top.rom_wrapper_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.rom_wrapper_r.r_ptr_f2_gray	    			-value 0
+define_tag -tag initState -name top.rom_wrapper_r.w_ptr_f2_gray 				-value 0
+
+
+
+# ---------------- axi_s1_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.im_wrapper_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_aw.w_ptr0					-value 0
+
+define_tag -tag initState -name top.im_wrapper_aw.w_ptr1	    			-value 0
+define_tag -tag initState -name top.im_wrapper_aw.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.im_wrapper_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_aw.r_ptr0					-value 0
+
+define_tag -tag initState -name top.im_wrapper_aw.r_ptr1	    			-value 0
+define_tag -tag initState -name top.im_wrapper_aw.r_ptr2					-value 0
+
+# W
+define_tag -tag initState -name top.im_wrapper_w.w_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_w.w_gray						-value 0
+
+define_tag -tag initState -name top.im_wrapper_w.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_w.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.im_wrapper_w.r_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_w.r_gray						-value 0
+
+define_tag -tag initState -name top.im_wrapper_w.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_w.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.im_wrapper_w.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_w.w_ptr_f2_gray 				-value 0 
+
+# AR 
+define_tag -tag initState -name top.im_wrapper_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_ar.w_ptr0					-value 0
+
+define_tag -tag initState -name top.im_wrapper_ar.w_ptr1	    			-value 0
+define_tag -tag initState -name top.im_wrapper_ar.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.im_wrapper_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_ar.r_ptr0					-value 0
+
+define_tag -tag initState -name top.im_wrapper_ar.r_ptr1	    			-value 0
+define_tag -tag initState -name top.im_wrapper_ar.r_ptr2					-value 0
+
+# R
+define_tag -tag initState -name top.im_wrapper_r.w_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_r.w_gray						-value 0
+
+define_tag -tag initState -name top.im_wrapper_r.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_r.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.im_wrapper_r.r_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_r.r_gray						-value 0
+
+define_tag -tag initState -name top.im_wrapper_r.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.im_wrapper_r.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.im_wrapper_r.w_ptr_f2_gray 				-value 0 
+
+# B
+define_tag -tag initState -name top.im_wrapper_b.w_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.im_wrapper_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.im_wrapper_b.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.im_wrapper_b.r_ptr	    				-value 0
+define_tag -tag initState -name top.im_wrapper_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.im_wrapper_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.im_wrapper_b.r_ptr2						-value 0
+
+
+# ---------------- axi_s2_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.dm_wrapper_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_aw.w_ptr0					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_aw.w_ptr1	    			-value 0
+define_tag -tag initState -name top.dm_wrapper_aw.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_aw.r_ptr0					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_aw.r_ptr1	    			-value 0
+define_tag -tag initState -name top.dm_wrapper_aw.r_ptr2					-value 0
+
+# W
+define_tag -tag initState -name top.dm_wrapper_w.w_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_w.w_gray						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_w.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_w.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dm_wrapper_w.r_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_w.r_gray						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_w.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_w.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dm_wrapper_w.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_w.w_ptr_f2_gray 				-value 0 
+
+# AR 
+define_tag -tag initState -name top.dm_wrapper_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_ar.w_ptr0					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_ar.w_ptr1	    			-value 0
+define_tag -tag initState -name top.dm_wrapper_ar.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_ar.r_ptr0					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_ar.r_ptr1	    			-value 0
+define_tag -tag initState -name top.dm_wrapper_ar.r_ptr2					-value 0
+
+# R
+define_tag -tag initState -name top.dm_wrapper_r.w_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_r.w_gray						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_r.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_r.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dm_wrapper_r.r_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_r.r_gray						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_r.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dm_wrapper_r.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.dm_wrapper_r.w_ptr_f2_gray 				-value 0 
+
+# B
+define_tag -tag initState -name top.dm_wrapper_b.w_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_b.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.dm_wrapper_b.r_ptr	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dm_wrapper_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dm_wrapper_b.r_ptr2						-value 0
+
+
+# ---------------- axi_s3_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.dma_s_wrapper_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_aw.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_aw.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_aw.w_ptr2 					-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_aw.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_aw.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_aw.r_ptr2						-value 0
+
+# W
+define_tag -tag initState -name top.dma_s_wrapper_w.w_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_w.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_w.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_w.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_w.r_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_w.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_w.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_w.r_ptr2						-value 0
+
+# AR 
+#define_tag -tag initState -name top.AXI0.AR_S3.sync_r2w.d_1 	    -value 0
+#define_tag -tag initState -name top.AXI0.AR_S3.sync_r2w.q 	        -value 0
+#define_tag -tag initState -name top.AXI0.AR_S3.sync_w2r.d_1 	    -value 0
+#define_tag -tag initState -name top.AXI0.AR_S3.sync_w2r.q 	        -value 0
+
+# R
+#define_tag -tag initState -name top.AXI0.R_S3.sync_r2w.d_1 	    -value 0
+#define_tag -tag initState -name top.AXI0.R_S3.sync_r2w.q 	        -value 0
+#define_tag -tag initState -name top.AXI0.R_S3.sync_w2r.d_1 	    -value 0
+#define_tag -tag initState -name top.AXI0.R_S3.sync_w2r.q 	        -value 0
+
+# B
+define_tag -tag initState -name top.dma_s_wrapper_b.w_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_b.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_b.r_ptr	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dma_s_wrapper_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dma_s_wrapper_b.r_ptr2						-value 0
+
+
+
+
+
+# ---------------- axi_s4_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.wdt_wrapper_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_aw.w_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_aw.w_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_aw.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_aw.r_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_aw.r_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_aw.r_ptr2						-value 0
+
+# W
+define_tag -tag initState -name top.wdt_wrapper_w.w_ptr	    					-value 0
+define_tag -tag initState -name top.wdt_wrapper_w.w_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_w.w_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_w.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_w.r_ptr	    					-value 0
+define_tag -tag initState -name top.wdt_wrapper_w.r_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_w.r_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_w.r_ptr2						-value 0
+
+# B
+define_tag -tag initState -name top.wdt_wrapper_b.w_ptr	    					-value 0
+define_tag -tag initState -name top.wdt_wrapper_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_b.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_b.r_ptr	    					-value 0
+define_tag -tag initState -name top.wdt_wrapper_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.wdt_wrapper_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.wdt_wrapper_b.r_ptr2						-value 0
+
+
+# ---------------- axi_s5_cdc ---------------- #
+# AW
+define_tag -tag initState -name top.dram_wrapper_aw.w_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_aw.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_aw.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_aw.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_aw.r_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_aw.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_aw.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_aw.r_ptr2						-value 0
+
+# W
+define_tag -tag initState -name top.dram_wrapper_w.w_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_w.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_w.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_w.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_w.r_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_w.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_w.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_w.r_ptr2						-value 0
+
+# AR 
+define_tag -tag initState -name top.dram_wrapper_ar.w_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_ar.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_ar.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_ar.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_ar.r_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_ar.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_ar.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_ar.r_ptr2						-value 0
+
+# R
+define_tag -tag initState -name top.dram_wrapper_r.w_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_r.w_gray						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_r.w_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dram_wrapper_r.w_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dram_wrapper_r.r_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_r.r_gray						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_r.r_ptr_f0_gray	    		-value 0
+define_tag -tag initState -name top.dram_wrapper_r.r_ptr_f1_gray 				-value 0
+
+define_tag -tag initState -name top.dram_wrapper_r.r_ptr_f2_gray	    		-value 0
+define_tag -tag initState -name top.dram_wrapper_r.w_ptr_f2_gray 				-value 0 
+
+# B
+define_tag -tag initState -name top.dram_wrapper_b.w_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_b.w_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_b.w_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_b.w_ptr2 						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_b.r_ptr	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_b.r_ptr0						-value 0
+
+define_tag -tag initState -name top.dram_wrapper_b.r_ptr1	    				-value 0
+define_tag -tag initState -name top.dram_wrapper_b.r_ptr2						-value 0
+
+waive -rule Ar_syncrst_setupcheck01
+
+#  async fifo source flip-flop is a static signal, no synchronization may be required
+# m0
+quasi_static -name top.cpu_wrapper_m0_ar.DATA_FIFO
+quasi_static -name top.cpu_wrapper_m0_r.DATA_FIFO
+# m1
+quasi_static -name top.cpu_wrapper_m1_aw.DATA_FIFO
+quasi_static -name top.cpu_wrapper_m1_w.DATA_FIFO
+quasi_static -name top.cpu_wrapper_m1_ar.DATA_FIFO
+quasi_static -name top.cpu_wrapper_m1_r.DATA_FIFO
+quasi_static -name top.cpu_wrapper_m1_b.DATA_FIFO
+# s0
+quasi_static -name top.rom_wrapper_ar.DATA_FIFO
+quasi_static -name top.rom_wrapper_r.DATA_FIFO
+# s1
+quasi_static -name top.im_wrapper_ar.DATA_FIFO
+quasi_static -name top.im_wrapper_r.DATA_FIFO
+quasi_static -name top.im_wrapper_aw.DATA_FIFO
+quasi_static -name top.im_wrapper_w.DATA_FIFO
+quasi_static -name top.im_wrapper_b.DATA_FIFO
+# s2
+quasi_static -name top.dm_wrapper_ar.DATA_FIFO
+quasi_static -name top.dm_wrapper_r.DATA_FIFO
+quasi_static -name top.dm_wrapper_aw.DATA_FIFO
+quasi_static -name top.dm_wrapper_w.DATA_FIFO
+quasi_static -name top.dm_wrapper_b.DATA_FIFO
+# s3 
+quasi_static -name top.dma_s_wrapper_aw.DATA_FIFO
+quasi_static -name top.dma_s_wrapper_w.DATA_FIFO
+quasi_static -name top.dma_s_wrapper_b.DATA_FIFO
+# s4
+quasi_static -name top.wdt_wrapper_aw.DATA_FIFO
+quasi_static -name top.wdt_wrapper_w.DATA_FIFO
+quasi_static -name top.wdt_wrapper_b.DATA_FIFO
+# s5
+quasi_static -name top.dram_wrapper_aw.DATA_FIFO
+quasi_static -name top.dram_wrapper_w.DATA_FIFO
+quasi_static -name top.dram_wrapper_ar.DATA_FIFO
+quasi_static -name top.dram_wrapper_r.DATA_FIFO
+quasi_static -name top.dram_wrapper_b.DATA_FIFO
