@@ -1,21 +1,20 @@
 // =============================================================================
 // dist_net_row.sv — Per-PE-row A/B Distribution network
 // =============================================================================
-// Owner: NoC(黃妍心 + QuillQ)
+// NoC distribution network
 // Paper: Trapezoid (ISCA'24) Fig 6「A/B Distribution」(Benes network)
 //
 // 依 MFIU 的 effectual_idx 把 a/b 路由到對的 multiplier:
 //   out[m] = in[ effectual_idx[m] ]
 // Dense IP 的 identity idx 讓它自動退化成 pass-through,所以不需 mode 分支。
 //
-// 拓樸:架構主打 **Benes network**(non-blocking 16×16,對齊 paper)。
-//   本檔目前是功能等價的 gather stand-in(out[m]=in[idx[m]]),Benes 與
-//   gather 對外行為相同,差在內部 switch 級數 / 面積。之後可換成真正的
-//   Benes butterfly 實作,port 不變。
+// 拓樸:這就是一張 **crossbar**(non-blocking 16×16)。本檔用 behavioral select
+//   寫(out[m]=in[idx[m]]),合成即為 mux-based crossbar。之後可換成顯式
+//   Benes butterfly(同功能、switch 數較省),port 不變。
 // Pipeline:組合 routing + 1 output register(DIST_STAGES=1)。
 //
 // 簡化:A/B 共用同一條 effectual_idx(Dense 下都 identity,等價)。若 TrIP
-//   需要 A/B 分開路由,再加 b_idx port(對齊 MFIU 輸出,楊承豫 + QuillQ)。
+//   需要 A/B 分開路由,再加 b_idx port(對齊 MFIU 輸出)。
 // =============================================================================
 
 module dist_net_row
@@ -28,21 +27,21 @@ module dist_net_row
 
     input  logic [1:0]                            dataflow_sel,
 
-    // ── 原始 a/b 值 ──
+    // ── raw a/b values ──
     input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_vec_in,
     input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_in,
 
-    // ── 從 MFIU 來的 routing index ──
+    // ── routing index from MFIU ──
     input  logic        [N_MUL_ROW-1:0][4:0]        effectual_idx,
 
-    // ── 給 multiplier 的 routing 後 a/b(registered)──
+    // ── routed a/b to the multiplier (registered) ──
     output logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_vec_out,
     output logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_out,
     output logic                                    out_valid
 );
 
     // ============================================================
-    // packed → unpacked(避開 iverilog packed-array 變數 index 限制)
+    // packed → unpacked (works around iverilog packed-array variable-index limitation)
     // ============================================================
     logic signed [DATA_W-1:0] a_in_u [N_MUL_ROW];
     logic signed [DATA_W-1:0] b_in_u [N_MUL_ROW];
@@ -58,7 +57,7 @@ module dist_net_row
     endgenerate
 
     // ============================================================
-    // Combinational gather:out[m] = in[idx[m]]
+    // Crossbar(behavioral select):out[m] = in[idx[m]]
     // ============================================================
     logic signed [DATA_W-1:0] a_out_c [N_MUL_ROW];
     logic signed [DATA_W-1:0] b_out_c [N_MUL_ROW];
@@ -66,7 +65,7 @@ module dist_net_row
     integer m;
     always_comb begin
         for (m = 0; m < N_MUL_ROW; m = m + 1) begin
-            a_out_c[m] = a_in_u[idx_u[m][3:0]];   // 取低 4 bit 當 index(0..15)
+            a_out_c[m] = a_in_u[idx_u[m][3:0]];   // use low 4 bits as index (0..15)
             b_out_c[m] = b_in_u[idx_u[m][3:0]];
         end
     end
@@ -103,7 +102,7 @@ module dist_net_row
         end
     endgenerate
 
-    // dataflow_sel 保留給未來 A/B 分開路由,目前 gather 邏輯 mode-agnostic
+    // dataflow_sel reserved for future separate A/B routing; crossbar logic currently mode-agnostic
     wire _unused = &{1'b0, dataflow_sel};
 
 endmodule

@@ -4,7 +4,6 @@
 // 測 module: rtl/pe/pe_row_full.sv
 //   內含: A-reg latch + MFIU + dist net + mul×16 + flexagon tree
 //        + 16→4 壓縮 + 4-bank local buffer(SRAM macro / behavioral)
-// Owner: 黃妍心
 //
 // 跑法: make tb_pe_row_full
 //

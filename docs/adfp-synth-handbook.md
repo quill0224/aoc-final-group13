@@ -50,7 +50,7 @@ bash
 cd ~/aoc-final
 
 # 3) 選要合哪個 module:改 synth.tcl 的 set TOP
-nano synth/synth.tcl     # set TOP local_buffer_row(或 mac_unit / merge_tree_radix16_flexagon / pe_row_full)
+nano synth/synth.tcl     # set TOP local_buffer_row(或 mac_unit / reduction_tree_radix16 / pe_row_full)
 #    Ctrl+O Enter 存、Ctrl+X 離開
 
 # 4) 跑(tee 存 log)
@@ -149,7 +149,7 @@ analyze -format sverilog -define {USE_SRAM_MACRO} $RTL_FILES   ;# ← 關鍵:定
 
 **已合過的結果(報告用):**
 - `mac_unit`:88 µm²,slack +0.91 ✅
-- `merge_tree_radix16_flexagon`:2034 µm²,slack +0.60(realistic constraint)✅
+- `reduction_tree_radix16`:2034 µm²,slack +0.60(realistic constraint)✅
 - `local_buffer_row`(macro):13733 µm²,Macro Count 4,slack +0.53 ✅
 
 ---
@@ -180,7 +180,7 @@ analyze -format sverilog -define {USE_SRAM_MACRO} $RTL_FILES   ;# ← 關鍵:定
 ## 8. 進度 / 下一步
 
 - [x] `mac_unit` 合成 ✅
-- [x] `merge_tree_radix16_flexagon` 合成 ✅(確認過 500MHz,不用切 pipeline)
+- [x] `reduction_tree_radix16` 合成 ✅(確認過 500MHz,不用切 pipeline)
 - [x] `local_buffer_row`(真 macro)合成 ✅
 - [ ] **pe_row 整合**:把 tree 的 16-lane 輸出**壓成 4 筆 banked write** 餵 buffer(`clear`→`first_pass`);接真 MFIU/dist 時要對齊 latency
 - [ ] 接真 MFIU(楊承豫)/ dist(QuillQ):確認 port + **latency 幾拍**(pe_row 延遲對齊要用)

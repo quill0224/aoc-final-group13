@@ -44,15 +44,16 @@ set link_library   "* $STDCELL_DB $SRAM_DB"
 
 # ---------- 讀 RTL ----------
 #   只讀 pe_row_full 需要的檔(package 先);不 glob 整資料夾,避免掃到 WIP。
-#   ⚠️ mfiu_row / dist_net_row 目前是 stand-in(Dense IP pass-through);
-#      真版到了把這兩行換成楊承豫 / QuillQ 的檔即可,其餘不動。
+#   mfiu_adapter 內含交集核心 mfiu.v(楊承豫);dist_net_row 為 Dense identity
+#      crossbar(QuillQ 真版 NoC 到位後替換),其餘不動。
 set RTL_FILES [list \
     rtl/trapezoid_pkg.sv \
     rtl/pe/mac_unit.sv \
-    rtl/mfiu/mfiu_row.sv \
+    rtl/mfiu/mfiu.v \
+    rtl/mfiu/mfiu_adapter.sv \
     rtl/dist/dist_net_row.sv \
     rtl/dist/dist_net_row_trip.sv \
-    rtl/dist/merge_tree_radix16_flexagon.sv \
+    rtl/dist/reduction_tree_radix16.sv \
     rtl/pe/sram_128x32_1r1w.sv \
     rtl/pe/local_buffer_row.sv \
     rtl/pe/pe_row_full.sv ]
@@ -76,7 +77,7 @@ check_design > $RPT/check_design.rpt
 # ---------- constraints ----------
 source synth/constraints.sdc
 
-# ---------- 時序約束完整性檢查(有沒有沒被約束到的 endpoint)----------
+# ---------- 時序限制完整性檢查(有沒有沒被限制到的 endpoint)----------
 check_timing > $RPT/check_timing.rpt
 
 # ---------- 合成 ----------
@@ -85,13 +86,13 @@ compile_ultra
 # ---------- 報告 ----------
 report_timing -max_paths 10 -delay_type max  > $RPT/timing_setup.rpt
 report_timing -max_paths 10 -delay_type min  > $RPT/timing_hold.rpt   ;# 參考用:hold 在合成階段不準,P&R 才修
-report_constraint -all_violators             > $RPT/violators.rpt     ;# ★最關鍵:有沒有違反任何約束
+report_constraint -all_violators             > $RPT/violators.rpt     ;# ★最關鍵:有沒有違反任何限制
 report_area  -hierarchy                      > $RPT/area.rpt
 report_power -hierarchy                      > $RPT/power.rpt
 report_qor                                   > $RPT/qor.rpt
 report_reference -hierarchy                  > $RPT/reference.rpt      ;# 各 cell/macro 用幾顆(確認 Macro Count)
 
-# ---------- handoff:給 P&R 用的 netlist + 資料庫 + 約束 ----------
+# ---------- handoff:給 P&R 用的 netlist + 資料庫 + 限制 ----------
 write -format verilog -hierarchy -output $RPT/${TOP}_netlist.v
 write -format ddc     -hierarchy -output $RPT/${TOP}.ddc
 write_sdc                                  $RPT/${TOP}.sdc

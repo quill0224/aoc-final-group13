@@ -2,14 +2,13 @@
 // tb_dist_net_row.sv — dist_net_row 單元測試
 // =============================================================================
 // 測 module: rtl/dist/dist_net_row.sv
-// Owner: NoC(黃妍心 + QuillQ)
 //
 // 跑法: make tb_dist_net
 //
 // === 測什麼 ===
 //   T1: Dense IP identity idx → out = in(pass-through),延 DIST_STAGES 拍
-//   T2: TrIP gather — idx 反轉 [15,14,...,0] → out[m] = in[15-m]
-//   T3: TrIP gather — idx 壓縮 [3,1,0,...] → out[0]=in[3], out[1]=in[1], out[2]=in[0]
+//   T2: TrIP crossbar — idx 反轉 [15,14,...,0] → out[m] = in[15-m]
+//   T3: TrIP crossbar — idx 壓縮 [3,1,0,...] → out[0]=in[3], out[1]=in[1], out[2]=in[0]
 // =============================================================================
 
 `timescale 1ns/1ps
@@ -70,7 +69,7 @@ module tb_dist_net_row;
     endtask
 
     // 驗 out[m] == a_vec_in[exp_src[m]] (用 idx 推期望)
-    task check_gather(input string msg);
+    task check_crossbar(input string msg);
         logic ok; integer src;
         ok = 1'b1;
         for (i = 0; i < N_MUL_ROW; i = i + 1) begin
@@ -84,7 +83,7 @@ module tb_dist_net_row;
                          msg, i, b_vec_out[i], src, src+32); ok = 0;
             end
         end
-        if (ok) $display("[PASS] %s: gather correct (16 lanes)", msg);
+        if (ok) $display("[PASS] %s: crossbar correct (16 lanes)", msg);
         else    fails = fails + 1;
     endtask
 
@@ -103,15 +102,15 @@ module tb_dist_net_row;
         @(negedge clk);
         set_inputs; set_idx_identity; in_valid = 1; dataflow_sel = MODE_DENSE_IP;
         wait_dist;
-        check_gather("T1 Dense identity pass-through");
+        check_crossbar("T1 Dense identity pass-through");
 
-        // T2: TrIP reverse gather
+        // T2: TrIP reverse crossbar
         @(negedge clk);
         set_inputs; set_idx_reverse; in_valid = 1; dataflow_sel = MODE_TRIP;
         wait_dist;
-        check_gather("T2 TrIP reverse gather");
+        check_crossbar("T2 TrIP reverse crossbar");
 
-        // T3: TrIP 壓縮 gather — idx[0]=3, idx[1]=1, idx[2]=0, 其餘 0
+        // T3: TrIP 壓縮 crossbar — idx[0]=3, idx[1]=1, idx[2]=0, 其餘 0
         @(negedge clk);
         set_inputs;
         for (i = 0; i < N_MUL_ROW; i = i + 1) effectual_idx[i] = 5'd0;
@@ -120,7 +119,7 @@ module tb_dist_net_row;
         effectual_idx[2] = 5'd0;
         in_valid = 1; dataflow_sel = MODE_TRIP;
         wait_dist;
-        check_gather("T3 TrIP compressed gather");
+        check_crossbar("T3 TrIP compressed crossbar");
 
         @(negedge clk); in_valid = 0;
         $display("");
