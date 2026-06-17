@@ -6,38 +6,37 @@ RTL_DIR  := rtl
 TB_DIR   := sim
 PKG      := $(RTL_DIR)/trapezoid_pkg.sv
 
-# 所有 RTL 檔 (top.sv + 各 module)
-# 注意:merge_tree_radix16.sv owner = 黃妍心 + QuillQ,放 rtl/dist/。
-#       它在 pe_row 內 instantiate (per-row,對齊 paper Fig 6,不是 global tree)。
+# 最終 PE row stack(lint 用;各單元測試 target 自列依賴)
+# mfiu_adapter 內含交集核心 mfiu.v(楊承豫);dist_net_row 為 Dense identity crossbar,
+# QuillQ 真版 NoC 到位後替換。
 RTL_SRCS := $(PKG) \
             $(RTL_DIR)/pe/mac_unit.sv \
-            $(RTL_DIR)/pe/pe_row.sv \
-            $(RTL_DIR)/pe/pe_array.sv \
-            $(RTL_DIR)/mfiu/mfiu_top.sv \
-            $(RTL_DIR)/dist/merge_tree_radix16.sv \
-            $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv \
-            $(RTL_DIR)/dist/distribution_net.sv \
-            $(RTL_DIR)/mem/global_buffer.sv \
-            $(RTL_DIR)/ctrl/dataflow_ctrl.sv \
-            $(RTL_DIR)/top.sv
+            $(RTL_DIR)/mfiu/mfiu.v \
+            $(RTL_DIR)/mfiu/mfiu_adapter.sv \
+            $(RTL_DIR)/dist/dist_net_row.sv \
+            $(RTL_DIR)/dist/reduction_tree_radix16.sv \
+            $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+            $(RTL_DIR)/pe/local_buffer_row.sv \
+            $(RTL_DIR)/pe/pe_row_full.sv
 
 IVERILOG := iverilog
 VERILATOR := verilator
 
-.PHONY: all tb_mac tb_tree tb_tree_sliced tb_pe_row tb_pe_array tb_dist lint clean help
+.PHONY: all tb_mac tb_reduction_tree tb_lbuf tb_mfiu_adapter tb_dist_net tb_pe_row_full tb_pe_array lint clean help
 
 all: help
 
 help:
 	@echo "Targets:"
-	@echo "  make tb_mac          — 跑 mac_unit 單元測試 (iverilog)"
-	@echo "  make tb_tree         — 跑 merge_tree_radix16 單元測試 (single-tree mode)"
-	@echo "  make tb_tree_sliced  — 跑 merge_tree_radix16_sliced 單元測試 (TrIP sub-tree slicing)"
-	@echo "  make tb_pe_row       — 跑 pe_row 單元測試 (iverilog)"
-	@echo "  make tb_dist         — 跑 distribution_net Phase 1 pass-through 測試 (iverilog)"
-	@echo "  make tb_pe_array     — 跑 pe_array 單元測試 (Dense IP + B chain)"
-	@echo "  make lint            — Verilator lint 整個專案"
-	@echo "  make clean           — 清掉 build artifact"
+	@echo "  make tb_mac           — mac_unit 單元測試 (iverilog)"
+	@echo "  make tb_reduction_tree — reduction_tree_radix16 單元測試 (sub-tree slicing)"
+	@echo "  make tb_lbuf          — local_buffer_row 單元測試 (4-bank accumulator)"
+	@echo "  make tb_mfiu_adapter      — mfiu_adapter 單元測試 (包 mfiu.v 交集核心; Dense + TrIP)"
+	@echo "  make tb_dist_net      — dist_net_row 單元測試 (Dense identity)"
+	@echo "  make tb_pe_row_full   — pe_row_full 端到端測試 (8-stage PE row)"
+	@echo "  make tb_pe_array      — pe_array 端到端測試 (16×16, Dense IP vs A×B)"
+	@echo "  make lint             — Verilator lint (top = pe_row_full)"
+	@echo "  make clean            — 清掉 build artifact"
 
 # ── mac_unit 單元測試 (iverilog) ──
 tb_mac: $(RTL_DIR)/pe/mac_unit.sv $(TB_DIR)/tb_mac_unit.sv
@@ -47,68 +46,98 @@ tb_mac: $(RTL_DIR)/pe/mac_unit.sv $(TB_DIR)/tb_mac_unit.sv
 		$(TB_DIR)/tb_mac_unit.sv
 	vvp tb_mac.vvp
 
-# ── merge_tree_radix16 單元測試 (iverilog) ──
-tb_tree: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16.sv $(TB_DIR)/tb_merge_tree.sv
-	$(IVERILOG) -g2012 -o tb_tree.vvp \
+# ── reduction_tree_radix16 單元測試 (iverilog) ──
+# Flexagon-style binary tree:cut_after 分段加總,組合邏輯 + 1 拍 output register
+tb_reduction_tree: $(PKG) $(RTL_DIR)/dist/reduction_tree_radix16.sv $(TB_DIR)/tb_reduction_tree.sv
+	$(IVERILOG) -g2012 -o tb_reduction_tree.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
-		$(RTL_DIR)/dist/merge_tree_radix16.sv \
-		$(TB_DIR)/tb_merge_tree.sv
-	vvp tb_tree.vvp
+		$(RTL_DIR)/dist/reduction_tree_radix16.sv \
+		$(TB_DIR)/tb_reduction_tree.sv
+	vvp tb_reduction_tree.vvp
 
-# ── merge_tree_radix16_sliced 單元測試 (iverilog) ──
-# 測 TrIP sub-tree slicing(paper §III.B Fig 10 對應)
-tb_tree_sliced: $(PKG) $(RTL_DIR)/dist/merge_tree_radix16_sliced.sv $(TB_DIR)/tb_merge_tree_sliced.sv
-	$(IVERILOG) -g2012 -o tb_tree_sliced.vvp \
+# ── local_buffer_row 單元測試 (iverilog) ──
+tb_lbuf: $(PKG) $(RTL_DIR)/pe/sram_128x32_1r1w.sv $(RTL_DIR)/pe/local_buffer_row.sv $(TB_DIR)/tb_local_buffer.sv
+	$(IVERILOG) -g2012 -o tb_lbuf.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
-		$(RTL_DIR)/dist/merge_tree_radix16_sliced.sv \
-		$(TB_DIR)/tb_merge_tree_sliced.sv
-	vvp tb_tree_sliced.vvp
+		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+		$(RTL_DIR)/pe/local_buffer_row.sv \
+		$(TB_DIR)/tb_local_buffer.sv
+	vvp tb_lbuf.vvp
 
-# ── pe_row 單元測試 (iverilog) ──
-# 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16 + pe_row
-tb_pe_row: $(PKG) \
-           $(RTL_DIR)/pe/mac_unit.sv \
-           $(RTL_DIR)/dist/merge_tree_radix16.sv \
-           $(RTL_DIR)/pe/pe_row.sv \
-           $(TB_DIR)/tb_pe_row.sv
-	$(IVERILOG) -g2012 -o tb_pe_row.vvp \
+# ── mfiu_adapter 單元測試 (iverilog) ──
+# 交集核心採用 mfiu.v(楊承豫);設為單 fiber pair × K=16,涵蓋 Dense + TrIP
+tb_mfiu_adapter: $(PKG) $(RTL_DIR)/mfiu/mfiu.v $(RTL_DIR)/mfiu/mfiu_adapter.sv $(TB_DIR)/tb_mfiu_adapter.sv
+	$(IVERILOG) -g2012 -o tb_mfiu_adapter.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
+		$(TB_DIR)/tb_mfiu_adapter.sv
+	vvp tb_mfiu_adapter.vvp
+
+# ── dist_net_row 單元測試 (iverilog) ──
+# 介面 stand-in:Dense identity;真版 body 由 QuillQ 提供
+tb_dist_net: $(PKG) $(RTL_DIR)/dist/dist_net_row.sv $(TB_DIR)/tb_dist_net_row.sv
+	$(IVERILOG) -g2012 -o tb_dist_net.vvp \
+		-I$(RTL_DIR) \
+		$(PKG) \
+		$(RTL_DIR)/dist/dist_net_row.sv \
+		$(TB_DIR)/tb_dist_net_row.sv
+	vvp tb_dist_net.vvp
+
+# ── pe_row_full 端到端測試 (iverilog) ──
+# 完整 PE row:A latch + MFIU + dist net + mul×16 + flexagon tree
+#             + 16→4 壓縮 + 4-bank local buffer(SRAM wrapper)
+tb_pe_row_full: $(PKG) \
+                $(RTL_DIR)/pe/mac_unit.sv \
+                $(RTL_DIR)/mfiu/mfiu.v \
+                $(RTL_DIR)/mfiu/mfiu_adapter.sv \
+                $(RTL_DIR)/dist/dist_net_row.sv \
+                $(RTL_DIR)/dist/reduction_tree_radix16.sv \
+                $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+                $(RTL_DIR)/pe/local_buffer_row.sv \
+                $(RTL_DIR)/pe/pe_row_full.sv \
+                $(TB_DIR)/tb_pe_row_full.sv
+	$(IVERILOG) -g2012 -o tb_pe_row_full.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
 		$(RTL_DIR)/pe/mac_unit.sv \
-		$(RTL_DIR)/dist/merge_tree_radix16.sv \
-		$(RTL_DIR)/pe/pe_row.sv \
-		$(TB_DIR)/tb_pe_row.sv
-	vvp tb_pe_row.vvp
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
+		$(RTL_DIR)/dist/dist_net_row.sv \
+		$(RTL_DIR)/dist/reduction_tree_radix16.sv \
+		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+		$(RTL_DIR)/pe/local_buffer_row.sv \
+		$(RTL_DIR)/pe/pe_row_full.sv \
+		$(TB_DIR)/tb_pe_row_full.sv
+	vvp tb_pe_row_full.vvp
 
-# ── distribution_net 單元測試 (iverilog) ──
-# 依賴:trapezoid_pkg + distribution_net (純組合 0 cycle，無需其他 module)
-# Phase 1 範圍:dense identity pass-through (6 個 test cases)
-tb_dist: $(PKG) $(RTL_DIR)/dist/distribution_net.sv $(TB_DIR)/tb_distribution_net.sv
-	$(IVERILOG) -g2012 -o tb_dist.vvp \
-		-I$(RTL_DIR) \
-		$(PKG) \
-		$(RTL_DIR)/dist/distribution_net.sv \
-		$(TB_DIR)/tb_distribution_net.sv
-	vvp tb_dist.vvp
-
-# ── pe_array 單元測試 (iverilog) ──
-# 依賴:trapezoid_pkg + mac_unit + merge_tree_radix16(舊版 single tree)+ pe_row + pe_array
-# 測:Dense IP K=1/K=2 + B forwarding chain + A row-stationary
-# 不測:TrIP sub-tree slicing(等 pe_row 換接 merge_tree_radix16_sliced 再加)
+# ── pe_array 端到端測試 (iverilog) ──
+# 16× pe_row_full + B 縱向鏈;Dense IP 對 A×B 驗證
 tb_pe_array: $(PKG) \
              $(RTL_DIR)/pe/mac_unit.sv \
-             $(RTL_DIR)/dist/merge_tree_radix16.sv \
-             $(RTL_DIR)/pe/pe_row.sv \
+             $(RTL_DIR)/mfiu/mfiu.v \
+             $(RTL_DIR)/mfiu/mfiu_adapter.sv \
+             $(RTL_DIR)/dist/dist_net_row.sv \
+             $(RTL_DIR)/dist/reduction_tree_radix16.sv \
+             $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+             $(RTL_DIR)/pe/local_buffer_row.sv \
+             $(RTL_DIR)/pe/pe_row_full.sv \
              $(RTL_DIR)/pe/pe_array.sv \
              $(TB_DIR)/tb_pe_array.sv
 	$(IVERILOG) -g2012 -o tb_pe_array.vvp \
 		-I$(RTL_DIR) \
 		$(PKG) \
 		$(RTL_DIR)/pe/mac_unit.sv \
-		$(RTL_DIR)/dist/merge_tree_radix16.sv \
-		$(RTL_DIR)/pe/pe_row.sv \
+		$(RTL_DIR)/mfiu/mfiu.v \
+		$(RTL_DIR)/mfiu/mfiu_adapter.sv \
+		$(RTL_DIR)/dist/dist_net_row.sv \
+		$(RTL_DIR)/dist/reduction_tree_radix16.sv \
+		$(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+		$(RTL_DIR)/pe/local_buffer_row.sv \
+		$(RTL_DIR)/pe/pe_row_full.sv \
 		$(RTL_DIR)/pe/pe_array.sv \
 		$(TB_DIR)/tb_pe_array.sv
 	vvp tb_pe_array.vvp
@@ -117,7 +146,7 @@ tb_pe_array: $(PKG) \
 lint:
 	$(VERILATOR) --lint-only -Wall -Wno-UNUSED -Wno-DECLFILENAME \
 		-I$(RTL_DIR) \
-		--top-module top \
+		--top-module pe_row_full \
 		$(RTL_SRCS)
 
 clean:
