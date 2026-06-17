@@ -11,16 +11,46 @@
 
 ```
 Final_project/
-├── README.md                  # ← 你正在看這個
-├── .gitignore                 # macOS / Python / EDA artefacts
-├── docs/
-│   ├── git-workflow.md        # 團隊整合 (push/PR) 細流程
-│   └── proposal-review.md     # 提案 vs Trapezoid 論文 gap 分析
-├── quantization/              # Lab 1/2 衍生 VGG-8 量化模型
-├── analysis/                  # Lab 2 analytical model 延伸（PE sweep / roofline）
-├── rtl/                       # Verilog RTL（之後加入）
-├── sim/                       # 模擬腳本 / testbench
-└── reference/                 # 提案 PDF、論文 PDF
+├── README.md                  
+├── Makefile                   # `make tb_*` 跑 testbench / `make lint` Verilator
+├── .gitignore
+│
+├── rtl/                       # SystemVerilog RTL
+│   ├── trapezoid_pkg.sv       # 全域 parameter
+│   ├── top.sv                 # 系統 top-level
+│   ├── pe/                    # PE Array (黃妍心)
+│   │   ├── mac_unit.sv        # INT8×INT8→INT16 mul,1-cycle registered
+│   │   ├── pe_row.sv          # 16 mul + radix-16 tree + INT32 acc + B-fwd latch
+│   │   └── pe_array.sv        # 16 條 pe_row + B vertical chain
+│   ├── dist/                  # Tree + Distribution Net
+│   │   ├── merge_tree_radix16.sv         # 單 tree (paper Fig 6,4-stage pipelined)
+│   │   ├── merge_tree_radix16_sliced.sv  # Sub-tree slicing (paper §III.B Fig 10,黃妍心)
+│   │   └── distribution_net.sv           # Benes 16×16 (QuillQ)
+│   ├── mfiu/                  # Multi-Fiber Intersection Unit (彭俞凱,stub)
+│   ├── mem/                   # Global Buffer
+│   └── ctrl/                  # Dataflow Controller FSM
+│
+├── sim/                       # SystemVerilog testbenches (iverilog -g2012)
+│   ├── tb_distribution_net.sv        
+│   ├── tb_mac_unit.sv              # 12 testcases
+│   ├── tb_merge_tree.sv
+│   ├── tb_merge_tree_sliced.sv     # 17 sub-checks,TrIP Fig 10 對齊
+│   ├── tb_pe_row.sv
+│   └── tb_pe_array.sv              # 49 sub-checks,Dense IP + B chain
+│
+├── docs/                      # 設計 / 流程 / 提案文件
+│   ├── architecture-deltas.md      # RTL 跟 paper 的差異紀錄 (Δ1-Δ6)
+│   ├── interfaces.md               # 模組介面契約 (§1-§6)
+│   ├── spec_open_questions.md      # 未決議題清單
+│   ├── how-to-run-tb.md            # 跑 testbench 步驟
+│   ├── git-workflow.md             # 整合 / PR / 衝突解法
+│   ├── proposal-review.md          # 提案 vs Trapezoid 論文 gap 分析
+│   └── proposal-v2-patch.md        # 提案修訂段落
+│
+├── quantization/              # Lab 1/2 衍生 VGG-8 INT8 量化模型
+├── analysis/                  # Lab 2 analytical model 延伸 (PE sweep / roofline)
+├── tests/                     # Python integration tests (Lab 1/2 verification)
+└── reference/                 # 提案 PDF / 論文 PDF
 ```
 
 ---
@@ -96,6 +126,7 @@ gh pr create --fill --web                  # 開瀏覽器發 PR
 | GitHub | 姓名 | 主責 |
 |--------|------|------|
 | @quill0224 | Quill | TBD |
+| @JackyPeng066 | 彭俞凱 | Architecture/Dataflow/MFIU |
 | TBD | TBD | TBD |
 | TBD | TBD | TBD |
 
