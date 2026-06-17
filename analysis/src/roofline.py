@@ -25,6 +25,7 @@ __all__ = [
     "plot_roofline_from_df",
     "plot_roofline_from_csv",
     "plot_combined_roofline",
+    "plot_compulsory_actual_roofline_from_df",
     "load_roofline_series_from_csv",
 ]
 
@@ -143,38 +144,117 @@ def _read_csv_rows(ifile: str | Path) -> list[dict]:
         return rows
 
 
-def plot_roofline_from_df(df, ofile: str | Path) -> None:
-    # Load the roofline and workload data
-    intensity_col = "intensity" if _has_column(df, "intensity") else "dense_intensity"
-    if _has_column(df, "roofline_name"):
+def _select_intensity_col(table, intensity_col: str | None = None) -> str:
+    if intensity_col is not None:
+        if not _has_column(table, intensity_col):
+            raise ValueError(f"Missing intensity column: {intensity_col}")
+        return intensity_col
+    for candidate in ("operational_intensity", "intensity", "oi_actual", "dense_intensity"):
+        if _has_column(table, candidate):
+            return candidate
+    raise ValueError("No intensity column found for roofline plot.")
+
+
+def _rooflines_from_table(table) -> dict[str, RooflineParam]:
+    if _has_column(table, "roofline_name"):
         roofline_items = []
         seen = set()
         for name, perf, band in zip(
-            _column(df, "roofline_name"),
-            _column(df, "peak_performance"),
-            _column(df, "peak_bandwidth"),
+            _column(table, "roofline_name"),
+            _column(table, "peak_performance"),
+            _column(table, "peak_bandwidth"),
         ):
-            key = (name, perf, band)
+            key = (name, float(perf), float(band))
             if key not in seen:
                 seen.add(key)
                 roofline_items.append(key)
-        rooflines = {str(name): (perf, band) for name, perf, band in roofline_items}
-    else:
-        roofline_params = frozenset(zip(_column(df, "peak_performance"), _column(df, "peak_bandwidth")))
-        rooflines = {f"Roofline of Hardware {i}": v for i, v in enumerate(roofline_params)}
-    workloads = {k: v for k, v in zip(_column(df, "layer"), _column(df, intensity_col))}
-    print(f"{len(rooflines)} rooflines and {len(workloads)} workloads loaded.")
+        return {str(name): (perf, band) for name, perf, band in roofline_items}
 
-    # Plot the roofline model
+    roofline_params = []
+    seen = set()
+    for perf, band in zip(_column(table, "peak_performance"), _column(table, "peak_bandwidth")):
+        key = (float(perf), float(band))
+        if key not in seen:
+            seen.add(key)
+            roofline_params.append(key)
+    return {f"Roofline of Hardware {i}": v for i, v in enumerate(roofline_params)}
+
+
+def plot_roofline_from_df(
+    df,
+    ofile: str | Path,
+    intensity_col: str | None = None,
+) -> None:
+    selected_intensity_col = _select_intensity_col(df, intensity_col)
+    rooflines = _rooflines_from_table(df)
+    workloads = {
+        k: float(v)
+        for k, v in zip(_column(df, "layer"), _column(df, selected_intensity_col))
+    }
+    print(
+        f"{len(rooflines)} rooflines and {len(workloads)} workloads loaded "
+        f"from {selected_intensity_col}."
+    )
     plot_roofline(rooflines, workloads, ofile)
 
 
-def plot_roofline_from_csv(ifile: str | Path, ofile: str | Path) -> None:
+def plot_compulsory_actual_roofline_from_df(
+    df,
+    ofile: str | Path,
+    compulsory_col: str = "oi_compulsory",
+    actual_col: str = "oi_actual",
+) -> None:
+    for col in (compulsory_col, actual_col):
+        if not _has_column(df, col):
+            raise ValueError(f"Missing intensity column: {col}")
+
+    rooflines = _rooflines_from_table(df)
+    compulsory = [float(v) for v in _column(df, compulsory_col)]
+    actual = [float(v) for v in _column(df, actual_col)]
+    perf_values = [float(v) for v in _column(df, "peak_performance")]
+    band_values = [float(v) for v in _column(df, "peak_bandwidth")]
+    oi_max = max(compulsory + actual + [1.0])
+
+    plt.figure(figsize=(8, 6))
+    xmin, xmax = 0.0, oi_max * 1.05
+    ymax = 0.0
+
+    for i, (key, (perf, band)) in enumerate(rooflines.items()):
+        x, y, *_ = get_roofline(perf, band, max_op_intensity=xmax)
+        color = "black" if i == len(rooflines) - 1 else "#aaaaaa"
+        plt.plot(x, y, linewidth=2, color=color, label=key)
+        ymax = max(ymax, float(np.max(y)))
+
+    compulsory_y = [min(perf, oi * band) for oi, perf, band in zip(compulsory, perf_values, band_values)]
+    actual_y = [min(perf, oi * band) for oi, perf, band in zip(actual, perf_values, band_values)]
+    plt.scatter(compulsory, compulsory_y, marker="o", s=28, color="tab:blue", label="compulsory OI")
+    plt.scatter(actual, actual_y, marker="x", s=34, color="tab:orange", label="actual OI")
+    ymax = max(ymax, *(compulsory_y or [0.0]), *(actual_y or [0.0]))
+
+    plt.xlabel("Operational Intensity (MACs/byte)")
+    plt.ylabel("Performance (MACs/cycle)")
+    plt.xlim(xmin, xmax)
+    plt.ylim(0, ymax * 1.05 if ymax > 0 else 1.0)
+    plt.title("Compulsory vs Actual Roofline")
+    plt.grid(which="both", linestyle="--", linewidth=0.5)
+    plt.legend()
+
+    path = Path(preprocess_filename(ofile, existed="overwrite"))
+    path.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(path)
+    plt.close()
+    print(f"Combined compulsory/actual roofline plot saved at {path}")
+
+def plot_roofline_from_csv(
+    ifile: str | Path,
+    ofile: str | Path,
+    intensity_col: str | None = None,
+) -> None:
     if pd is not None:
         df = pd.read_csv(ifile)
     else:
         df = _read_csv_rows(ifile)
-    plot_roofline_from_df(df, ofile)
+    plot_roofline_from_df(df, ofile, intensity_col=intensity_col)
 
 
 def load_roofline_series_from_csv(
