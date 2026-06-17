@@ -102,3 +102,6 @@ analysis/results/*/
 # Allow committed snapshots (canonical reference runs)
 !analysis/results/baseline/
 *.vvp
+
+obj_dir/
+dla/obj_dir/
