@@ -1,0 +1,190 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 540" font-family="Arial, sans-serif">
+  <defs>
+    <marker id="arr"   markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#444"/></marker>
+    <marker id="arr-b" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#1a78a8"/></marker>
+    <marker id="arr-g" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#1e8449"/></marker>
+    <marker id="arr-r" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#c0392b"/></marker>
+    <marker id="arr-p" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#6c3483"/></marker>
+    <marker id="arr-y" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#9a7700"/></marker>
+    <marker id="arr-o" markerWidth="8" markerHeight="7" refX="7" refY="3.5" orient="auto"><polygon points="0,0 8,3.5 0,7" fill="#b34800"/></marker>
+  </defs>
+
+  <!-- ===== trip_tile_compute_engine outer border ===== -->
+  <rect x="8" y="8" width="704" height="524" rx="8" fill="#fafafa" stroke="#555" stroke-width="2" stroke-dasharray="10,4"/>
+  <text x="360" y="22" text-anchor="middle" font-size="11" fill="#666" font-style="italic">trip_tile_compute_engine</text>
+
+  <!-- ===== PE Row outer box ===== -->
+  <rect x="22" y="28" width="636" height="370" rx="6" fill="#efefef" stroke="#aaa" stroke-width="1.5"/>
+  <!-- PE Row label strip -->
+  <rect x="22" y="28" width="30" height="370" rx="6" fill="#d0d0d0" stroke="#aaa" stroke-width="1.5"/>
+  <text transform="rotate(-90,37,213)" x="37" y="213" text-anchor="middle" font-size="12" font-weight="bold" fill="#444">PE Row</text>
+
+  <!-- ===== bitmask_buffer A ===== -->
+  <rect x="62" y="38" width="148" height="66" rx="4" fill="#aed6f1" stroke="#1a78a8" stroke-width="1.8"/>
+  <text x="136" y="59" text-anchor="middle" font-size="11" font-weight="bold" fill="#154360">bitmask_buffer (A)</text>
+  <text x="136" y="75" text-anchor="middle" font-size="10" fill="#154360">mask + values</text>
+  <text x="136" y="97" text-anchor="middle" font-size="9" fill="#555">Nr = 2 row fibers</text>
+
+  <!-- ===== bitmask_buffer B ===== -->
+  <rect x="226" y="38" width="148" height="66" rx="4" fill="#aed6f1" stroke="#1a78a8" stroke-width="1.8"/>
+  <text x="300" y="59" text-anchor="middle" font-size="11" font-weight="bold" fill="#154360">bitmask_buffer (B)</text>
+  <text x="300" y="75" text-anchor="middle" font-size="10" fill="#154360">mask + values</text>
+  <text x="300" y="97" text-anchor="middle" font-size="9" fill="#555">Nc = 2 col fibers</text>
+
+  <!-- ===== MFIU (vertical, left) ===== -->
+  <rect x="62" y="120" width="80" height="160" rx="4" fill="#5dade2" stroke="#1277b0" stroke-width="2"/>
+  <text transform="rotate(-90,102,200)" x="102" y="200" text-anchor="middle" font-size="13" font-weight="bold" fill="white">MFIU</text>
+  <text transform="rotate(-90,102,220)" x="102" y="225" text-anchor="middle" font-size="8"  fill="#d0eeff">(comb. AND)</text>
+
+  <!-- ===== Merge-reduction tree (orange) ===== -->
+  <rect x="154" y="120" width="400" height="58" rx="4" fill="#e67e22" stroke="#a04000" stroke-width="1.8"/>
+  <text x="354" y="148" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Merge-reduction tree</text>
+  <text x="354" y="167" text-anchor="middle" font-size="10" fill="#ffe8cc">trip_reduction_tree  (combinational)</text>
+
+  <!-- ===== Mul boxes (yellow) ===== -->
+  <rect x="154" y="192" width="72" height="52" rx="3" fill="#FFD700" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="190" y="216" text-anchor="middle" font-size="13" font-weight="bold" fill="#5a4000">Mul</text>
+  <text x="190" y="236" text-anchor="middle" font-size="8"  fill="#5a4000">pe_lane[0]</text>
+
+  <rect x="238" y="192" width="72" height="52" rx="3" fill="#FFD700" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="274" y="216" text-anchor="middle" font-size="13" font-weight="bold" fill="#5a4000">Mul</text>
+  <text x="274" y="236" text-anchor="middle" font-size="8"  fill="#5a4000">pe_lane[1]</text>
+
+  <rect x="322" y="192" width="72" height="52" rx="3" fill="#FFD700" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="358" y="216" text-anchor="middle" font-size="13" font-weight="bold" fill="#5a4000">Mul</text>
+  <text x="358" y="236" text-anchor="middle" font-size="8"  fill="#5a4000">pe_lane[2]</text>
+
+  <text x="424" y="222" text-anchor="middle" font-size="22" fill="#aaa">···</text>
+
+  <rect x="450" y="192" width="72" height="52" rx="3" fill="#FFD700" stroke="#b8860b" stroke-width="1.5"/>
+  <text x="486" y="216" text-anchor="middle" font-size="13" font-weight="bold" fill="#5a4000">Mul</text>
+  <text x="486" y="236" text-anchor="middle" font-size="8"  fill="#5a4000">pe_lane[3]</text>
+
+  <!-- pe_lane group label -->
+  <text x="354" y="187" text-anchor="middle" font-size="9" fill="#888">pe_lane × LANES = 4  (combinational multiply)</text>
+
+  <!-- ===== Distribution network (purple) ===== -->
+  <rect x="154" y="258" width="400" height="58" rx="4" fill="#8e44ad" stroke="#5b2c6f" stroke-width="1.8"/>
+  <text x="354" y="286" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Distribution network</text>
+  <text x="354" y="305" text-anchor="middle" font-size="10" fill="#e8d5f5">trip_distribution_network  (combinational crossbar)</text>
+
+  <!-- ===== Buf / row_local_buffer (green, vertical, right) ===== -->
+  <rect x="564" y="120" width="80" height="196" rx="4" fill="#58d68d" stroke="#1e8449" stroke-width="2"/>
+  <text transform="rotate(-90,604,218)" x="604" y="218" text-anchor="middle" font-size="13" font-weight="bold" fill="white">Buf</text>
+  <text transform="rotate(-90,604,240)" x="604" y="244" text-anchor="middle" font-size="9"  fill="#d5f5e3">row_local_buffer</text>
+
+  <!-- ===== C-tile Accumulator (bottom) ===== -->
+  <rect x="22" y="408" width="636" height="84" rx="6" fill="#d5f5e3" stroke="#1e8449" stroke-width="2"/>
+  <text x="340" y="432" text-anchor="middle" font-size="13" font-weight="bold" fill="#1a5e34">C-tile Accumulator  (K-chunk accumulation registers)</text>
+  <text x="340" y="450" text-anchor="middle" font-size="10" fill="#1a5e34">tile_accum[ ] : TILE_ACC_WIDTH bits each</text>
+
+  <!-- Accum register cells -->
+  <rect x="110" y="458" width="80" height="28" rx="3" fill="#a9dfbf" stroke="#1e8449" stroke-width="1.2"/>
+  <text x="150" y="477" text-anchor="middle" font-size="12" fill="#1a5e34">C[0][0]</text>
+
+  <rect x="210" y="458" width="80" height="28" rx="3" fill="#a9dfbf" stroke="#1e8449" stroke-width="1.2"/>
+  <text x="250" y="477" text-anchor="middle" font-size="12" fill="#1a5e34">C[0][1]</text>
+
+  <rect x="310" y="458" width="80" height="28" rx="3" fill="#a9dfbf" stroke="#1e8449" stroke-width="1.2"/>
+  <text x="350" y="477" text-anchor="middle" font-size="12" fill="#1a5e34">C[1][0]</text>
+
+  <rect x="410" y="458" width="80" height="28" rx="3" fill="#a9dfbf" stroke="#1e8449" stroke-width="1.2"/>
+  <text x="450" y="477" text-anchor="middle" font-size="12" fill="#1a5e34">C[1][1]</text>
+
+  <!-- ======================== ARROWS ======================== -->
+
+  <!-- External A/B fiber writes (into bitmask buffers) -->
+  <line x1="136" y1="10" x2="136" y2="38"  stroke="#1a78a8" stroke-width="1.8" marker-end="url(#arr-b)"/>
+  <text x="60"  y="20" font-size="10" fill="#1a78a8">A fiber writes</text>
+
+  <line x1="300" y1="10" x2="300" y2="38"  stroke="#1a78a8" stroke-width="1.8" marker-end="url(#arr-b)"/>
+  <text x="222" y="20" font-size="10" fill="#1a78a8">B fiber writes</text>
+
+  <!-- bitmask_buf A → MFIU  (a_mask, down) -->
+  <line x1="100" y1="104" x2="100" y2="120" stroke="#1a78a8" stroke-width="1.8" marker-end="url(#arr-b)"/>
+  <text x="48"  y="115" font-size="9" fill="#1a78a8">a_mask</text>
+
+  <!-- bitmask_buf B → MFIU  (b_mask, L-shape) -->
+  <path d="M 300 104 L 300 112 L 142 112 L 142 120" stroke="#1a78a8" stroke-width="1.8" fill="none" marker-end="url(#arr-b)"/>
+  <text x="215" y="111" font-size="9" fill="#1a78a8">b_mask</text>
+
+  <!-- bitmask_buf A values → Distribution network (dashed) -->
+  <path d="M 195 71 L 200 71 L 200 272" stroke="#1a78a8" stroke-width="1.2" stroke-dasharray="5,3" fill="none" marker-end="url(#arr-b)"/>
+
+  <!-- bitmask_buf B values → Distribution network (dashed) -->
+  <path d="M 374 71 L 380 71 L 380 258" stroke="#1a78a8" stroke-width="1.2" stroke-dasharray="5,3" fill="none" marker-end="url(#arr-b)"/>
+  <text x="385" y="185" font-size="9" fill="#1a78a8">values</text>
+
+  <!-- MFIU → Distribution network (lane sel signals, down-right) -->
+  <line x1="142" y1="248" x2="154" y2="280" stroke="#1a78a8" stroke-width="1.8" marker-end="url(#arr-b)"/>
+  <text x="28" y="256" font-size="9" fill="#1a78a8">row/col/k sel</text>
+  <text x="28" y="268" font-size="9" fill="#1a78a8">lane_valid ×4</text>
+
+  <!-- MFIU → Merge-reduction tree (output coord tags, up-right) -->
+  <line x1="142" y1="164" x2="154" y2="152" stroke="#1a78a8" stroke-width="1.8" marker-end="url(#arr-b)"/>
+  <text x="28"  y="158" font-size="9" fill="#1a78a8">out coord</text>
+  <text x="28"  y="170" font-size="9" fill="#1a78a8">tags (r,c)</text>
+
+  <!-- MFIU overflow_o (left) -->
+  <line x1="62" y1="170" x2="30" y2="170" stroke="#c0392b" stroke-width="1.2" marker-end="url(#arr-r)"/>
+  <text x="0"   y="168" font-size="8"  fill="#c0392b">overflow</text>
+
+  <!-- Distribution → Mul (4 upward arrows) -->
+  <line x1="190" y1="258" x2="190" y2="244" stroke="#6c3483" stroke-width="1.8" marker-end="url(#arr-p)"/>
+  <line x1="274" y1="258" x2="274" y2="244" stroke="#6c3483" stroke-width="1.8" marker-end="url(#arr-p)"/>
+  <line x1="358" y1="258" x2="358" y2="244" stroke="#6c3483" stroke-width="1.8" marker-end="url(#arr-p)"/>
+  <line x1="486" y1="258" x2="486" y2="244" stroke="#6c3483" stroke-width="1.8" marker-end="url(#arr-p)"/>
+  <text x="157"  y="254" font-size="9" fill="#6c3483">lane_a / lane_b</text>
+
+  <!-- Mul → Merge-reduction tree (4 upward arrows) -->
+  <line x1="190" y1="192" x2="190" y2="178" stroke="#9a7700" stroke-width="1.8" marker-end="url(#arr-y)"/>
+  <line x1="274" y1="192" x2="274" y2="178" stroke="#9a7700" stroke-width="1.8" marker-end="url(#arr-y)"/>
+  <line x1="358" y1="192" x2="358" y2="178" stroke="#9a7700" stroke-width="1.8" marker-end="url(#arr-y)"/>
+  <line x1="486" y1="192" x2="486" y2="178" stroke="#9a7700" stroke-width="1.8" marker-end="url(#arr-y)"/>
+  <text x="410"  y="186" font-size="9" fill="#9a7700">products ×4</text>
+
+  <!-- Merge-reduction tree → Buf (right) -->
+  <line x1="554" y1="148" x2="564" y2="148" stroke="#b34800" stroke-width="1.8" marker-end="url(#arr-o)"/>
+
+  <!-- Distribution net → Buf (right, write after intersection_done) -->
+  <line x1="554" y1="286" x2="564" y2="286" stroke="#6c3483" stroke-width="1.8" marker-end="url(#arr-p)"/>
+  <text x="558" y="300" font-size="8" fill="#6c3483">result</text>
+
+  <!-- Buf → C-tile Accum (down) -->
+  <line x1="604" y1="316" x2="604" y2="408" stroke="#1e8449" stroke-width="1.8" marker-end="url(#arr-g)"/>
+  <text x="608" y="365" font-size="9" fill="#1e8449">partial_result</text>
+
+  <!-- start_i / clear_accum_i (right-side control dashed line) -->
+  <line x1="678" y1="28" x2="678" y2="408" stroke="#888" stroke-width="1.2" stroke-dasharray="5,3"/>
+  <line x1="658" y1="432" x2="659" y2="432" stroke="#888" stroke-width="1" marker-end="url(#arr)"/>
+  <path d="M 678 408 L 678 432 L 660 432" stroke="#888" stroke-width="1.2" fill="none" marker-end="url(#arr)"/>
+  <text x="682" y="40"  font-size="9" fill="#777">start_i</text>
+  <text x="682" y="52"  font-size="9" fill="#777">clear_accum_i</text>
+
+  <!-- done_o / busy_o (from C-tile accum, right) -->
+  <line x1="658" y1="455" x2="698" y2="455" stroke="#1e8449" stroke-width="1.5" marker-end="url(#arr-g)"/>
+  <text x="700" y="459" font-size="9" fill="#1e8449">done_o / busy_o</text>
+
+  <!-- chunk_count_o (from C-tile accum, left) -->
+  <line x1="22"  y1="455" x2="8"   y2="455" stroke="#1e8449" stroke-width="1.2" marker-end="url(#arr-g)"/>
+  <text x="0"    y="452" font-size="8" fill="#1e8449">chunk_cnt</text>
+
+  <!-- tile_result_o output (bottom) -->
+  <line x1="340" y1="492" x2="340" y2="516" stroke="#1e8449" stroke-width="2.2" marker-end="url(#arr-g)"/>
+  <text x="340" y="530" text-anchor="middle" font-size="11" font-weight="bold" fill="#1a5e34">tile_result_o  [ C[0][0]  C[0][1]  C[1][0]  C[1][1] ]</text>
+
+  <!-- overflow_seen_o label -->
+  <text x="30" y="190" font-size="8" fill="#c0392b">match_count_o</text>
+
+  <!-- Legend -->
+  <rect x="395" y="38" width="155" height="74" rx="3" fill="white" stroke="#ccc" stroke-width="1"/>
+  <text x="472" y="52" text-anchor="middle" font-size="9" font-weight="bold" fill="#444">Legend</text>
+  <rect x="400" y="58" width="14" height="10" fill="#5dade2" stroke="#1277b0" stroke-width="1"/>
+  <text x="418" y="68" font-size="9" fill="#333">Intersection (MFIU + FSM)</text>
+  <rect x="400" y="73" width="14" height="10" fill="#8e44ad" stroke="#5b2c6f" stroke-width="1"/>
+  <text x="418" y="83" font-size="9" fill="#333">Distribution network</text>
+  <rect x="400" y="88" width="14" height="10" fill="#FFD700" stroke="#b8860b" stroke-width="1"/>
+  <text x="418" y="98" font-size="9" fill="#333">Multiplier lanes (pe_lane)</text>
+  <rect x="400" y="103" width="14" height="10" fill="#e67e22" stroke="#a04000" stroke-width="1"/>
+  <text x="418" y="113" font-size="9" fill="#333">Reduction tree</text>
+</svg>

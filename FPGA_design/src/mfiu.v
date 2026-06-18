@@ -1,105 +1,135 @@
-// mfiu.v — Multi-Fiber Intersection Unit  (V0: combinational scanner)
+// mfiu.v — Multi-Fiber Intersection Unit.
 //
-// For each (row, col) fiber pair, computes a_mask & b_mask to find every k-slot
-// where both A and B are nonzero (an "effectual" MAC).  The hits are packed
-// in (r, c, k) scan order into LANES output slots.
+// Packed TrIP-style MFIU:
+//   1. Computes all pairwise A-row/B-column bitmask intersections.
+//   2. Scans effectual (row, col, k) matches in row -> column -> k order.
+//   3. Packs only effectual MACs into lane 0..LANES-1 and emits routing
+//      metadata for the A/B distribution networks.
 //
-// Outputs feed directly into distribution_network:
-//   lane_valid_o  — which lanes carry a valid pair
-//   a_row_sel_o   — which A fiber to read for that lane
-//   b_col_sel_o   — which B fiber to read for that lane
-//   k_sel_o       — which slot index inside the fiber
-//
-// overflow_o goes high when effectual MACs > LANES; the caller must replay.
-//
-// Implementation note:
-//   Variable part-selects on packed output regs ([lane_ptr*W +: W]) in
-//   always @(*) blocks are unreliable in ModelSim Verilog-2001 mode.
-//   Fix: use unpacked reg arrays internally (variable array index IS legal),
-//   then pack to output wires via generate with constant genvar indices.
-//
-// See HARDWARE_STRUCTURE.md §22 for interface spec, §29 for worked example.
+// This approximates the paper's MFIU prefix/shift behavior at RTL level while
+// keeping the PE multiplier lanes unchanged.
 
 module mfiu #(
-    parameter NUM_ROWS  = 2,
-    parameter NUM_COLS  = 2,
+    parameter NUM_ROWS  = 4,
+    parameter NUM_COLS  = 4,
     parameter K_BITS    = 4,
-    parameter LANES     = 4,           // max effectual MACs captured per cycle
+    parameter LANES     = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter PACKED_MODE = 0,
     // derived — do not override
     parameter ROW_IDX_W = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter COL_IDX_W = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,
     parameter K_IDX_W   = (K_BITS   > 1) ? $clog2(K_BITS)   : 1,
-    parameter CNT_W     = $clog2(LANES + 1)
+    parameter ACTIVE_COLS_W = (NUM_COLS > 1) ? $clog2(NUM_COLS + 1) : 1,
+    parameter CNT_W     = $clog2(LANES + 1),
+    parameter TOTAL_CANDIDATES = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter POLICY_CNT_W = $clog2(TOTAL_CANDIDATES + 1)
 ) (
-    // Bitmasks: fiber r lives at a_mask_i[r*K_BITS +: K_BITS]
     input  wire [NUM_ROWS*K_BITS-1:0]           a_mask_i,
     input  wire [NUM_COLS*K_BITS-1:0]           b_mask_i,
 
-    // Per-lane routing metadata (packed, LSB = lane 0)
-    output wire [LANES-1:0]                      lane_valid_o,
-    output wire [LANES*ROW_IDX_W-1:0]            a_row_sel_o,
-    output wire [LANES*COL_IDX_W-1:0]            b_col_sel_o,
-    output wire [LANES*K_IDX_W-1:0]              k_sel_o,
+    output reg  [LANES-1:0]                      lane_valid_o,
+    output reg  [LANES*ROW_IDX_W-1:0]            a_row_sel_o,
+    output reg  [LANES*COL_IDX_W-1:0]            b_col_sel_o,
+    output reg  [LANES*K_IDX_W-1:0]              k_sel_o,
 
-    output reg  [CNT_W-1:0]                      match_count_o, // lanes filled (0..LANES)
-    output reg                                   overflow_o     // effectual > LANES
+    output reg  [CNT_W-1:0]                      match_count_o,
+    output reg  [ACTIVE_COLS_W-1:0]              active_b_cols_o,
+    output reg                                   overflow_o
 );
 
-    // Internal unpacked arrays — variable array indexing is well-defined in
-    // Verilog-2001, unlike variable part-selects on packed regs.
-    reg                  lane_vld [0:LANES-1];
-    reg [ROW_IDX_W-1:0] lane_row [0:LANES-1];
-    reg [COL_IDX_W-1:0] lane_col [0:LANES-1];
-    reg [K_IDX_W-1:0]   lane_k   [0:LANES-1];
-
-    integer r, c, k;
-    integer lane_ptr;   // next free lane slot (0..LANES)
-    integer total;      // all effectual hits including overflow ones
-    integer il;
-
+    reg [TOTAL_CANDIDATES-1:0] event_valid;
+    reg [POLICY_CNT_W-1:0] event_rank [0:TOTAL_CANDIDATES-1];
+    reg [POLICY_CNT_W-1:0] col_group_count [0:NUM_COLS-1];
+    integer e_i, p_i, l_i;
+    integer r_i, c_i, k_i;
+    integer ev_r, ev_c, ev_k;
     always @(*) begin
-        for (il = 0; il < LANES; il = il + 1) begin
-            lane_vld[il] = 1'b0;
-            lane_row[il] = {ROW_IDX_W{1'b0}};
-            lane_col[il] = {COL_IDX_W{1'b0}};
-            lane_k  [il] = {K_IDX_W{1'b0}};
-        end
+        lane_valid_o = {LANES{1'b0}};
+        a_row_sel_o  = {(LANES*ROW_IDX_W){1'b0}};
+        b_col_sel_o  = {(LANES*COL_IDX_W){1'b0}};
+        k_sel_o      = {(LANES*K_IDX_W){1'b0}};
         match_count_o = {CNT_W{1'b0}};
-        overflow_o    = 1'b0;
-        lane_ptr      = 0;
-        total         = 0;
+        active_b_cols_o = {ACTIVE_COLS_W{1'b0}};
+        overflow_o = 1'b0;
+        ev_r = 0;
+        ev_c = 0;
+        ev_k = 0;
+        for (e_i = 0; e_i < TOTAL_CANDIDATES; e_i = e_i + 1) begin
+            event_valid[e_i] = 1'b0;
+            event_rank[e_i] = {POLICY_CNT_W{1'b0}};
+        end
+        for (c_i = 0; c_i < NUM_COLS; c_i = c_i + 1)
+            col_group_count[c_i] = {POLICY_CNT_W{1'b0}};
 
-        for (r = 0; r < NUM_ROWS; r = r + 1) begin
-            for (c = 0; c < NUM_COLS; c = c + 1) begin
-                for (k = 0; k < K_BITS; k = k + 1) begin
-                    if (a_mask_i[r*K_BITS + k] & b_mask_i[c*K_BITS + k]) begin
-                        total = total + 1;
-                        if (lane_ptr < LANES) begin
-                            lane_vld[lane_ptr] = 1'b1;
-                            lane_row[lane_ptr] = r[ROW_IDX_W-1:0];
-                            lane_col[lane_ptr] = c[COL_IDX_W-1:0];
-                            lane_k  [lane_ptr] = k[K_IDX_W-1:0];
-                            lane_ptr = lane_ptr + 1;
-                        end
+        if (PACKED_MODE) begin
+            for (c_i = 0; c_i < NUM_COLS; c_i = c_i + 1) begin
+                col_group_count[c_i] = (c_i == 0) ? {POLICY_CNT_W{1'b0}} : col_group_count[c_i-1];
+                for (r_i = 0; r_i < NUM_ROWS; r_i = r_i + 1) begin
+                    for (k_i = 0; k_i < K_BITS; k_i = k_i + 1) begin
+                        col_group_count[c_i] = col_group_count[c_i] +
+                            {{(POLICY_CNT_W-1){1'b0}}, (a_mask_i[r_i*K_BITS + k_i] &&
+                                                        b_mask_i[c_i*K_BITS + k_i])};
                     end
                 end
             end
-        end
 
-        match_count_o = lane_ptr[CNT_W-1:0];
-        overflow_o    = (total > LANES) ? 1'b1 : 1'b0;
+            active_b_cols_o = {{(ACTIVE_COLS_W-1){1'b0}}, 1'b1};
+            overflow_o = (col_group_count[0] > LANES);
+            for (c_i = 0; c_i < NUM_COLS; c_i = c_i + 1) begin
+                if (col_group_count[c_i] <= LANES) begin
+                    active_b_cols_o = c_i + 1;
+                    overflow_o = 1'b0;
+                end
+            end
+
+            for (r_i = 0; r_i < NUM_ROWS; r_i = r_i + 1) begin
+                for (c_i = 0; c_i < NUM_COLS; c_i = c_i + 1) begin
+                    for (k_i = 0; k_i < K_BITS; k_i = k_i + 1) begin
+                        e_i = r_i * NUM_COLS * K_BITS + c_i * K_BITS + k_i;
+                        event_valid[e_i] = a_mask_i[r_i*K_BITS + k_i] &&
+                                           b_mask_i[c_i*K_BITS + k_i] &&
+                                           (c_i < active_b_cols_o);
+                    end
+                end
+            end
+
+            for (e_i = 0; e_i < TOTAL_CANDIDATES; e_i = e_i + 1) begin
+                event_rank[e_i] = {POLICY_CNT_W{1'b0}};
+                for (p_i = 0; p_i <= e_i; p_i = p_i + 1)
+                    event_rank[e_i] = event_rank[e_i] + {{(POLICY_CNT_W-1){1'b0}}, event_valid[p_i]};
+            end
+
+            match_count_o = event_rank[TOTAL_CANDIDATES-1][CNT_W-1:0];
+
+            for (l_i = 0; l_i < LANES; l_i = l_i + 1) begin
+                for (e_i = 0; e_i < TOTAL_CANDIDATES; e_i = e_i + 1) begin
+                    if (event_valid[e_i] && (event_rank[e_i] == (l_i + 1))) begin
+                        ev_r = e_i / (NUM_COLS * K_BITS);
+                        ev_c = (e_i / K_BITS) % NUM_COLS;
+                        ev_k = e_i % K_BITS;
+                        lane_valid_o[l_i] = 1'b1;
+                        a_row_sel_o[l_i*ROW_IDX_W +: ROW_IDX_W] = ev_r[ROW_IDX_W-1:0];
+                        b_col_sel_o[l_i*COL_IDX_W +: COL_IDX_W] = ev_c[COL_IDX_W-1:0];
+                        k_sel_o[l_i*K_IDX_W +: K_IDX_W] = ev_k[K_IDX_W-1:0];
+                    end
+                end
+            end
+        end else begin
+            active_b_cols_o = NUM_COLS;
+            for (l_i = 0; l_i < LANES; l_i = l_i + 1) begin
+                ev_r = l_i / (NUM_COLS * K_BITS);
+                ev_c = (l_i / K_BITS) % NUM_COLS;
+                ev_k = l_i % K_BITS;
+                if (l_i < TOTAL_CANDIDATES) begin
+                    lane_valid_o[l_i] = a_mask_i[ev_r*K_BITS + ev_k] &&
+                                        b_mask_i[ev_c*K_BITS + ev_k];
+                    a_row_sel_o[l_i*ROW_IDX_W +: ROW_IDX_W] = ev_r[ROW_IDX_W-1:0];
+                    b_col_sel_o[l_i*COL_IDX_W +: COL_IDX_W] = ev_c[COL_IDX_W-1:0];
+                    k_sel_o[l_i*K_IDX_W +: K_IDX_W] = ev_k[K_IDX_W-1:0];
+                    match_count_o = match_count_o + {{(CNT_W-1){1'b0}}, lane_valid_o[l_i]};
+                end
+            end
+        end
     end
-
-    // Pack internal arrays to output wires using constant genvar — no
-    // variable part-selects here, so this is safe in all Verilog-2001 tools.
-    genvar gl;
-    generate
-        for (gl = 0; gl < LANES; gl = gl + 1) begin : gen_pack
-            assign lane_valid_o[gl]                         = lane_vld[gl];
-            assign a_row_sel_o [gl*ROW_IDX_W +: ROW_IDX_W] = lane_row[gl];
-            assign b_col_sel_o [gl*COL_IDX_W +: COL_IDX_W] = lane_col[gl];
-            assign k_sel_o     [gl*K_IDX_W   +: K_IDX_W]   = lane_k[gl];
-        end
-    endgenerate
 
 endmodule

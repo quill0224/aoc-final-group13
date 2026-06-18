@@ -2,17 +2,21 @@
 //
 // bitmask buffers -> MFIU -> small A/B distribution -> multiplier lanes ->
 // reduction-by-output-coordinate -> row-local buffer.
+//
+// LANES is the packed effectual-MAC capacity.  If a chunk produces more
+// effectual MACs than LANES, MFIU asserts overflow_o.
 
 module trip_compute_top #(
-    parameter NUM_ROWS      = 2,
-    parameter NUM_COLS      = 2,
+    parameter NUM_ROWS      = 4,
+    parameter NUM_COLS      = 4,
     parameter K_BITS        = 4,
-    parameter LANES         = 4,
+    parameter LANES         = 64,
     parameter DATA_WIDTH    = 16,
     parameter ID_WIDTH      = 4,
     parameter PRODUCT_WIDTH = DATA_WIDTH * 2,
     parameter ACC_WIDTH     = PRODUCT_WIDTH + $clog2(LANES + 1),
     parameter SIGNED_DATA   = 0,
+    parameter PACKED_MFIU   = 0,
     // derived
     parameter ADDR_W_A      = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter ADDR_W_B      = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,
@@ -59,8 +63,46 @@ module trip_compute_top #(
     wire [LANES*DATA_WIDTH-1:0] dist_b;
     wire [LANES-1:0] product_valid;
     wire [LANES*PRODUCT_WIDTH-1:0] products;
+    reg  [NUM_OUTPUTS-1:0] per_output_valid_d1;
+    reg  [NUM_OUTPUTS-1:0] per_output_valid_d2;
+    reg  [NUM_OUTPUTS-1:0] per_output_valid_d3;
+    reg  reduce_write_en_d1;
+    reg  reduce_write_en_d2;
+    reg  reduce_write_en_d3;
+    reg  reduce_write_en_d4;
+    reg  reduce_write_en_d5;
     wire [NUM_OUTPUTS-1:0] reduce_valid;
     wire [NUM_OUTPUTS*ACC_WIDTH-1:0] reduce_value;
+    reg  [NUM_OUTPUTS-1:0] reduce_valid_r;
+    reg  [NUM_OUTPUTS*ACC_WIDTH-1:0] reduce_value_r;
+
+    // per-output enable: high when >= 1 lane targets this (row, col) slot.
+    // With direct MFIU mapping, lanes for output oc are contiguous:
+    //   LANE_BASE = (oc/NUM_COLS)*NUM_COLS*K_BITS + (oc%NUM_COLS)*K_BITS
+    reg [NUM_OUTPUTS-1:0] per_output_valid;
+    integer pov_i, pov_lane_i;
+    integer pov_base;
+    always @(*) begin
+        per_output_valid = {NUM_OUTPUTS{1'b0}};
+        pov_base = 0;
+        if (PACKED_MFIU) begin
+            for (pov_lane_i = 0; pov_lane_i < LANES; pov_lane_i = pov_lane_i + 1) begin
+                if (lane_valid[pov_lane_i]) begin
+                    for (pov_i = 0; pov_i < NUM_OUTPUTS; pov_i = pov_i + 1) begin
+                        if ((a_row_sel[pov_lane_i*ROW_IDX_W +: ROW_IDX_W] == (pov_i / NUM_COLS)) &&
+                            (b_col_sel[pov_lane_i*COL_IDX_W +: COL_IDX_W] == (pov_i % NUM_COLS))) begin
+                            per_output_valid[pov_i] = 1'b1;
+                        end
+                    end
+                end
+            end
+        end else begin
+            for (pov_i = 0; pov_i < NUM_OUTPUTS; pov_i = pov_i + 1) begin
+                pov_base = (pov_i / NUM_COLS) * NUM_COLS * K_BITS + (pov_i % NUM_COLS) * K_BITS;
+                per_output_valid[pov_i] = |lane_valid[pov_base +: K_BITS];
+            end
+        end
+    end
 
     trip_intersection_top #(
         .NUM_ROWS   (NUM_ROWS),
@@ -68,7 +110,8 @@ module trip_compute_top #(
         .K_BITS     (K_BITS),
         .LANES      (LANES),
         .DATA_WIDTH (DATA_WIDTH),
-        .ID_WIDTH   (ID_WIDTH)
+        .ID_WIDTH   (ID_WIDTH),
+        .PACKED_MFIU(PACKED_MFIU)
     ) u_intersection (
         .clk           (clk),
         .reset         (reset),
@@ -89,6 +132,7 @@ module trip_compute_top #(
         .b_col_sel_o   (b_col_sel),
         .k_sel_o       (k_sel),
         .match_count_o (match_count_o),
+        .active_b_cols_o(),
         .overflow_o    (overflow_o),
         .a_values_o    (captured_a_values),
         .b_values_o    (captured_b_values)
@@ -99,7 +143,8 @@ module trip_compute_top #(
         .NUM_COLS   (NUM_COLS),
         .K_BITS     (K_BITS),
         .LANES      (LANES),
-        .DATA_WIDTH (DATA_WIDTH)
+        .DATA_WIDTH (DATA_WIDTH),
+        .PACKED_MODE(PACKED_MFIU)
     ) u_dist (
         .a_values_i    (captured_a_values),
         .b_values_i    (captured_b_values),
@@ -120,6 +165,8 @@ module trip_compute_top #(
                 .PRODUCT_WIDTH (PRODUCT_WIDTH),
                 .SIGNED_DATA   (SIGNED_DATA)
             ) u_lane (
+                .clk       (clk),
+                .reset     (reset),
                 .valid_i   (dist_valid[gl]),
                 .a_i       (dist_a[gl*DATA_WIDTH +: DATA_WIDTH]),
                 .b_i       (dist_b[gl*DATA_WIDTH +: DATA_WIDTH]),
@@ -129,19 +176,50 @@ module trip_compute_top #(
         end
     endgenerate
 
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            per_output_valid_d1 <= {NUM_OUTPUTS{1'b0}};
+            per_output_valid_d2 <= {NUM_OUTPUTS{1'b0}};
+            per_output_valid_d3 <= {NUM_OUTPUTS{1'b0}};
+            reduce_write_en_d1  <= 1'b0;
+            reduce_write_en_d2  <= 1'b0;
+            reduce_write_en_d3  <= 1'b0;
+            reduce_write_en_d4  <= 1'b0;
+            reduce_write_en_d5  <= 1'b0;
+            reduce_valid_r      <= {NUM_OUTPUTS{1'b0}};
+            reduce_value_r      <= {(NUM_OUTPUTS*ACC_WIDTH){1'b0}};
+        end else begin
+            per_output_valid_d1 <= per_output_valid;
+            per_output_valid_d2 <= per_output_valid_d1;
+            per_output_valid_d3 <= per_output_valid_d2;
+            reduce_write_en_d1  <= intersection_done;
+            reduce_write_en_d2  <= reduce_write_en_d1;
+            reduce_write_en_d3  <= reduce_write_en_d2;
+            reduce_write_en_d4  <= reduce_write_en_d3;
+            reduce_write_en_d5  <= reduce_write_en_d4;
+            reduce_valid_r      <= reduce_valid;
+            reduce_value_r      <= reduce_value;
+        end
+    end
+
     trip_reduction_tree #(
         .NUM_ROWS      (NUM_ROWS),
         .NUM_COLS      (NUM_COLS),
+        .K_BITS        (K_BITS),
         .LANES         (LANES),
         .DATA_WIDTH    (DATA_WIDTH),
         .PRODUCT_WIDTH (PRODUCT_WIDTH),
         .ACC_WIDTH     (ACC_WIDTH),
-        .SIGNED_DATA   (SIGNED_DATA)
+        .SIGNED_DATA   (SIGNED_DATA),
+        .PACKED_MODE   (PACKED_MFIU)
     ) u_reduce (
+        .clk            (clk),
+        .reset          (reset),
         .lane_valid_i   (product_valid),
         .a_row_sel_i    (a_row_sel),
         .b_col_sel_i    (b_col_sel),
         .lane_product_i (products),
+        .out_enable_i   (per_output_valid_d3),
         .out_valid_o    (reduce_valid),
         .out_value_o    (reduce_value)
     );
@@ -153,9 +231,9 @@ module trip_compute_top #(
     ) u_row_buf (
         .clk        (clk),
         .reset      (reset),
-        .wr_en_i    (intersection_done),
-        .wr_valid_i (reduce_valid),
-        .wr_data_i  (reduce_value),
+        .wr_en_i    (reduce_write_en_d5),
+        .wr_valid_i (reduce_valid_r),
+        .wr_data_i  (reduce_value_r),
         .rd_valid_o (result_valid_o),
         .rd_data_o  (result_o)
     );
@@ -164,7 +242,7 @@ module trip_compute_top #(
         if (reset)
             done_o <= 1'b0;
         else
-            done_o <= intersection_done;
+            done_o <= reduce_write_en_d5;
     end
 
 endmodule

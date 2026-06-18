@@ -7,7 +7,7 @@
 // then drives the hardware tiling loop and compares every element.
 //
 // Overflow avoidance: each fiber has at most 1 nonzero per K-chunk,
-// so intersections per chunk ≤ NUM_ROWS × NUM_COLS = 4 = LANES.
+// so intersections per chunk ≤ NUM_ROWS × NUM_COLS × K_BITS = LANES = 16.
 //
 // Run:
 //   iverilog -g2012 -o sim.out \
@@ -23,12 +23,12 @@ module tb_trip_tile_random;
     localparam NUM_ROWS       = 2;
     localparam NUM_COLS       = 2;
     localparam K_BITS         = 4;
-    localparam LANES          = 4;
+    localparam LANES          = 16;  // must equal NUM_ROWS*NUM_COLS*K_BITS = 16
     localparam DATA_WIDTH     = 16;
     localparam ID_WIDTH       = 4;
     localparam ADDR_W_A       = 1;   // clog2(NUM_ROWS)
     localparam ADDR_W_B       = 1;   // clog2(NUM_COLS)
-    localparam CNT_W          = 3;   // clog2(LANES+1)
+    localparam CNT_W          = 5;   // $clog2(LANES+1) = $clog2(17) = 5
     localparam PRODUCT_WIDTH  = DATA_WIDTH * 2;
     localparam ACC_WIDTH      = PRODUCT_WIDTH + CNT_W;
     localparam TILE_ACC_WIDTH = ACC_WIDTH + 8;
@@ -53,6 +53,7 @@ module tb_trip_tile_random;
     reg [VAL_W-1:0]    a_wr_values_i, b_wr_values_i;
 
     wire busy_o, done_o, overflow_o, overflow_seen_o;
+    wire [1:0] fsm_state_obs_o;
     wire [NUM_OUTPUTS-1:0]                tile_valid_o;
     wire [NUM_OUTPUTS*TILE_ACC_WIDTH-1:0] tile_result_o;
     wire [NUM_OUTPUTS-1:0]                partial_valid_o;
@@ -92,7 +93,10 @@ module tb_trip_tile_random;
         .overflow_seen_o  (overflow_seen_o),
         .tile_valid_o     (tile_valid_o),
         .tile_result_o    (tile_result_o),
-        .chunk_count_o    (chunk_count_o)
+        .chunk_count_o    (chunk_count_o),
+        .test_mode_i      (1'b0),
+        .scan_en_i        (1'b0),
+        .fsm_state_obs_o  (fsm_state_obs_o)
     );
 
     initial clk = 0;

@@ -5,12 +5,12 @@ module tb_trip_compute_top;
     localparam NUM_ROWS      = 2;
     localparam NUM_COLS      = 2;
     localparam K_BITS        = 4;
-    localparam LANES         = 4;
+    localparam LANES         = 16;
     localparam DATA_WIDTH    = 16;
     localparam ID_WIDTH      = 4;
     localparam ADDR_W_A      = 1;
     localparam ADDR_W_B      = 1;
-    localparam CNT_W         = 3;
+    localparam CNT_W         = 5;
     localparam PRODUCT_WIDTH = DATA_WIDTH * 2;
     localparam ACC_WIDTH     = PRODUCT_WIDTH + CNT_W;
     localparam NUM_OUTPUTS   = NUM_ROWS * NUM_COLS;
@@ -136,14 +136,12 @@ module tb_trip_compute_top;
     endtask
 
     task run_compute;
-        integer i;
         begin
             @(negedge clk);
             start_i = 1'b1;
             @(posedge clk); #1;
             start_i = 1'b0;
-            for (i = 0; i < 4; i = i + 1)
-                @(posedge clk);
+            wait (done_o === 1'b1);
             #1;
         end
     endtask

@@ -32,8 +32,7 @@ module row_local_buffer #(
         end else if (wr_en_i) begin
             valid_mem <= wr_valid_i;
             for (i = 0; i < NUM_OUTPUTS; i = i + 1) begin
-                data_mem[i] <= wr_valid_i[i] ?
-                    wr_data_i[i*DATA_WIDTH +: DATA_WIDTH] : {DATA_WIDTH{1'b0}};
+                data_mem[i] <= wr_data_i[i*DATA_WIDTH +: DATA_WIDTH];
             end
         end
     end
