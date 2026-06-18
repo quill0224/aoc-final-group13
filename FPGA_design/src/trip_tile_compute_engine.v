@@ -30,6 +30,8 @@ module trip_tile_compute_engine #(
     parameter ADDR_W_A       = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter ADDR_W_B       = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,
     parameter CNT_W          = $clog2(LANES + 1),
+    parameter TOTAL_CANDIDATES = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter EVENT_CNT_W    = $clog2(TOTAL_CANDIDATES + 1),
     parameter NUM_OUTPUTS    = NUM_ROWS * NUM_COLS,
     parameter CHUNK_CNT_W    = 8
 ) (
@@ -93,8 +95,11 @@ module trip_tile_compute_engine #(
     reg clear_pending;
     reg [7:0] replay_pass;
     reg [TILE_ACC_WIDTH-1:0] tile_accum [0:NUM_OUTPUTS-1];
+    wire [EVENT_CNT_W-1:0] replay_skip;
 
     wire inner_done;
+
+    assign replay_skip = replay_pass * LANES;
 
     // ── Inner compute (single K-chunk) ────────────────────────────────────────
     trip_compute_top #(
@@ -122,6 +127,7 @@ module trip_tile_compute_engine #(
         .b_wr_mask_i    (b_wr_mask_i),
         .b_wr_values_i  (b_wr_values_i),
         .start_i        (inner_start),
+        .replay_skip_i  (replay_skip),
         .done_o         (inner_done),
         .result_valid_o (partial_valid_o),
         .result_o       (partial_result_o),
@@ -239,9 +245,9 @@ module trip_tile_compute_engine #(
                     end
                 end
 
-                // Re-issue inner compute for same K-chunk (future: pass
-                // replay_pass to MFIU skip_count_i to skip already-processed
-                // effectual MACs).  In direct mode this state is never reached.
+                // Re-issue inner compute for the same K-chunk. replay_skip
+                // skips already-emitted effectual MACs inside the packed MFIU.
+                // In direct mode this state is never reached.
                 S_REPLAY: begin
                     busy_o        <= 1'b1;
                     inner_start   <= 1'b1;

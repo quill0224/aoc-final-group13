@@ -24,6 +24,8 @@ module trip_compute_top #(
     parameter COL_IDX_W     = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,
     parameter K_IDX_W       = (K_BITS   > 1) ? $clog2(K_BITS)   : 1,
     parameter CNT_W         = $clog2(LANES + 1),
+    parameter TOTAL_CANDIDATES = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter EVENT_CNT_W   = $clog2(TOTAL_CANDIDATES + 1),
     parameter NUM_OUTPUTS   = NUM_ROWS * NUM_COLS
 ) (
     input  wire clk,
@@ -42,6 +44,7 @@ module trip_compute_top #(
     input  wire [K_BITS*DATA_WIDTH-1:0]   b_wr_values_i,
 
     input  wire start_i,
+    input  wire [EVENT_CNT_W-1:0] replay_skip_i,
     output reg  done_o,
 
     output wire [NUM_OUTPUTS-1:0]         result_valid_o,
@@ -66,6 +69,12 @@ module trip_compute_top #(
     reg  [NUM_OUTPUTS-1:0] per_output_valid_d1;
     reg  [NUM_OUTPUTS-1:0] per_output_valid_d2;
     reg  [NUM_OUTPUTS-1:0] per_output_valid_d3;
+    reg  [LANES*ROW_IDX_W-1:0] a_row_sel_d1;
+    reg  [LANES*ROW_IDX_W-1:0] a_row_sel_d2;
+    reg  [LANES*ROW_IDX_W-1:0] a_row_sel_d3;
+    reg  [LANES*COL_IDX_W-1:0] b_col_sel_d1;
+    reg  [LANES*COL_IDX_W-1:0] b_col_sel_d2;
+    reg  [LANES*COL_IDX_W-1:0] b_col_sel_d3;
     reg  reduce_write_en_d1;
     reg  reduce_write_en_d2;
     reg  reduce_write_en_d3;
@@ -126,6 +135,7 @@ module trip_compute_top #(
         .b_wr_mask_i   (b_wr_mask_i),
         .b_wr_values_i (b_wr_values_i),
         .start_i       (start_i),
+        .replay_skip_i (replay_skip_i),
         .done_o        (intersection_done),
         .lane_valid_o  (lane_valid),
         .a_row_sel_o   (a_row_sel),
@@ -181,6 +191,12 @@ module trip_compute_top #(
             per_output_valid_d1 <= {NUM_OUTPUTS{1'b0}};
             per_output_valid_d2 <= {NUM_OUTPUTS{1'b0}};
             per_output_valid_d3 <= {NUM_OUTPUTS{1'b0}};
+            a_row_sel_d1        <= {(LANES*ROW_IDX_W){1'b0}};
+            a_row_sel_d2        <= {(LANES*ROW_IDX_W){1'b0}};
+            a_row_sel_d3        <= {(LANES*ROW_IDX_W){1'b0}};
+            b_col_sel_d1        <= {(LANES*COL_IDX_W){1'b0}};
+            b_col_sel_d2        <= {(LANES*COL_IDX_W){1'b0}};
+            b_col_sel_d3        <= {(LANES*COL_IDX_W){1'b0}};
             reduce_write_en_d1  <= 1'b0;
             reduce_write_en_d2  <= 1'b0;
             reduce_write_en_d3  <= 1'b0;
@@ -192,6 +208,12 @@ module trip_compute_top #(
             per_output_valid_d1 <= per_output_valid;
             per_output_valid_d2 <= per_output_valid_d1;
             per_output_valid_d3 <= per_output_valid_d2;
+            a_row_sel_d1        <= a_row_sel;
+            a_row_sel_d2        <= a_row_sel_d1;
+            a_row_sel_d3        <= a_row_sel_d2;
+            b_col_sel_d1        <= b_col_sel;
+            b_col_sel_d2        <= b_col_sel_d1;
+            b_col_sel_d3        <= b_col_sel_d2;
             reduce_write_en_d1  <= intersection_done;
             reduce_write_en_d2  <= reduce_write_en_d1;
             reduce_write_en_d3  <= reduce_write_en_d2;
@@ -216,8 +238,8 @@ module trip_compute_top #(
         .clk            (clk),
         .reset          (reset),
         .lane_valid_i   (product_valid),
-        .a_row_sel_i    (a_row_sel),
-        .b_col_sel_i    (b_col_sel),
+        .a_row_sel_i    (a_row_sel_d3),
+        .b_col_sel_i    (b_col_sel_d3),
         .lane_product_i (products),
         .out_enable_i   (per_output_valid_d3),
         .out_valid_o    (reduce_valid),

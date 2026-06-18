@@ -73,6 +73,7 @@ module tb_trip_intersection_top;
         .b_wr_mask_i    (b_wr_mask_i),
         .b_wr_values_i  (b_wr_values_i),
         .start_i        (start_i),
+        .replay_skip_i  ('0),
         .done_o         (done_o),
         .lane_valid_o   (lane_valid_o),
         .a_row_sel_o    (a_row_sel_o),
@@ -404,6 +405,7 @@ module tb_trip_overflow;
         .b_wr_mask_i      (b_wr_mask),
         .b_wr_values_i    (b_wr_values),
         .start_i          (start),
+        .replay_skip_i    ('0),
         .done_o           (done),
         .lane_valid_o     (lane_valid),
         .a_row_sel_o      (a_row_sel),
@@ -520,8 +522,9 @@ module tb_trip_overflow;
         repeat (2) @(posedge clk);
 
         // ─── TC1: all-ones masks → overflow ─────────────────────────────────
-        // col_cnt[0]=8 > LANES=6 → overflow_o=1, active_b_cols_o=1
-        // Only 6 events placed (rows 0..1 × col 0 × k=0..1 for row 1 dropped)
+        // total_events=16 > LANES=6 → overflow_o=1. active_b_cols_o remains
+        // the policy-visible column count, but packed replay emits a full
+        // row-major event window so later passes can complete the tile.
         $display("--- TC1: all-ones masks (overflow expected) ---");
         write_a_fiber(0, 4'b1111, {(K_BITS*DATA_WIDTH){1'b0}});
         write_a_fiber(1, 4'b1111, {(K_BITS*DATA_WIDTH){1'b0}});
@@ -539,9 +542,9 @@ module tb_trip_overflow;
         check_lane(1, 0, 0, 1);
         check_lane(2, 0, 0, 2);
         check_lane(3, 0, 0, 3);
-        // Lanes 4..5: row1 × col0 × k=0..1 (k=2,3 dropped: lane_idx 6,7 ≥ LANES)
-        check_lane(4, 1, 0, 0);
-        check_lane(5, 1, 0, 1);
+        // Lanes 4..5: row0 × col1 × k=0..1; remaining events are replayed.
+        check_lane(4, 0, 1, 0);
+        check_lane(5, 0, 1, 1);
 
         // ─── TC2: two B cols, 3 events each → exactly LANES, no overflow ────
         // A row 0 = k=0..2 (3 bits), A row 1 = empty

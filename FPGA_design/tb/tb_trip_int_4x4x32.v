@@ -83,6 +83,7 @@ module tb_trip_int_4x4x32;
         .b_wr_mask_i     (b_wr_mask),
         .b_wr_values_i   (b_wr_values),
         .start_i         (start),
+        .replay_skip_i   ('0),
         .done_o          (done),
         .lane_valid_o    (lane_valid),
         .a_row_sel_o     (a_row_sel),

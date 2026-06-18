@@ -32,6 +32,8 @@ module trip_intersection_top #(
     parameter K_IDX_W    = (K_BITS   > 1) ? $clog2(K_BITS)   : 1,
     parameter ACTIVE_COLS_W = (NUM_COLS > 1) ? $clog2(NUM_COLS + 1) : 1,
     parameter CNT_W      = $clog2(LANES + 1),
+    parameter TOTAL_CANDIDATES = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter EVENT_CNT_W = $clog2(TOTAL_CANDIDATES + 1),
     parameter MAX_FIBERS = (NUM_ROWS > NUM_COLS) ? NUM_ROWS : NUM_COLS,
     parameter FC_W       = (MAX_FIBERS > 1) ? $clog2(MAX_FIBERS + 1) : 2
 ) (
@@ -54,6 +56,7 @@ module trip_intersection_top #(
 
     // ── Control ──────────────────────────────────────────────────────────────
     input  wire start_i,
+    input  wire [EVENT_CNT_W-1:0] replay_skip_i,
     output reg  done_o,    // one-cycle pulse — sample MFIU outputs when high
 
     // ── MFIU outputs (valid when done_o = 1) ─────────────────────────────────
@@ -178,6 +181,7 @@ module trip_intersection_top #(
                 .clk           (clk),
                 .reset         (reset),
                 .valid_i       (mfiu_start),
+                .replay_skip_i (replay_skip_i),
                 .a_mask_i      (a_masks_mfiu),
                 .b_mask_i      (b_masks_mfiu),
                 .valid_o       (mfiu_pipe_valid),

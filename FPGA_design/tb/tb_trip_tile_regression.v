@@ -563,7 +563,7 @@ module tb_trip_signed_compute;
         .a_wr_mask_i(a_wr_mask_i), .a_wr_values_i(a_wr_values_i),
         .b_wr_en_i(b_wr_en_i), .b_wr_addr_i(b_wr_addr_i), .b_wr_id_i(b_wr_id_i),
         .b_wr_mask_i(b_wr_mask_i), .b_wr_values_i(b_wr_values_i),
-        .start_i(start_i), .done_o(done_o),
+        .start_i(start_i), .replay_skip_i('0), .done_o(done_o),
         .result_valid_o(result_valid_o), .result_o(result_o),
         .match_count_o(match_count_o), .overflow_o(overflow_o)
     );
@@ -677,7 +677,7 @@ module tb_trip_param_shapes;
         .a_wr_mask_i(s_a_mask), .a_wr_values_i(s_a_val),
         .b_wr_en_i(s_b_we), .b_wr_addr_i(1'b0), .b_wr_id_i(s_b_id),
         .b_wr_mask_i(s_b_mask), .b_wr_values_i(s_b_val),
-        .start_i(s_start), .done_o(s_done),
+        .start_i(s_start), .replay_skip_i('0), .done_o(s_done),
         .result_valid_o(s_valid), .result_o(s_result),
         .match_count_o(s_count), .overflow_o(s_overflow)
     );
@@ -704,7 +704,7 @@ module tb_trip_param_shapes;
         .a_wr_mask_i(b_a_mask), .a_wr_values_i(b_a_values),
         .b_wr_en_i(b_b_we), .b_wr_addr_i(b_b_addr), .b_wr_id_i(b_b_id),
         .b_wr_mask_i(b_b_mask), .b_wr_values_i(b_b_values),
-        .start_i(b_start), .done_o(b_done),
+        .start_i(b_start), .replay_skip_i('0), .done_o(b_done),
         .result_valid_o(b_valid), .result_o(b_result),
         .match_count_o(b_count), .overflow_o(b_overflow)
     );

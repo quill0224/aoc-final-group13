@@ -27,6 +27,7 @@ module mfiu_pipelined #(
     parameter ACTIVE_COLS_W = (NUM_COLS > 1) ? $clog2(NUM_COLS + 1) : 1,
     parameter CNT_W         = $clog2(LANES + 1),
     parameter TOTAL_CANDIDATES = NUM_ROWS * NUM_COLS * K_BITS,
+    parameter EVENT_CNT_W   = $clog2(TOTAL_CANDIDATES + 1),
     parameter G_SIZE        = TOTAL_CANDIDATES / GROUPS,
     parameter G_CNT_W       = $clog2(G_SIZE + 1),
     parameter POLICY_CNT_W  = $clog2(TOTAL_CANDIDATES + 1),
@@ -35,6 +36,7 @@ module mfiu_pipelined #(
     input  wire                          clk,
     input  wire                          reset,
     input  wire                          valid_i,
+    input  wire [EVENT_CNT_W-1:0]        replay_skip_i,
     input  wire [NUM_ROWS*K_BITS-1:0]   a_mask_i,
     input  wire [NUM_COLS*K_BITS-1:0]   b_mask_i,
 
@@ -51,18 +53,21 @@ module mfiu_pipelined #(
     // ── Stage 1: register input masks ────────────────────────────────────────
     reg [NUM_ROWS*K_BITS-1:0] a_mask_r;
     reg [NUM_COLS*K_BITS-1:0] b_mask_r;
+    reg [EVENT_CNT_W-1:0] replay_skip_r;
     reg s1_valid;
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             a_mask_r <= {(NUM_ROWS*K_BITS){1'b0}};
             b_mask_r <= {(NUM_COLS*K_BITS){1'b0}};
+            replay_skip_r <= {EVENT_CNT_W{1'b0}};
             s1_valid <= 1'b0;
         end else begin
             s1_valid <= valid_i;
             if (valid_i) begin
                 a_mask_r <= a_mask_i;
                 b_mask_r <= b_mask_i;
+                replay_skip_r <= replay_skip_i;
             end
         end
     end
@@ -74,6 +79,7 @@ module mfiu_pipelined #(
     reg [PAIR_CNT_W-1:0] pair_cnt_r    [0:NUM_COLS*NUM_ROWS-1];
     reg [NUM_ROWS*K_BITS-1:0] a_mask_r2;   // forward masks to stage 2b
     reg [NUM_COLS*K_BITS-1:0] b_mask_r2;
+    reg [EVENT_CNT_W-1:0] replay_skip_r2;
     reg s2a_valid;
 
     integer s2a_c, s2a_r, s2a_k, s2a_i;
@@ -95,12 +101,14 @@ module mfiu_pipelined #(
             s2a_valid <= 1'b0;
             a_mask_r2 <= {(NUM_ROWS*K_BITS){1'b0}};
             b_mask_r2 <= {(NUM_COLS*K_BITS){1'b0}};
+            replay_skip_r2 <= {EVENT_CNT_W{1'b0}};
             for (s2a_i = 0; s2a_i < NUM_COLS*NUM_ROWS; s2a_i = s2a_i + 1)
                 pair_cnt_r[s2a_i] <= {PAIR_CNT_W{1'b0}};
         end else begin
             s2a_valid <= s1_valid;
             a_mask_r2 <= a_mask_r;
             b_mask_r2 <= b_mask_r;
+            replay_skip_r2 <= replay_skip_r;
             for (s2a_i = 0; s2a_i < NUM_COLS*NUM_ROWS; s2a_i = s2a_i + 1)
                 pair_cnt_r[s2a_i] <= pair_cnt_next[s2a_i];
         end
@@ -112,6 +120,7 @@ module mfiu_pipelined #(
     // For 4×4: 3+3+4+2 ≈ 12 gate levels (vs old 512-chain col_grp_cnt).
     reg [TOTAL_CANDIDATES-1:0] event_valid_r;
     reg [POLICY_CNT_W-1:0]    event_count_r;
+    reg [EVENT_CNT_W-1:0]     replay_skip_r3;
     reg [ACTIVE_COLS_W-1:0]   active_b_cols_r;
     reg                         overflow_r;
     reg s2b_valid;
@@ -143,24 +152,24 @@ module mfiu_pipelined #(
         for (s2b_c = 1; s2b_c < NUM_COLS; s2b_c = s2b_c + 1)
             col_acc[s2b_c] = col_acc[s2b_c-1] + col_cnt[s2b_c];
 
-        // Step 3: find active_b_cols (chain = NUM_COLS comparisons)
-        ec_next2 = col_acc[0];
+        // Step 3: find active_b_cols for policy visibility, while replay
+        // uses the full column event stream so later B columns are not dropped.
+        ec_next2 = col_acc[NUM_COLS-1];
         ov_next2 = (col_acc[0] > LANES);
         for (s2b_c = 0; s2b_c < NUM_COLS; s2b_c = s2b_c + 1)
             if (col_acc[s2b_c] <= LANES) begin
                 ac_next2 = s2b_c + 1;
-                ec_next2 = col_acc[s2b_c];
                 ov_next2 = 1'b0;
             end
 
-        // Step 4: event_valid bitmap (parallel, depends on ac_next2)
+        // Step 4: event_valid bitmap across all columns; replay_skip_i selects
+        // which LANES-wide window is emitted in the final gather stage.
         for (s2b_r = 0; s2b_r < NUM_ROWS; s2b_r = s2b_r + 1)
             for (s2b_c = 0; s2b_c < NUM_COLS; s2b_c = s2b_c + 1)
                 for (s2b_k = 0; s2b_k < K_BITS; s2b_k = s2b_k + 1) begin
                     s2b_e = s2b_r * NUM_COLS * K_BITS + s2b_c * K_BITS + s2b_k;
                     ev_next2[s2b_e] = a_mask_r2[s2b_r*K_BITS + s2b_k] &
-                                      b_mask_r2[s2b_c*K_BITS + s2b_k] &
-                                      (s2b_c < ac_next2);
+                                      b_mask_r2[s2b_c*K_BITS + s2b_k];
                 end
     end
 
@@ -168,6 +177,7 @@ module mfiu_pipelined #(
         if (reset) begin
             event_valid_r   <= {TOTAL_CANDIDATES{1'b0}};
             event_count_r   <= {POLICY_CNT_W{1'b0}};
+            replay_skip_r3  <= {EVENT_CNT_W{1'b0}};
             active_b_cols_r <= {ACTIVE_COLS_W{1'b0}};
             overflow_r      <= 1'b0;
             s2b_valid       <= 1'b0;
@@ -175,6 +185,7 @@ module mfiu_pipelined #(
             s2b_valid       <= s2a_valid;
             event_valid_r   <= ev_next2;
             event_count_r   <= ec_next2;
+            replay_skip_r3  <= replay_skip_r2;
             active_b_cols_r <= ac_next2;
             overflow_r      <= ov_next2;
         end
@@ -186,6 +197,7 @@ module mfiu_pipelined #(
     reg [G_CNT_W-1:0]          local_rank_r  [0:TOTAL_CANDIDATES-1];
     reg [G_CNT_W-1:0]          group_count_r [0:GROUPS-1];
     reg [POLICY_CNT_W-1:0]     event_count_r2;
+    reg [EVENT_CNT_W-1:0]      replay_skip_r4;
     reg [ACTIVE_COLS_W-1:0]    active_b_cols_r2;
     reg                          overflow_r2;
     reg s3_valid;
@@ -196,6 +208,7 @@ module mfiu_pipelined #(
         if (reset) begin
             event_valid_r2   <= {TOTAL_CANDIDATES{1'b0}};
             event_count_r2   <= {POLICY_CNT_W{1'b0}};
+            replay_skip_r4   <= {EVENT_CNT_W{1'b0}};
             active_b_cols_r2 <= {ACTIVE_COLS_W{1'b0}};
             overflow_r2      <= 1'b0;
             s3_valid         <= 1'b0;
@@ -207,6 +220,7 @@ module mfiu_pipelined #(
             s3_valid         <= s2b_valid;
             event_valid_r2   <= event_valid_r;
             event_count_r2   <= event_count_r;
+            replay_skip_r4   <= replay_skip_r3;
             active_b_cols_r2 <= active_b_cols_r;
             overflow_r2      <= overflow_r;
             for (s3_g = 0; s3_g < GROUPS; s3_g = s3_g + 1) begin
@@ -228,13 +242,17 @@ module mfiu_pipelined #(
     // gather in always @* lets Yosys build an OR tree (depth=log2(TC)) instead
     // of the TC-deep mux priority chain that scatter in always @(posedge clk)
     // creates via the proc pass.
-    reg [CNT_W-1:0]           s4_gbase       [0:GROUPS-1];
+    reg [EVENT_CNT_W-1:0]     s4_gbase       [0:GROUPS-1];
     reg [LANES-1:0]           lane_valid_next;
     reg [LANES*ROW_IDX_W-1:0] a_row_sel_next;
     reg [LANES*COL_IDX_W-1:0] b_col_sel_next;
     reg [LANES*K_IDX_W-1:0]   k_sel_next;
+    reg [CNT_W-1:0]           emitted_count_next;
+    reg                       overflow_next;
 
     integer s4_gb, s4_e, s4_gidx, s4_lidx, s4_evr, s4_evc, s4_evk;
+    integer s4_global_rank;
+    integer s4_replay_lane;
 
     always @* begin
         // Group base prefix sum (chain = GROUPS additions)
@@ -247,18 +265,30 @@ module mfiu_pipelined #(
         a_row_sel_next  = {(LANES*ROW_IDX_W){1'b0}};
         b_col_sel_next  = {(LANES*COL_IDX_W){1'b0}};
         k_sel_next      = {(LANES*K_IDX_W){1'b0}};
+        emitted_count_next = {CNT_W{1'b0}};
+        overflow_next = (event_count_r2 > replay_skip_r4 + LANES);
+        s4_gidx = 0;
+        s4_lidx = 0;
+        s4_global_rank = 0;
+        s4_replay_lane = 0;
+        s4_evr = 0;
+        s4_evc = 0;
+        s4_evk = 0;
         for (s4_e = 0; s4_e < TOTAL_CANDIDATES; s4_e = s4_e + 1) begin
             if (event_valid_r2[s4_e]) begin
                 s4_gidx = s4_e / G_SIZE;
                 s4_lidx = s4_gbase[s4_gidx] + local_rank_r[s4_e];
-                if (s4_lidx < LANES) begin
+                s4_global_rank = s4_lidx;
+                s4_replay_lane = s4_global_rank - replay_skip_r4;
+                if ((s4_global_rank >= replay_skip_r4) && (s4_replay_lane < LANES)) begin
                     s4_evr = s4_e / (NUM_COLS * K_BITS);
                     s4_evc = (s4_e / K_BITS) % NUM_COLS;
                     s4_evk = s4_e % K_BITS;
-                    lane_valid_next[s4_lidx]                          = 1'b1;
-                    a_row_sel_next [s4_lidx*ROW_IDX_W +: ROW_IDX_W] = s4_evr[ROW_IDX_W-1:0];
-                    b_col_sel_next [s4_lidx*COL_IDX_W +: COL_IDX_W] = s4_evc[COL_IDX_W-1:0];
-                    k_sel_next     [s4_lidx*K_IDX_W   +: K_IDX_W  ] = s4_evk[K_IDX_W-1:0];
+                    lane_valid_next[s4_replay_lane] = 1'b1;
+                    a_row_sel_next [s4_replay_lane*ROW_IDX_W +: ROW_IDX_W] = s4_evr[ROW_IDX_W-1:0];
+                    b_col_sel_next [s4_replay_lane*COL_IDX_W +: COL_IDX_W] = s4_evc[COL_IDX_W-1:0];
+                    k_sel_next     [s4_replay_lane*K_IDX_W   +: K_IDX_W  ] = s4_evk[K_IDX_W-1:0];
+                    emitted_count_next = emitted_count_next + {{(CNT_W-1){1'b0}}, 1'b1};
                 end
             end
         end
@@ -276,9 +306,9 @@ module mfiu_pipelined #(
             overflow_o      <= 1'b0;
         end else begin
             valid_o         <= s3_valid;
-            match_count_o   <= event_count_r2[CNT_W-1:0];
+            match_count_o   <= emitted_count_next;
             active_b_cols_o <= active_b_cols_r2;
-            overflow_o      <= overflow_r2;
+            overflow_o      <= overflow_next;
             lane_valid_o    <= lane_valid_next;
             a_row_sel_o     <= a_row_sel_next;
             b_col_sel_o     <= b_col_sel_next;

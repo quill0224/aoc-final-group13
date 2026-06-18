@@ -51,6 +51,7 @@ module tb_trip_compute_top;
         .b_wr_mask_i    (b_wr_mask_i),
         .b_wr_values_i  (b_wr_values_i),
         .start_i        (start_i),
+        .replay_skip_i  ('0),
         .done_o         (done_o),
         .result_valid_o (result_valid_o),
         .result_o       (result_o),
