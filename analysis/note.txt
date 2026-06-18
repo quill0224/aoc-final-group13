@@ -1,0 +1,199 @@
+python main.py ./weights/vgg16_imagenet100_pruned_power2_int8.pth \
+  --arch eyeriss \
+  --format torch \
+  --backend power2 \
+  --output ../log/eyeriss \
+  --plot \
+  --input-size 224 \
+  -v
+
+  python main.py ./weights/vgg16_imagenet100_pruned_power2_int8.pth \
+  --arch standard_ip \
+  --format torch \
+  --backend power2 \
+  --output ../log/standard_ip \
+  --plot \
+  --input-size 224 \
+  -v
+
+  python main.py ./weights/vgg16_imagenet100_pruned_power2_int8.pth \
+  --arch trip \
+  --format torch \
+  --backend power2 \
+  --output ../log/trip \
+  --plot \
+  --input-size 224 \
+  -v
+
+Eyeriss
+[INFO] Parsed conv layers: 13
+[LAYER] vgg16.conv0
+  GEMM           : M=1024, K=27, N=64
+  Conv shape     : N=1, C=3, H=32, W=32, M=64, R=3, S=3, E=32, F=32
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 617984
+[LAYER] vgg16.conv1
+  GEMM           : M=1024, K=576, N=64
+  Conv shape     : N=1, C=64, H=32, W=32, M=64, R=3, S=3, E=32, F=32
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 8220672
+[LAYER] vgg16.conv2
+  GEMM           : M=256, K=576, N=128
+  Conv shape     : N=1, C=64, H=16, W=16, M=128, R=3, S=3, E=16, F=16
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 5169152
+[LAYER] vgg16.conv3
+  GEMM           : M=256, K=1152, N=128
+  Conv shape     : N=1, C=128, H=16, W=16, M=128, R=3, S=3, E=16, F=16
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 10336256
+[LAYER] vgg16.conv4
+  GEMM           : M=64, K=1152, N=256
+  Conv shape     : N=1, C=128, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 7417856
+[LAYER] vgg16.conv5
+  GEMM           : M=64, K=2304, N=256
+  Conv shape     : N=1, C=256, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 14790656
+[LAYER] vgg16.conv6
+  GEMM           : M=64, K=2304, N=256
+  Conv shape     : N=1, C=256, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 14834688
+[LAYER] vgg16.conv7
+  GEMM           : M=16, K=2304, N=512
+  Conv shape     : N=1, C=256, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 11982848
+[LAYER] vgg16.conv8
+  GEMM           : M=16, K=4608, N=512
+  Conv shape     : N=1, C=512, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 23943168
+[LAYER] vgg16.conv9
+  GEMM           : M=16, K=4608, N=512
+  Conv shape     : N=1, C=512, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 23965184
+[LAYER] vgg16.conv10
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 10573312
+[LAYER] vgg16.conv11
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 10573312
+[LAYER] vgg16.conv12
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 10578816
+
+
+  standard_ip
+  [INFO] Parsed conv layers: 13
+[LAYER] vgg16.conv0
+  GEMM           : M=1024, K=27, N=64
+  Conv shape     : N=1, C=3, H=32, W=32, M=64, R=3, S=3, E=32, F=32
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 177856
+[LAYER] vgg16.conv1
+  GEMM           : M=1024, K=576, N=64
+  Conv shape     : N=1, C=64, H=32, W=32, M=64, R=3, S=3, E=32, F=32
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 1997824
+[LAYER] vgg16.conv2
+  GEMM           : M=256, K=576, N=128
+  Conv shape     : N=1, C=64, H=16, W=16, M=128, R=3, S=3, E=16, F=16
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 830208
+[LAYER] vgg16.conv3
+  GEMM           : M=256, K=1152, N=128
+  Conv shape     : N=1, C=128, H=16, W=16, M=128, R=3, S=3, E=16, F=16
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 1736192
+[LAYER] vgg16.conv4
+  GEMM           : M=64, K=1152, N=256
+  Conv shape     : N=1, C=128, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 783744
+[LAYER] vgg16.conv5
+  GEMM           : M=64, K=2304, N=256
+  Conv shape     : N=1, C=256, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 1544064
+[LAYER] vgg16.conv6
+  GEMM           : M=64, K=2304, N=256
+  Conv shape     : N=1, C=256, H=8, W=8, M=256, R=3, S=3, E=8, F=8
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 1605376
+[LAYER] vgg16.conv7
+  GEMM           : M=16, K=2304, N=512
+  Conv shape     : N=1, C=256, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 760512
+[LAYER] vgg16.conv8
+  GEMM           : M=16, K=4608, N=512
+  Conv shape     : N=1, C=512, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 1509312
+[LAYER] vgg16.conv9
+  GEMM           : M=16, K=4608, N=512
+  Conv shape     : N=1, C=512, H=4, W=4, M=512, R=3, S=3, E=4, F=4
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 1539968
+[LAYER] vgg16.conv10
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 1483776
+[LAYER] vgg16.conv11
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : no
+  valid mappings : 1
+  best total_cycles_dense: 1483776
+[LAYER] vgg16.conv12
+  GEMM           : M=4, K=4608, N=512
+  Conv shape     : N=1, C=512, H=2, W=2, M=512, R=3, S=3, E=2, F=2
+  MaxPool        : yes
+  valid mappings : 1
+  best total_cycles_dense: 1491440
+[INFO] Report is saved to /home/colin/projects/aoc-final-group13/analysize/src/../log/standard_ip
+1 rooflines and 13 workloads loaded.
+Roofline plot saved at /home/colin/projects/aoc-final-group13/analysize/src/../log/standard_ip/output.png
+[INFO] Roofline plot is saved to /home/colin/projects/aoc-final-group13/analysize/src/../log/standard_ip/output.png
+[SUMMARY]
+  arch           : standard_ip
+  layers         : 13
+  sum(dense_macs) : 3.132e+08
+  sum(dram_total) : 2.681e+07
+  sum(total_cycles_dense) : 1.694e+07
