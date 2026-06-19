@@ -1,0 +1,25 @@
+layer_index: 0
+layer_name: features.40
+layer_type: Conv2d
+module_type: Conv2d
+input_shape: 1 512 14 14
+weight_shape: 512 512 3 3
+bias_shape: 512
+output_shape: 1 512 14 14
+stride: 1 1
+padding: 1 1
+dilation: 1 1
+groups: 1
+gemm_M: 196
+gemm_K: 4608
+gemm_N: 512
+activation_layout: NCHW
+weight_layout: OIHW
+gemm_A_layout: row-major
+gemm_B_layout: row-major
+gemm_C_layout: row-major
+input_dtype: quint8
+weight_dtype: qint8
+bias_dtype: int32
+psum_dtype: int32
+output_dtype: uint8
