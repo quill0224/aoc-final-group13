@@ -1,7 +1,3 @@
-# shape: 196 512
-# dtype: int32
-# layout: row-major
-# tensor: psum_mn
 0
 -1868
 860

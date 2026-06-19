@@ -1,4 +1,4 @@
-layer_index: 0
+dump_index: 0
 layer_name: features.40
 layer_type: Conv2d
 module_type: Conv2d
@@ -13,13 +13,13 @@ groups: 1
 gemm_M: 196
 gemm_K: 4608
 gemm_N: 512
-activation_layout: NCHW
-weight_layout: OIHW
 gemm_A_layout: row-major
 gemm_B_layout: row-major
 gemm_C_layout: row-major
+psum_dtype: int32
+activation_layout: NCHW
+weight_layout: OIHW
 input_dtype: quint8
 weight_dtype: qint8
-bias_dtype: int32
-psum_dtype: int32
-output_dtype: uint8
+bias_dtype: float32
+output_dtype: quint8

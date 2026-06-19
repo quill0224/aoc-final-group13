@@ -1,0 +1,37 @@
+layer_name: features.40
+layer_type: Conv2d
+sparse_format: bitmask_64b_plus_nonzero_values
+flatten_order: row-major
+bitmask_word_bits: 64
+bit_order: bit i maps to element i in each 64-element block, bit0 is LSB
+values_order: non-zero values in row-major scan order
+A_original_shape: 196 4608
+A_total_elements: 903168
+A_nonzero_count: 94588
+A_zero_count: 808580
+A_sparsity: 0.8952708688
+A_bitmask_words: 14112
+A_value_bitwidth: 8
+B_original_shape: 4608 512
+B_total_elements: 2359296
+B_nonzero_count: 185446
+B_zero_count: 2173850
+B_sparsity: 0.921397739
+B_bitmask_words: 36864
+B_value_bitwidth: 8
+output_original_shape: 196 512
+output_total_elements: 100352
+output_nonzero_count: 20221
+output_zero_count: 80131
+output_sparsity: 0.7984992825
+output_bitmask_words: 1568
+output_value_bitwidth: 8
+input_A_values_file: input_A_values_hex.txt
+input_A_bitmask_file: input_A_bitmask_64b_hex.txt
+input_B_values_file: input_B_values_hex.txt
+input_B_bitmask_file: input_B_bitmask_64b_hex.txt
+golden_output_values_file: golden_output_values_hex.txt
+golden_output_bitmask_file: golden_output_bitmask_64b_hex.txt
+A_bitmask_reconstruct_pass: true
+B_bitmask_reconstruct_pass: true
+output_bitmask_reconstruct_pass: true

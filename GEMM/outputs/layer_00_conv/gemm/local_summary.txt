@@ -1,0 +1,29 @@
+layer_name: features.0
+layer_type: Conv2d
+file_format: decimal_txt_no_header
+one_value_per_line: true
+layout: row-major
+gemm_M: 50176
+gemm_K: 27
+gemm_N: 64
+A_file: A_im2col_mk.txt
+A_shape: 50176 27
+A_dtype: uint8
+A_flatten_order: A[0][0], A[0][1], ..., A[M-1][K-1]
+B_file: B_weight_kn.txt
+B_shape: 27 64
+B_dtype: int8
+B_flatten_order: B[0][0], B[0][1], ..., B[K-1][N-1]
+bias_file: bias_n.txt
+bias_shape: 64
+bias_dtype: int32
+psum_file: psum_mn.txt
+psum_shape: 50176 64
+psum_dtype: int32
+output_file: output_mn.txt
+output_shape: 50176 64
+output_dtype: uint8
+gemm_definition: M=Hout*Wout, K=Cin*Kh*Kw, N=Cout
+im2col_order: oh, ow, cin, kh, kw; row=oh*Wout+ow; col=cin*Kh*Kw+kh*Kw+kw
+weight_order: cin, kh, kw, cout; k=cin*Kh*Kw+kh*Kw+kw; n=cout
+output_reshape: C[m,n] -> output[0,n,oh,ow], m=oh*Wout+ow
