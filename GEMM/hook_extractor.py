@@ -15,7 +15,7 @@ class LayerRecord:
     layer_type: str
     input_activation: torch.Tensor
     output_activation: torch.Tensor
-    weight: torch.Tensor
+    weight: torch.Tensor | None
     bias: torch.Tensor | None
 
     @property
@@ -27,14 +27,20 @@ class LayerRecord:
         return tuple(self.output_activation.shape)
 
 
-def is_supported_layer(module: nn.Module) -> bool:
+def normalize_module_types(module_types: list[str] | tuple[str, ...] | None) -> set[str]:
+    if not module_types:
+        return {"Conv2d", "Linear"}
+    cleaned = {item.strip() for item in module_types if item.strip()}
+    if "all" in {item.lower() for item in cleaned}:
+        return {"Conv2d", "Linear", "ReLU", "MaxPool2d"}
+    return cleaned
+
+
+def is_supported_layer(module: nn.Module, module_types: set[str] | None = None) -> bool:
     type_name = type(module).__name__
-    return isinstance(module, (nn.Conv2d, nn.Linear)) or type_name in {
-        "Conv2d",
-        "Linear",
-        "QuantizedConv2d",
-        "QuantizedLinear",
-    }
+    canonical = canonical_layer_type(module)
+    allowed = normalize_module_types(None) if module_types is None else module_types
+    return canonical in allowed or type_name in allowed
 
 
 def canonical_layer_type(module: nn.Module) -> str:
@@ -42,20 +48,31 @@ def canonical_layer_type(module: nn.Module) -> str:
         return "Conv2d"
     if "Linear" in type(module).__name__:
         return "Linear"
+    if isinstance(module, nn.ReLU) or type(module).__name__ == "ReLU":
+        return "ReLU"
+    if isinstance(module, nn.MaxPool2d) or type(module).__name__ == "MaxPool2d":
+        return "MaxPool2d"
     return type(module).__name__
 
 
-def iter_target_layers(model: nn.Module, target_layer: str = "all") -> Iterable[tuple[str, nn.Module]]:
+def iter_target_layers(
+    model: nn.Module,
+    target_layer: str = "all",
+    module_types: list[str] | tuple[str, ...] | None = None,
+) -> Iterable[tuple[str, nn.Module]]:
+    allowed = normalize_module_types(module_types)
     for name, module in model.named_modules():
-        if not name or not is_supported_layer(module):
+        if not name or not is_supported_layer(module, allowed):
             continue
         if target_layer != "all" and name != target_layer:
             continue
         yield name, module
 
 
-def get_module_weight(module: nn.Module) -> torch.Tensor:
+def get_module_weight(module: nn.Module) -> torch.Tensor | None:
     weight = getattr(module, "weight", None)
+    if weight is None:
+        return None
     if callable(weight):
         return weight().detach().cpu().clone()
     return weight.detach().cpu().clone()
@@ -75,15 +92,16 @@ def extract_layer_records(
     input_tensor: torch.Tensor,
     target_layer: str = "all",
     max_layers: int | None = None,
+    module_types: list[str] | tuple[str, ...] | None = None,
 ) -> tuple[OrderedDict[str, LayerRecord], torch.Tensor]:
     records: OrderedDict[str, LayerRecord] = OrderedDict()
     handles = []
 
-    targets = list(iter_target_layers(model, target_layer))
+    targets = list(iter_target_layers(model, target_layer, module_types))
     if max_layers is not None:
         targets = targets[:max_layers]
     if not targets:
-        raise ValueError(f"No Conv2d/Linear layer matched target_layer={target_layer!r}")
+        raise ValueError(f"No requested module type matched target_layer={target_layer!r}")
 
     def make_hook(layer_name: str, module: nn.Module):
         def hook(mod: nn.Module, inputs: tuple[torch.Tensor, ...], output: torch.Tensor) -> None:

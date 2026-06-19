@@ -1,0 +1,58 @@
+layer_name: features.40
+layer_type: Conv2d
+file_format: hex
+header: none
+one_value_per_line: true
+signed_representation: two's complement
+A_matrix_shape: 196 4608
+B_matrix_shape: 4608 512
+psum_output_shape: 196 512
+flatten_order: row-major
+requant_granularity: per_tensor
+per_channel_axis: not_found
+channel_count_Cout_or_N: 512
+requant_channel_mapping: requant_shift_per_channel[i] maps to output channel i, GEMM output N dimension i
+requant_shift_per_channel_file: not_applicable
+input_A_hex_shape: 196 4608
+input_A_hex_dtype: uint8
+input_A_hex_bitwidth: 8
+input_A_hex_layout: row-major
+input_B_hex_shape: 4608 512
+input_B_hex_dtype: int8
+input_B_hex_bitwidth: 8
+input_B_hex_layout: row-major
+input_bias_hex_shape: 512
+input_bias_hex_dtype: int32
+input_bias_hex_bitwidth: 32
+input_bias_hex_layout: channel
+golden_psum_hex_shape: 196 512
+golden_psum_hex_dtype: int32
+golden_psum_hex_bitwidth: 32
+golden_psum_hex_layout: row-major
+golden_output_hex_shape: 196 512
+golden_output_hex_dtype: uint8
+golden_output_hex_bitwidth: 8
+golden_output_hex_layout: row-major
+input_scale: 0.015625
+input_zero_point: 0
+weight_scale: 0.015625
+weight_zero_point: 0
+weight_qscheme: torch.per_tensor_affine
+weight_scale_per_channel: not_found
+weight_zero_point_per_channel: not_found
+per_channel_axis_semantics: not_found
+channel_count: 512
+power2_weight_exponent_per_channel: not_found
+bias_scale: 0.000244140625
+output_scale: 0.125
+output_zero_point: 0
+requant_scale: 0.001953125
+requant_scale_per_channel: not_found
+requant_exponent_per_channel: not_found
+requant_shift_per_channel: not_found
+power2_input_exponent: -6
+power2_weight_exponent: -6
+power2_output_exponent: -3
+power2_requant_exponent: -9
+requant_shift: 9
+requant_warning: not_found

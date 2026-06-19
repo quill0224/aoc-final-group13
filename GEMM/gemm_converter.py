@@ -44,6 +44,30 @@ def tensor_zero_point(tensor: torch.Tensor) -> int | None:
     return None
 
 
+def tensor_per_channel_scales(tensor: torch.Tensor) -> list[float] | None:
+    if not isinstance(tensor, torch.Tensor) or not tensor.is_quantized:
+        return None
+    if tensor.qscheme() in (torch.per_channel_affine, torch.per_channel_symmetric):
+        return [float(v) for v in tensor.q_per_channel_scales().detach().cpu().reshape(-1)]
+    return None
+
+
+def tensor_per_channel_zero_points(tensor: torch.Tensor) -> list[int] | None:
+    if not isinstance(tensor, torch.Tensor) or not tensor.is_quantized:
+        return None
+    if tensor.qscheme() in (torch.per_channel_affine, torch.per_channel_symmetric):
+        return [int(v) for v in tensor.q_per_channel_zero_points().detach().cpu().reshape(-1)]
+    return None
+
+
+def tensor_per_channel_axis(tensor: torch.Tensor) -> int | None:
+    if not isinstance(tensor, torch.Tensor) or not tensor.is_quantized:
+        return None
+    if tensor.qscheme() in (torch.per_channel_affine, torch.per_channel_symmetric):
+        return int(tensor.q_per_channel_axis())
+    return None
+
+
 def module_output_scale(module: nn.Module) -> float | None:
     scale = getattr(module, "scale", None)
     if isinstance(scale, torch.Tensor):
@@ -94,9 +118,12 @@ def _centered_int_tensor(tensor: torch.Tensor) -> torch.Tensor:
     return tensor.int_repr().to(torch.int32) - int(zp)
 
 
-def _quantized_bias_int32(bias: torch.Tensor | None, input_scale: float | None, weight_scale: float | None) -> np.ndarray | None:
+def _quantized_bias_int32(bias: torch.Tensor | None, input_scale: float | None, weight_scale: float | None, weight_scales_pc: list[float] | None = None) -> np.ndarray | None:
     if bias is None:
         return None
+    if input_scale is not None and weight_scales_pc is not None:
+        denom = torch.tensor([input_scale * scale for scale in weight_scales_pc], dtype=torch.float32)
+        return torch.round(bias.detach().cpu().float() / denom).to(torch.int32).numpy()
     if input_scale is None or weight_scale is None:
         return bias.detach().cpu().numpy().astype(np.float32)
     denom = input_scale * weight_scale
@@ -122,6 +149,11 @@ def _clip_quantized(q: np.ndarray, out_dtype: torch.dtype) -> np.ndarray:
     else:
         q = q.astype(np.int32)
     return q
+
+
+def _tensor_int_numpy_dtype(tensor: torch.Tensor) -> np.dtype:
+    raw = tensor_int_repr(tensor)
+    return raw.detach().cpu().contiguous().numpy().dtype
 
 
 def convert_layer(record) -> GemmData:
@@ -171,9 +203,10 @@ def conv2d_to_gemm(record) -> GemmData:
     input_zp = tensor_zero_point(x)
     weight_scale = tensor_scale(w)
     weight_zp = tensor_zero_point(w)
+    weight_scales_pc = tensor_per_channel_scales(w)
     output_scale = module_output_scale(module) if x.is_quantized or w.is_quantized else None
     output_zp = module_output_zero_point(module) if x.is_quantized or w.is_quantized else None
-    bias_dump = _quantized_bias_int32(bias, input_scale, weight_scale)
+    bias_dump = _quantized_bias_int32(bias, input_scale, weight_scale, weight_scales_pc)
 
     if bias_dump is not None:
         output_accum = psum + bias_dump.reshape(1, -1)
@@ -229,9 +262,10 @@ def linear_to_gemm(record) -> GemmData:
     input_zp = tensor_zero_point(x)
     weight_scale = tensor_scale(w)
     weight_zp = tensor_zero_point(w)
+    weight_scales_pc = tensor_per_channel_scales(w)
     output_scale = module_output_scale(record.module) if x.is_quantized or w.is_quantized else None
     output_zp = module_output_zero_point(record.module) if x.is_quantized or w.is_quantized else None
-    bias_dump = _quantized_bias_int32(bias, input_scale, weight_scale)
+    bias_dump = _quantized_bias_int32(bias, input_scale, weight_scale, weight_scales_pc)
     output_accum = psum + bias_dump.reshape(1, -1) if bias_dump is not None else psum
 
     if x.is_quantized or w.is_quantized:
@@ -267,7 +301,32 @@ def linear_to_gemm(record) -> GemmData:
 
 
 def build_quant_meta(record, input_scale, input_zp, weight_scale, weight_zp, output_scale, output_zp) -> dict[str, Any]:
+    weight_scales_pc = tensor_per_channel_scales(record.weight)
+    weight_zps_pc = tensor_per_channel_zero_points(record.weight)
+    weight_axis = tensor_per_channel_axis(record.weight)
+    qscheme = str(record.weight.qscheme()) if isinstance(record.weight, torch.Tensor) and record.weight.is_quantized else None
+    requant_granularity = "per_channel" if weight_scales_pc is not None else ("per_tensor" if weight_scale is not None else None)
     bias_scale = input_scale * weight_scale if input_scale is not None and weight_scale is not None else None
+    requant_scale = input_scale * weight_scale / output_scale if input_scale and weight_scale and output_scale else None
+    requant_scales_pc = None
+    if input_scale is not None and output_scale is not None and weight_scales_pc is not None:
+        requant_scales_pc = [input_scale * scale / output_scale for scale in weight_scales_pc]
+    input_exp = power2_exponent(input_scale)
+    output_exp = power2_exponent(output_scale)
+    weight_exp_pc = [power2_exponent(scale) for scale in weight_scales_pc] if weight_scales_pc is not None else None
+    requant_exp_pc = None
+    if isinstance(input_exp, int) and isinstance(output_exp, int) and weight_exp_pc is not None:
+        requant_exp_pc = [
+            input_exp + weight_exp - output_exp if isinstance(weight_exp, int) else "not_found"
+            for weight_exp in weight_exp_pc
+        ]
+    requant_shift_pc = None
+    if requant_exp_pc is not None:
+        requant_shift_pc = [-exp if isinstance(exp, int) else "not_found" for exp in requant_exp_pc]
+    warning = None
+    if _tensor_int_numpy_dtype(record.output_activation) in (np.dtype("int8"), np.dtype("uint8")):
+        if output_scale is None or (requant_scale is None and requant_scales_pc is None):
+            warning = "output int8 exists but requantization scale is missing; hardware cannot reproduce psum->int8 exactly."
     return {
         "layer_name": record.name,
         "layer_type": record.layer_type,
@@ -275,16 +334,31 @@ def build_quant_meta(record, input_scale, input_zp, weight_scale, weight_zp, out
         "input_zero_point": input_zp,
         "weight_scale": weight_scale,
         "weight_zero_point": weight_zp,
+        "weight_qscheme": qscheme,
+        "requant_granularity": requant_granularity,
+        "weight_scale_per_channel": weight_scales_pc,
+        "weight_zero_point_per_channel": weight_zps_pc,
+        "per_channel_axis": weight_axis,
+        "per_channel_axis_semantics": "output channel / GEMM N dimension" if weight_axis is not None else None,
+        "channel_count": len(weight_scales_pc) if weight_scales_pc is not None else (int(record.weight.shape[0]) if record.weight is not None else None),
+        "power2_weight_exponent_per_channel": weight_exp_pc,
         "bias_scale": bias_scale,
         "output_scale": output_scale,
         "output_zero_point": output_zp,
+        "requant_scale": requant_scale,
+        "requant_scale_per_channel": requant_scales_pc,
+        "requant_exponent_per_channel": requant_exp_pc,
+        "requant_shift_per_channel": requant_shift_pc,
         "power2_weight_scale": weight_scale if power2_exponent(weight_scale) != "not_found" else None,
+        "power2_input_exponent": input_exp,
         "power2_weight_exponent": power2_exponent(weight_scale),
+        "power2_output_exponent": output_exp,
+        "power2_requant_exponent": power2_exponent(requant_scale),
         "power2_activation_scale": input_scale if power2_exponent(input_scale) != "not_found" else None,
         "power2_activation_exponent": power2_exponent(input_scale),
-        "requant_scale": None,
-        "requant_shift": None,
-        "output_mn_source": "gemm_plus_bias" if output_scale is None else None,
+        "requant_shift": _power2_shift(requant_scale) if requant_scale is not None else None,
+        "output_mn_source": "gemm_plus_bias" if output_scale is None else "pytorch_quantized_layer_int_repr",
+        "requant_warning": warning,
     }
 
 

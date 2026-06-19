@@ -1,0 +1,8 @@
+model_path: ..\weights\vgg16_imagenet100_pruned_power2_int8.pth
+image_path: images\fish.JPEG
+target_layer: all
+module_types: Conv2d,ReLU,MaxPool2d
+quantized_checkpoint: true
+num_layers_dumped: 10
+all_verify_pass: true
+layers: 0:features.0:Conv2d:layer_00_conv:pass=True 1:features.2:ReLU:layer_02_relu:pass=True 2:features.3:Conv2d:layer_03_conv:pass=True 3:features.5:ReLU:layer_05_relu:pass=True 4:features.6:MaxPool2d:layer_06_maxpool:pass=True 5:features.7:Conv2d:layer_07_conv:pass=True 6:features.9:ReLU:layer_09_relu:pass=True 7:features.10:Conv2d:layer_10_conv:pass=True 8:features.12:ReLU:layer_12_relu:pass=True 9:features.13:MaxPool2d:layer_13_maxpool:pass=True

@@ -1,7 +1,3 @@
-# shape: 196 4608
-# dtype: uint8
-# layout: row-major
-# tensor: A_im2col_mk
 0
 0
 0
