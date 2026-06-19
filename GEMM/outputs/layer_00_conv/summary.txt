@@ -1,0 +1,49 @@
+model_path: ..\weights\vgg16_imagenet100_pruned_power2_int8.pth
+image_path: images\fish.JPEG
+target_layer: features.0
+actual_layer_name: features.0
+layer_folder_name: layer_00_conv
+layer_type: Conv2d
+input_image_path: images\fish.JPEG
+input_resized_size: 224 224
+input_crop_method: none_direct_resize
+input_mean: 0.485 0.456 0.406
+input_std: 0.229 0.224 0.225
+input_tensor_shape: 1 3 224 224
+input_layout: NCHW
+input_dtype: float32
+model_output_shape: 1 100
+predicted_class_index: 73
+verify_pass: true
+max_abs_error: 0
+mean_abs_error: 0
+num_mismatch: 0
+mismatch_ratio: 0
+quantized_checkpoint: true
+requant_granularity: per_tensor
+input_scale: 0.015625
+input_zero_point: 136
+weight_scale: 0.015625
+weight_zero_point: 0
+weight_qscheme: torch.per_tensor_affine
+weight_scale_per_channel: not_found
+weight_zero_point_per_channel: not_found
+per_channel_axis: not_found
+per_channel_axis_semantics: not_found
+channel_count: 64
+power2_weight_exponent_per_channel: not_found
+bias_scale: 0.000244140625
+output_scale: 0.0625
+output_zero_point: 0
+requant_scale: 0.00390625
+requant_scale_per_channel: not_found
+requant_exponent_per_channel: not_found
+requant_shift_per_channel: not_found
+power2_input_exponent: -6
+power2_weight_exponent: -6
+power2_output_exponent: -4
+power2_requant_exponent: -8
+requant_shift: 8
+requant_warning: not_found
+missing_quantization_metadata: none
+generated_files: pytorch\input_activation_nchw.txt pytorch\weight_oihw.txt pytorch\bias.txt pytorch\output_nchw.txt pytorch\local_summary.txt gemm\local_summary.txt gemm\A_im2col_mk.txt gemm\B_weight_kn.txt gemm\bias_n.txt gemm\psum_mn.txt gemm\output_mn.txt hw\local_summary.txt hw\input_A_hex.txt hw\input_B_hex.txt hw\input_bias_hex.txt hw\golden_psum_hex.txt hw\golden_output_hex.txt hw_bitmask\local_summary.txt hw_bitmask\input_A_values_hex.txt hw_bitmask\input_A_bitmask_64b_hex.txt hw_bitmask\input_B_values_hex.txt hw_bitmask\input_B_bitmask_64b_hex.txt hw_bitmask\golden_output_values_hex.txt hw_bitmask\golden_output_bitmask_64b_hex.txt quant_meta.txt layer_meta.txt verify.txt

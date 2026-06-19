@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
 import torch
 
 import config
@@ -10,6 +9,22 @@ from dump_writer import dump_meta_txt
 
 
 def verify_layer(record, gemm_data, output_path: Path) -> dict:
+    if gemm_data is None:
+        result = {
+            "layer_name": record.name,
+            "layer_type": record.layer_type,
+            "verify_method": "hook_only",
+            "compare_domain": "hook_output_present",
+            "max_abs_error": 0.0,
+            "mean_abs_error": 0.0,
+            "num_mismatch": 0,
+            "mismatch_ratio": 0.0,
+            "pass": record.output_activation is not None,
+            "first_mismatch_indices": "none",
+        }
+        dump_meta_txt(output_path, result)
+        return result
+
     pytorch_output = record.output_activation
     gemm_output = gemm_data.output_for_verify
 
@@ -48,6 +63,7 @@ def verify_layer(record, gemm_data, output_path: Path) -> dict:
     result = {
         "layer_name": record.name,
         "layer_type": record.layer_type,
+        "verify_method": "gemm_vs_pytorch",
         "compare_domain": compare_domain,
         "max_abs_error": max_abs_error,
         "mean_abs_error": mean_abs_error,
@@ -58,5 +74,8 @@ def verify_layer(record, gemm_data, output_path: Path) -> dict:
         "pass": passed,
         "first_mismatch_indices": first_mismatches if first_mismatches else "none",
     }
+    warning = gemm_data.quant_meta.get("requant_warning") if gemm_data is not None else None
+    if warning:
+        result["warning"] = warning
     dump_meta_txt(output_path, result)
     return result

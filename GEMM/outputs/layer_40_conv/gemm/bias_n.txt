@@ -1,7 +1,3 @@
-# shape: 512
-# dtype: int32
-# layout: channel
-# tensor: bias_n
 -1777
 -70
 -1311

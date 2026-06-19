@@ -1,7 +1,0 @@
-original_image_path: images\fish.JPEG
-input_shape: 1 3 224 224
-resize_size: 224 224
-center_crop: false
-mean: 0.485 0.456 0.406
-std: 0.229 0.224 0.225
-layout: NCHW

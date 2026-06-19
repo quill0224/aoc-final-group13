@@ -1,7 +1,3 @@
-# shape: 512
-# dtype: float32
-# layout: channel
-# tensor: bias
 -0.433906436
 -0.01704707742
 -0.3200569153
