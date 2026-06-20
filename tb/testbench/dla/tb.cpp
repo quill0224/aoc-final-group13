@@ -23,19 +23,19 @@ using TopModule = VGLB;
 #include "VDMA.h"
 using TopModule = VDMA;
 #elif defined(case_CTRL)
-#include "Vcontroller.h"       // 已拔除 top_ 前綴
-using TopModule = Vcontroller; // 已拔除 top_ 前綴
+#include "Vcontroller.h"
+using TopModule = Vcontroller;
 #elif defined(case_MC)
 #include "VMC.h"
 using TopModule = VMC;
 #elif defined(case_INTEGRATION)
-#include "Vintegration.h"       // 已拔除 top_ 前綴
-using TopModule = Vintegration; // 已拔除 top_ 前綴
+#include "Vintegration.h"
+using TopModule = Vintegration;
 #else
 #error "No CASE defined."
 #endif
 
-static TopModule* top = nullptr; // top 在此僅為 C++ 指標變數名稱，無需更改
+static TopModule* top = nullptr;
 static VerilatedFstC* fst = nullptr;
 uint64_t sim_time = 0;
 int pass_count = 0;
@@ -50,8 +50,14 @@ static void tick_half() {
 // ============================================================
 // Mock Behavior (For lower-level unit tests)
 // ============================================================
-#if defined(case_DMA)
+#if defined(case_DMA) || defined(case_INTEGRATION)
+// 開放給 DMA 與 INTEGRATION 共用的 DRAM 實體陣列與讀寫 API
 uint32_t mock_glb_mem[16384];
+void glb_mock_write(uint32_t byte_addr, uint32_t data) { mock_glb_mem[(byte_addr / 4) % 16384] = data; }
+uint32_t glb_mock_read(uint32_t byte_addr) { return mock_glb_mem[(byte_addr / 4) % 16384]; }
+#endif
+
+#if defined(case_DMA)
 static uint32_t delayed_glb_rdata = 0;
 void glb_mock_tick() {
     top->glb_rdata = delayed_glb_rdata;
@@ -121,8 +127,11 @@ void tb_init(int argc, char** argv, const char* test_name) {
     top->clk = 0; top->rst = 0;
     #endif
 
-    #if defined(case_DMA)
+    #if defined(case_DMA) || defined(case_INTEGRATION)
     std::memset(mock_glb_mem, 0, sizeof(mock_glb_mem));
+    #endif
+
+    #if defined(case_DMA)
     delayed_glb_rdata = 0;
     #endif
 
@@ -132,8 +141,9 @@ void tb_init(int argc, char** argv, const char* test_name) {
     #elif defined(case_INTEGRATION)
     // 整合測試下，k_done, DMA_done 已被內部化，不需且不可對外設值
     top->asic_en = 0; top->PEA_A_ready = 0; top->PEA_B_ready = 0; top->ppu_done = 0;
+    top->mock_pe_cfg_ready = 0; top->mock_pe_data_ready = 0;
     #elif defined(case_MC)
-    top->mc_start = 0; top->mc_mode = 0; top->mc_glb_base_A = 0; top->mc_glb_base_B = 0; top->mc_packet_count = 0;
+    top->mc_start = 0; top->mc_mode = 0; top->mc_glb_base_A = 0; top->mc_packet_count = 0;
     #endif
 }
 
@@ -196,8 +206,6 @@ void axi_set_AWREADY (uint8_t val)  { top->AWREADY = val; }
 void axi_set_WREADY  (uint8_t val)  { top->WREADY = val; }
 void axi_set_BVALID  (uint8_t val)  { top->BVALID = val; }
 void axi_set_BRESP   (uint8_t val)  { top->BRESP = val; }
-void glb_mock_write(uint32_t byte_addr, uint32_t data) { mock_glb_mem[(byte_addr / 4) % 16384] = data; }
-uint32_t glb_mock_read(uint32_t byte_addr) { return mock_glb_mem[(byte_addr / 4) % 16384]; }
 #endif
 
 // ------------------------------------------------------------
@@ -243,7 +251,6 @@ uint8_t  ctrl_get_mc_start(void) { return top->mc_start; }
 uint8_t  ctrl_get_global_flush(void) { return top->global_flush; }
 
 #elif defined(case_INTEGRATION)
-// 實體硬體已在內部連線，對外部的 C++ Setter/Getter 留空，避免破壞邊界
 void ctrl_set_DMA_done(uint8_t val) {}
 void ctrl_set_k_done(uint8_t val)   {}
 uint8_t  ctrl_get_DMA_en(void) { return 0; }
@@ -252,10 +259,17 @@ uint32_t ctrl_get_DMA_DRAM_ADDR(void) { return 0; }
 uint32_t ctrl_get_DMA_GLB_ADDR(void) { return 0; }
 uint32_t ctrl_get_DMA_len(void) { return 0; }
 
-// 映射至 Wrapper 的觀測腳位 (obs_*)
 uint8_t  ctrl_get_mc_start(void) { return top->obs_mc_start; }
 uint8_t  ctrl_get_global_flush(void) { return top->obs_global_flush; }
-uint8_t  ctrl_get_pe_data_valid(void) { return top->obs_pe_data_valid; }
+
+// 綁定 Integration 獨有的 MC 交握觀測與 Mock 腳位
+void intg_set_mock_pe_cfg_ready(uint8_t val) { top->mock_pe_cfg_ready = val; }
+void intg_set_mock_pe_data_ready(uint8_t val) { top->mock_pe_data_ready = val; }
+uint8_t  intg_get_pe_cfg_valid(void) { return top->obs_pe_cfg_valid; }
+uint8_t  intg_get_pe_cfg_length(void) { return top->obs_pe_cfg_length; }
+uint32_t intg_get_pe_cfg_bitmask(void) { return top->obs_pe_cfg_bitmask; }
+uint8_t  intg_get_pe_data_valid(void) { return top->obs_pe_data_valid; }
+uint32_t intg_get_pe_data_nzvalue(void) { return top->obs_pe_data_nzvalue; }
 #endif
 #endif
 
@@ -266,14 +280,21 @@ uint8_t  ctrl_get_pe_data_valid(void) { return top->obs_pe_data_valid; }
 void mc_set_start(uint8_t val)         { top->mc_start = val; }
 void mc_set_mode(uint8_t val)          { top->mc_mode = val; }
 void mc_set_glb_base_A(uint32_t val)   { top->mc_glb_base_A = val; }
-void mc_set_glb_base_B(uint32_t val)   { top->mc_glb_base_B = val; }
 void mc_set_packet_count(uint32_t val) { top->mc_packet_count = val; }
+void mc_set_glb_rdata_A(uint32_t val)  { top->glb_rdata_A = val; }
+void mc_set_pe_cfg_ready(uint8_t val)  { top->pe_cfg_ready = val; }
+void mc_set_pe_data_ready(uint8_t val) { top->pe_data_ready = val; }
+
 uint8_t  mc_get_k_done(void)           { return top->k_done; }
 uint8_t  mc_get_glb_ren_A(void)        { return top->mc_glb_ren_A; }
 uint32_t mc_get_glb_addr_A(void)       { return top->mc_glb_addr_A; }
-uint8_t  mc_get_glb_ren_B(void)        { return top->mc_glb_ren_B; }
-uint32_t mc_get_glb_addr_B(void)       { return top->mc_glb_addr_B; }
+uint8_t  mc_get_pe_cfg_valid(void)     { return top->pe_cfg_valid; }
+uint8_t  mc_get_pe_cfg_ready(void)     { return top->pe_cfg_ready; }
+uint8_t  mc_get_pe_cfg_length(void)    { return top->pe_cfg_length; }
+uint32_t mc_get_pe_cfg_bitmask(void)   { return top->pe_cfg_bitmask; }
 uint8_t  mc_get_pe_data_valid(void)    { return top->pe_data_valid; }
+uint8_t  mc_get_pe_data_ready(void)    { return top->pe_data_ready; }
+uint32_t mc_get_pe_data_nzvalue(void)  { return top->pe_data_nzvalue; }
 #endif
 
 } // extern "C"

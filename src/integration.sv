@@ -36,10 +36,22 @@ module integration (
     input  logic                                PEA_B_ready,
     input  logic                                ppu_done,
     
-    // 觀測腳位 (供 C++ Testbench 監聽)
+    // =========================================================================
+    // 觀測腳位 (供 C++ Testbench 監聽與 Mock PE 回應)
+    // =========================================================================
     output logic                                obs_mc_start,
+    output logic                                obs_global_flush,
+
+    // [PE 配置通道觀測]
+    output logic                                obs_pe_cfg_valid,
+    input  logic                                mock_pe_cfg_ready, 
+    output logic [15:0]                         obs_pe_cfg_length,
+    output logic [15:0]                         obs_pe_cfg_bitmask,
+
+    // [PE 資料通道觀測]
     output logic                                obs_pe_data_valid,
-    output logic                                obs_global_flush
+    input  logic                                mock_pe_data_ready, 
+    output logic [31:0]                         obs_pe_data_nzvalue
 );
 
     // =========================================================================
@@ -59,6 +71,10 @@ module integration (
     logic [`GLB_ADDR_BITS-1:0]        mc_glb_base_A, mc_glb_base_B;
     logic [`PKT_CNT_BITS-1:0]         mc_packet_count;
 
+    // MC <-> GLB (MC 專用讀取線)
+    logic                             mc_glb_ren_A, mc_glb_ren_B;
+    logic [`GLB_ADDR_BITS-1:0]        mc_glb_addr_A, mc_glb_addr_B;
+
     // DMA <-> GLB & AXI
     logic                             glb_en, glb_we;
     logic [3:0]                       glb_wstrb;
@@ -76,7 +92,28 @@ module integration (
     logic [`AXI_STRB_BITS-1:0] wstrb;
 
     // =========================================================================
-    // 子模組實體化 (徹底移除所有的 top_ 前綴)
+    // GLB 存取仲裁器 (Arbiter: MC Read Priority)
+    // =========================================================================
+    logic                       mux_glb_en;
+    logic                       mux_glb_we;
+    logic [`GLB_ADDR_BITS-1:0]  mux_glb_addr;
+
+    always_comb begin
+        if (mc_glb_ren_A) begin
+            // 當 MC 要求讀取 A 通道時，接管 GLB 位址線
+            mux_glb_en   = 1'b1;
+            mux_glb_we   = 1'b0;            // MC 只有讀取權限
+            mux_glb_addr = mc_glb_addr_A;
+        end else begin
+            // 否則預設交由 DMA 處理搬運
+            mux_glb_en   = glb_en;
+            mux_glb_we   = glb_we;
+            mux_glb_addr = glb_addr;
+        end
+    end
+
+    // =========================================================================
+    // 子模組實體化
     // =========================================================================
 
     controller u_ctrl (
@@ -114,11 +151,24 @@ module integration (
         .mc_glb_base_B(mc_glb_base_B),
         .mc_packet_count(mc_packet_count),
         .k_done(k_done),
-        .mc_glb_ren_A(),        
-        .mc_glb_addr_A(), 
-        .mc_glb_ren_B(), 
-        .mc_glb_addr_B(),
-        .pe_data_valid(obs_pe_data_valid)
+        
+        // 透過仲裁器與 GLB 對接
+        .mc_glb_ren_A(mc_glb_ren_A),        
+        .mc_glb_addr_A(mc_glb_addr_A), 
+        .glb_rdata_A(glb_rdata),           
+        
+        .mc_glb_ren_B(mc_glb_ren_B), 
+        .mc_glb_addr_B(mc_glb_addr_B),
+        
+        // 對接至外露觀測腳位
+        .pe_cfg_valid(obs_pe_cfg_valid),
+        .pe_cfg_ready(mock_pe_cfg_ready),  
+        .pe_cfg_length(obs_pe_cfg_length),
+        .pe_cfg_bitmask(obs_pe_cfg_bitmask),
+
+        .pe_data_valid(obs_pe_data_valid),
+        .pe_data_ready(mock_pe_data_ready), 
+        .pe_data_nzvalue(obs_pe_data_nzvalue)
     );
 
     DMA u_dma (
@@ -134,9 +184,10 @@ module integration (
         .WREADY(wready), .BID(bid), .BRESP(bresp), .BVALID(bvalid), .BREADY(bready)
     );
 
+    // 掛載經過仲裁的控制線
     GLB u_glb (
-        .clk(clk), .rst(rst), .EN(glb_en), .WEB(~glb_we),
-        .WSTRB(glb_wstrb), .A(glb_addr), .DI(glb_wdata), .DO(glb_rdata)
+        .clk(clk), .rst(rst), .EN(mux_glb_en), .WEB(~mux_glb_we),
+        .WSTRB(glb_wstrb), .A(mux_glb_addr), .DI(glb_wdata), .DO(glb_rdata)
     );
 
     axi_mem_model u_dram (

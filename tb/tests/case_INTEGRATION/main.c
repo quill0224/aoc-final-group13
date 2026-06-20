@@ -1,9 +1,28 @@
 #include "tb.h"
-#include "workload.h"
+#include "data_packer.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+    void run_workload(uint32_t compressed_bytes);
+#ifdef __cplusplus
+}
+#endif
 
 int main(int argc, char** argv) {
-    tb_init(argc, argv, "INTEGRATION_test");
-    run_workload();
+    const char* mask_path = "../../../GEMM/outputs/layer_40_conv/hw_bitmask/input_A_bitmask_64b_hex.txt";
+    const char* val_path  = "../../../GEMM/outputs/layer_40_conv/hw_bitmask/input_A_values_hex.txt";
+    const char* hex_path  = "dram_test.hex"; 
+
+    // 將打包結果輸出至 Word 位址 0 (對應 Byte 位址 0x0000)
+    uint32_t bytes = DataPacker::compress_to_hex(mask_path, val_path, hex_path, 0);
+
+    tb_init(argc, argv, "trace_INTEGRATION");
+    
+    if (bytes > 0) {
+        run_workload(bytes);
+    }
+    
     tb_close();
-    return 0;
+    return fail_count == 0 ? 0 : 1;
 }

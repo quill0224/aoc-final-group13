@@ -8,7 +8,7 @@
 //   IP=512, OP=512, H=W=28, R=S=3
 //   K = IP x R x S = 4608
 //   M = H  x W     = 784
-//   N = OP          = 512
+//   N = OP         = 512
 //
 // AXI_DATA_BITS = 32bits (4bytes per beat), from AXI_define.svh
 // All GLB accesses are 32bits wide to match AXI
@@ -24,18 +24,18 @@
 `define GLB_DATA_BITS           32      // matches AXI_DATA_BITS
 
 // ----------------------------------------------------------------------------
-// Packet Format
-// [ mode 2b ][ bitmask 16b ][ NZ values 128b ] = 146bits valid
-// Padded to 160bits (20bytes) for 4-byte AXI alignment
+// Packet Format (Updated: 160-bit Perfectly Aligned)
+// [ length 16b ][ bitmask 16b ][ NZ values 128b ] = 160bits
+// Padded perfectly to 160bits (20bytes) for 4-byte AXI alignment
 // 20bytes / 4bytes = 5 AXI beats per packet
-// Software zero-pads each packet to 20bytes before DMA
-// MC reads 5 x 32bit words from GLB and assembles one packet internally
+// MC reads 5 x 32bit words from GLB and assembles one packet internally:
+//   Word 0: {Length[15:0], Bitmask[15:0]}
+//   Word 1-4: Data
 // ----------------------------------------------------------------------------
-`define PKT_MODE_BITS           2
+`define PKT_LENGTH_BITS         16
 `define PKT_BITMASK_BITS        16
 `define PKT_NZ_BITS             128
-`define PKT_VALID_BITS          146     // 2 + 16 + 128
-`define PKT_TOTAL_BITS          160     // padded to 20bytes
+`define PKT_TOTAL_BITS          160     // 16 + 16 + 128
 `define PKT_BYTES               20      // 160 / 8
 `define PKT_BEATS               5       // 20bytes / 4bytes per beat
 `define PKT_WORDS               5       // alias for PKT_BEATS

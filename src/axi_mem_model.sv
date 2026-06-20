@@ -199,6 +199,8 @@ module axi_mem_model #(
     // -------------------------------------------------------------------------
     initial begin
         for (int i = 0; i < MEM_DEPTH; i++) mem[i] = 32'd0;
+
+        $readmemh("dram_test.hex", mem);
     end
 
 endmodule
