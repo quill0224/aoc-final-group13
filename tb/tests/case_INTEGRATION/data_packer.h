@@ -24,12 +24,10 @@ public:
         uint32_t val;
         uint32_t total_bytes = 0;
         
-        // DRAM size limit: 65536 words. We stop at 60000 to be safe.
         const uint32_t MAX_WORDS = 60000;
         uint32_t words_written = 0;
 
         while (fscanf(f_mask, "%63s", mask_str) == 1) {
-            // Early exit if approaching simulation memory limit
             if (words_written >= MAX_WORDS) break;
 
             unsigned long long mask64 = strtoull(mask_str, NULL, 16);

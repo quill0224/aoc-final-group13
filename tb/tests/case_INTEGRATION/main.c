@@ -14,7 +14,6 @@ int main(int argc, char** argv) {
     const char* val_path  = "../../../GEMM/outputs/layer_40_conv/hw_bitmask/input_A_values_hex.txt";
     const char* hex_path  = "dram_test.hex"; 
 
-    // 將打包結果輸出至 Word 位址 0 (對應 Byte 位址 0x0000)
     uint32_t bytes = DataPacker::compress_to_hex(mask_path, val_path, hex_path, 0);
 
     tb_init(argc, argv, "trace_INTEGRATION");
