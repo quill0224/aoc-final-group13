@@ -11,6 +11,7 @@ CASE ?= case_SRAM
 THIS_DIR := $(abspath .)
 ROOT_DIR := $(abspath ../../..)
 SRC_DIR := $(ROOT_DIR)/src
+RTL_DIR := $(ROOT_DIR)/rtl
 TESTS_DIR := $(abspath ../../tests)
 CASE_DIR := $(TESTS_DIR)/$(CASE)
 
@@ -76,7 +77,7 @@ V_SRCS := $(SRC_DIR)/integration.sv \
           $(SRC_DIR)/SRAM_rtl.sv \
           $(SRC_DIR)/axi_mem_model.sv \
           $(SRC_DIR)/MC.sv \
-          $(SRC_DIR)/pe_entry.sv
+          $(RTL_DIR)/pe/pe_entry.sv
 
 else
 $(error Unknown CASE=$(CASE). Valid: case_SRAM case_GLB case_DMA case_CTRL case_MC case_INTEGRATION)
