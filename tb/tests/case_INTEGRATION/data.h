@@ -111,9 +111,6 @@
 // #define VAL_PATH_A    "../../../GEMM/outputs/layer_40_conv/hw_bitmask/input_A_values_hex.txt"
 // #define GOLDEN_OUT    "../../../GEMM/outputs/layer_40_conv/hw_bitmask/golden_output_values_hex.txt"
 
-#pragma once
-#include <stdint.h>
-
 // =============================================================================
 // 核心設定：32-bit ASIC 啟動指令 (ASIC Command)
 // =============================================================================
