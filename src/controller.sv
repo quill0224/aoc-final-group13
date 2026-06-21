@@ -58,7 +58,10 @@ module controller (
     input  logic                                k_done,
 
     output logic [1:0]                          global_mode,
-    output logic                                global_flush,  
+    output logic                                global_flush,
+    // → pe_row_tail (B-3) 控制:第一個 K-tile 覆寫、本 N-tile 基底欄
+    output logic                                pe_first_pass,
+    output logic [8:0]                          pe_cur_n_base,   // = LOCAL_BUF_AW 寬 (512 深)
     output logic [`PE_ARRAY_H*`PE_ARRAY_W-1:0]  PE_en,
     output logic [10:0]                         PE_config,    
     input  logic                                PEA_A_ready,
@@ -323,6 +326,10 @@ module controller (
 
     assign global_mode  = operation_mode;
     assign global_flush = (cs == S9_FLUSH);
+
+    // → pe_row_tail (B-3):k_cnt==0 的 K-tile 覆寫 buffer,否則累加;n_cnt*16 = 本 N-tile 基底欄
+    assign pe_first_pass = (k_cnt == 0);
+    assign pe_cur_n_base = 9'(n_cnt * `N_TILE_SIZE);
 
     assign PE_en =
         (cs >= S4_SEND_PE_CONFIG && cs <= S10_WAIT_PPU)

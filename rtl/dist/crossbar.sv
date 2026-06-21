@@ -1,5 +1,5 @@
 // =============================================================================
-// crossbar.sv — TrIP value gather (Iris)  [Step B-2]
+// crossbar.sv — TrIP value gather
 // =============================================================================
 // 把 pe_mfiu_seq 的 per-lane meta「翻譯」成真正的 A/B 壓縮值,餵給 mac x16:
 //   a_val[l] = a_nz_row[ a_meta[l] ]                  (這條 A fiber 的壓縮值)
@@ -13,7 +13,7 @@
 module crossbar
     import trapezoid_pkg::*;
 (
-    // ── from pe_mfiu_seq(這 row 這個 group)──
+    // ── from pe_mfiu_seq(此 row 這個 group)──
     input  logic                      valid,
     input  logic [LANE_COUNT_W-1:0]   effectual,
     input  logic [N_MUL_ROW-1:0][3:0] a_meta,
@@ -25,14 +25,14 @@ module crossbar
     input  logic [15:0][7:0]          b_nz [0:15],     // = buffer.b_nz (16 欄)
 
     // ── to mac x16 + reduction ──
-    output logic [7:0]                a_val [0:15],     // A=uint8(mac 內當無號)
+    output logic [7:0]                a_val [0:15],     // A=uint8
     output logic [7:0]                b_val [0:15],     // B=int8
     output logic [3:0]                lane_col [0:15],  // 每 lane 對到的輸出欄(給 reduction 分組)
     output logic                      lane_valid [0:15],
     output logic                      valid_out
 );
 
-    // ── flatten packed → unpacked(變數索引安全;iverilog 也能編)──
+    // ── flatten packed → unpacked ──
     logic [7:0] a_u [0:15];
     logic [7:0] b_u [0:15][0:15];   // [col][idx]
     logic [3:0] am  [0:15];
