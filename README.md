@@ -127,6 +127,6 @@ gh pr create --fill --web                  # 開瀏覽器發 PR
 |--------|------|------|
 | @quill0224 | Quill | TBD |
 | @JackyPeng066 | 彭俞凱 | Architecture/Dataflow/MFIU |
-| TBD | TBD | TBD |
+| @colin0423 | 陳秉弘 | Quantization/Analysis/Architecture |
 | TBD | TBD | TBD |
 
