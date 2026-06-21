@@ -1,33 +1,39 @@
 // =============================================================================
-// pe_array.sv — 16 × PE row 陣列(systolic,B 縱向鏈)
+// pe_array.sv — 16 x PE row array (systolic, B vertical chain)
 // =============================================================================
-// 功能:
-//   instantiate N_PE_ROW 條 pe_row_full,組成 16×16 = 256 MAC 的運算陣列。
-//   row i 算輸出矩陣的第 i 列 C[i, :]。
-//     A:row-stationary —— 每條 row 吃自己的 a_vec(由 a_grid[i] 餵),駐留不動。
-//     B:縱向鏈 —— 從 row 0 進,每條 row 把 B 延 1 拍傳給下一條(pe_row_full
-//        的 b_vec_out);16 條 row 重用同一份 B(只從 GLB 讀一次)。
-//     C:每條 row 各算各的 → c_out[i],dump 時一次讀出一整個 column。
+// Function:
+//   Instantiate N_PE_ROW pe_row_full to form a 16x16 = 256 MAC array.
+//   Row i computes output matrix row i, C[i, :].
+//     A: row-stationary — each row consumes its own a_vec (fed by a_grid[i]),
+//        held stationary.
+//     B: vertical chain — enters at row 0; each row delays B by 1 cycle and
+//        passes to the next (pe_row_full's b_vec_out); all 16 rows reuse the
+//        same B (read from GLB once).
+//     C: each row computes independently -> c_out[i]; dump reads out a whole
+//        column at once.
 //
-// 控制錯拍(systolic 關鍵):
-//   B 到 row i 比 row 0 晚 i 拍,故 row i 的 in_valid / cur_n / first_pass 也要
-//   晚 i 拍才對得上:
-//     in_valid : 直接用上一條 row 的 b_valid_out(B 鏈自帶 valid,延 1/row)
-//     cur_n / first_pass : 本層做延遲鏈,row i 拿延 i 拍的版本
-//   dataflow_sel:全域廣播。dump_en/dump_addr:dump 階段廣播(此時無 compute,
-//   16 條 row 同步讀出同一 column → c_out 即該 column 跨 row 的 16 個值)。
+// Control skew (systolic key point):
+//   B reaches row i exactly i cycles later than row 0, so row i's in_valid /
+//   cur_n / first_pass must also be skewed by i cycles to line up:
+//     in_valid : take previous row's b_valid_out (B chain carries its own
+//                valid, delayed 1/row)
+//     cur_n / first_pass : delay chain in this layer; row i gets the version
+//                          delayed i cycles
+//   dataflow_sel: broadcast to all rows. dump_en/dump_addr: broadcast during
+//   dump phase (no compute then; all 16 rows read the same column in sync ->
+//   c_out is the 16 values of that column across rows).
 //
-// 介面:
-//   dataflow_sel / in_valid / cur_n / first_pass / dump_en / dump_addr  控制(餵 row 0)
-//   a_grid     [N_PE_ROW][N_MUL_ROW][DATA_W]  in   每條 row 的 row-stationary A
-//   a_bm_grid  [N_PE_ROW][N_MUL_ROW]          in   每條 row 的 A bitmask
-//   b_vec_top  [N_MUL_ROW][DATA_W]            in   進 row 0 的 B(其餘 row 由鏈傳)
-//   b_bm_top   [N_MUL_ROW]                    in   進 row 0 的 B bitmask
-//   c_out      [N_PE_ROW][ACC_W]              out  dump 時各 row 的 C 值(一個 column)
-//   c_valid                                   out  dump 結果有效(各 row 同步)
+// Interface:
+//   dataflow_sel / in_valid / cur_n / first_pass / dump_en / dump_addr  control (drive row 0)
+//   a_grid     [N_PE_ROW][N_A_FIBER][BITMASK_W][DATA_W] in row-stationary A (multi-fiber)
+//   a_bm_grid  [N_PE_ROW][N_A_FIBER][BITMASK_W]         in A bitmask (multi-fiber)
+//   b_vec_top  [N_B_FIBER][BITMASK_W][DATA_W]           in B bundle into row 0 (other rows via chain)
+//   b_bm_top   [N_B_FIBER][BITMASK_W]                   in B bitmask bundle into row 0
+//   c_out      [N_PE_ROW][ACC_W]              out  per-row C value on dump (one column)
+//   c_valid                                   out  dump result valid (rows in sync)
 //
-// 現況:Dense IP(MFIU/dist 為 stand-in);真版到位 TrIP 直接亮,本檔不用改
-//   (row 內部介面凍結)。
+// Status: Dense IP (MFIU/dist are stand-ins); when the real TrIP arrives it
+//   drops in directly, no change needed here (row internal interface frozen).
 // =============================================================================
 
 module pe_array
@@ -45,12 +51,16 @@ module pe_array
     input  logic [LOCAL_BUF_AW-1:0]                               dump_addr,
 
     // ── A: row-stationary, one set per row ──
-    input  logic signed [N_PE_ROW-1:0][N_MUL_ROW-1:0][DATA_W-1:0] a_grid,
-    input  logic        [N_PE_ROW-1:0][N_MUL_ROW-1:0]             a_bm_grid,
+    //   a_load_valid / a_clear are broadcast to all rows: one pulse loads every
+    //   row's a_grid[gr] into its A register (load once, then hold).
+    input  logic                                                  a_load_valid,
+    input  logic signed [N_PE_ROW-1:0][N_A_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] a_grid,
+    input  logic        [N_PE_ROW-1:0][N_A_FIBER-1:0][BITMASK_W-1:0]             a_bm_grid,
+    input  logic                                                  a_clear,
 
     // ── B: feed row 0 only; other rows receive it via the vertical chain ──
-    input  logic signed [N_MUL_ROW-1:0][DATA_W-1:0]               b_vec_top,
-    input  logic        [N_MUL_ROW-1:0]                           b_bm_top,
+    input  logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0]               b_vec_top,
+    input  logic        [N_B_FIBER-1:0][BITMASK_W-1:0]                           b_bm_top,
 
     // ── C output (on dump, one column spanning 16 rows) ──
     output logic [N_PE_ROW-1:0][ACC_W-1:0]                        c_out,
@@ -81,13 +91,13 @@ module pe_array
     // =====================================================================
     // B vertical chain + per-row output wires
     // =====================================================================
-    logic signed [N_MUL_ROW-1:0][DATA_W-1:0] bchain_vec [N_PE_ROW];
-    logic        [N_MUL_ROW-1:0]             bchain_bm  [N_PE_ROW];
+    logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] bchain_vec [N_PE_ROW];
+    logic        [N_B_FIBER-1:0][BITMASK_W-1:0]             bchain_bm  [N_PE_ROW];
     logic                                    bchain_vld [N_PE_ROW];
 
     // Per-row "input" source (row 0 = external; row i = previous row's chain / skewed control)
-    logic signed [N_MUL_ROW-1:0][DATA_W-1:0] row_bvi [N_PE_ROW];
-    logic        [N_MUL_ROW-1:0]             row_bbi [N_PE_ROW];
+    logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] row_bvi [N_PE_ROW];
+    logic        [N_B_FIBER-1:0][BITMASK_W-1:0]             row_bbi [N_PE_ROW];
     logic                                    row_ivi [N_PE_ROW];
     logic [LOCAL_BUF_AW-1:0]                 row_cni [N_PE_ROW];
     logic                                    row_fpi [N_PE_ROW];
@@ -126,8 +136,10 @@ module pe_array
                 .first_pass    (row_fpi[gr]),
                 .dump_en       (dump_en),       // dump broadcast
                 .dump_addr     (dump_addr),
+                .a_load_valid  (a_load_valid),  // broadcast: one pulse loads all rows' A
                 .a_vec         (a_grid[gr]),
                 .a_bitmask     (a_bm_grid[gr]),
+                .a_clear       (a_clear),       // broadcast
                 .b_vec_in      (row_bvi[gr]),
                 .b_bitmask_in  (row_bbi[gr]),
                 .b_vec_out     (bchain_vec[gr]),

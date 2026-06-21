@@ -1,30 +1,30 @@
 // =============================================================================
-// mfiu_adapter_mf.sv — Multi-Fiber MFIU adapter (4×4 packing)
+// mfiu_adapter_mf.sv - Multi-Fiber MFIU adapter (4x4 packing)
 // =============================================================================
-// Owner: NoC(QuillQ) — 多 fiber 路線的 MFIU 包裝；給 dist_net_row_trip 餵料
+// Owner: NoC(QuillQ) - multi-fiber MFIU wrapper; feeds dist_net_row_trip
 // Paper: Trapezoid (ISCA'24) Fig 11/12, Multi-Fiber Intersection Unit
 //
-// === 跟 Iris 單 fiber 版 mfiu_adapter.sv 的差別 ===
-//   單 fiber 版:把楊的 mfiu 核心設成 1×1,只吐單一 effectual_idx
-//   本檔多 fiber:把核心設成 N_A_FIBER × N_B_FIBER (4×4),吐三條
-//                a_row_sel / b_col_sel / k_sel + lane_valid,直接接
-//                dist_net_row_trip(2D gather)。
-//   → 兩版並存:dataflow_ctrl / 整合時選用哪顆。
+// === Difference vs Iris single-fiber mfiu_adapter.sv ===
+//   Single-fiber: configures the mfiu core as 1x1, emits one effectual_idx
+//   This (multi-fiber): configures the core as N_A_FIBER x N_B_FIBER (4x4), emits three
+//                buses a_row_sel / b_col_sel / k_sel + lane_valid, wiring straight into
+//                dist_net_row_trip (2D gather).
+//   -> Both versions coexist: dataflow_ctrl / integration picks which to use.
 //
-// === 做的事 ===
-//   1. instantiate 楊的 mfiu.v 核心(NUM_ROWS=4, NUM_COLS=4, K_BITS=16, LANES=16)
-//      → 掃 4×4×16 候選,把 effectual (r,c,k) 壓進 16 lane,overflow 時拉旗標
-//   2. 把核心的 flat bus 輸出轉成 dist_net_row_trip 要的多維 port
-//   3. 延 MFIU_STAGES 拍,對齊 pe_row datapath
+// === What it does ===
+//   1. Instantiate the mfiu.v core (NUM_ROWS=4, NUM_COLS=4, K_BITS=16, LANES=16)
+//      -> scan 4x4x16 candidates, pack effectual (r,c,k) into 16 lanes, assert flag on overflow
+//   2. Convert the core's flat bus outputs into the multi-dim ports dist_net_row_trip needs
+//   3. Delay MFIU_STAGES cycles to align with the pe_row datapath
 //
-// === 上游需要配合(2D 餵料)===
-//   a_bitmask / b_bitmask 現在是「4 條 fiber 各 16 bit」= 64 bit(不是單 16)。
-//   pe_row / buffer 要同時供 4 條 A fiber + 4 條 B fiber 的 bitmask 與 value。
-//   value 那條(a_values/b_values)直接餵給 dist_net_row_trip。
+// === Upstream requirement (2D feed) ===
+//   a_bitmask / b_bitmask are now "4 fibers x 16 bit each" = 64 bit (not a single 16).
+//   pe_row / buffer must supply bitmask and value for all 4 A fibers + 4 B fibers.
+//   The value lines (a_values/b_values) feed dist_net_row_trip directly.
 //
-// === overflow 註記 ===
-//   一拍 4×4×16 候選最多遠超 16 lane;核心壓滿 16 後拉 overflow_o。
-//   replay(把沒裝完的下一拍補)屬上游 ctrl 的事,本檔只透傳 overflow。
+// === Overflow note ===
+//   One cycle's 4x4x16 candidates far exceed 16 lanes; core packs 16 full then asserts overflow_o.
+//   Replay (re-issuing the unpacked remainder next cycle) is the upstream ctrl's job; this file just passes overflow through.
 // =============================================================================
 
 module mfiu_adapter_mf
@@ -34,7 +34,7 @@ module mfiu_adapter_mf
     parameter int NUM_B_FIBER = N_B_FIBER,   // 4
     parameter int K_SLOTS     = BITMASK_W,   // 16
     parameter int LANES       = N_MUL_ROW,   // 16
-    // ── derived ──
+    // -- derived --
     parameter int ROW_IDX_W = (NUM_A_FIBER > 1) ? $clog2(NUM_A_FIBER) : 1,  // 2
     parameter int COL_IDX_W = (NUM_B_FIBER > 1) ? $clog2(NUM_B_FIBER) : 1,  // 2
     parameter int K_IDX_W   = (K_SLOTS     > 1) ? $clog2(K_SLOTS)     : 1,  // 4
@@ -45,11 +45,11 @@ module mfiu_adapter_mf
     input  logic en,
     input  logic in_valid,
 
-    // ── 4 條 fiber 各 K_SLOTS bit 的 bitmask(上游餵)──
+    // -- bitmask of 4 fibers, K_SLOTS bit each (fed by upstream) --
     input  logic [NUM_A_FIBER*K_SLOTS-1:0] a_bitmask,
     input  logic [NUM_B_FIBER*K_SLOTS-1:0] b_bitmask,
 
-    // ── 給 dist_net_row_trip 的多維 routing metadata(registered)──
+    // -- multi-dim routing metadata for dist_net_row_trip (registered) --
     output logic [LANES-1:0]                  lane_valid,
     output logic [LANES-1:0][ROW_IDX_W-1:0]   a_row_sel,
     output logic [LANES-1:0][COL_IDX_W-1:0]   b_col_sel,
@@ -59,7 +59,7 @@ module mfiu_adapter_mf
     output logic                              meta_valid
 );
 
-    // ── intersection 核心:楊 mfiu.v,設成 4×4 × K_SLOTS ──
+    // -- intersection core: mfiu.v, configured as 4x4 x K_SLOTS --
     logic [LANES-1:0]           core_vld;
     logic [LANES*ROW_IDX_W-1:0] core_row;
     logic [LANES*COL_IDX_W-1:0] core_col;
@@ -83,7 +83,7 @@ module mfiu_adapter_mf
         .overflow_o    (core_ovf)
     );
 
-    // ── 延 MFIU_STAGES 拍(對齊 datapath)──
+    // -- delay MFIU_STAGES cycles (align with datapath) --
     logic [LANES-1:0]           vld_pipe [MFIU_STAGES];
     logic [LANES*ROW_IDX_W-1:0] row_pipe [MFIU_STAGES];
     logic [LANES*COL_IDX_W-1:0] col_pipe [MFIU_STAGES];
@@ -112,7 +112,7 @@ module mfiu_adapter_mf
         end
     end
 
-    // ── flat bus → 多維 port(最後一級)──
+    // -- flat bus -> multi-dim port (final stage) --
     genvar g;
     generate
         for (g = 0; g < LANES; g = g + 1) begin : g_unpack

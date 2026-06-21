@@ -21,10 +21,10 @@
 // See HARDWARE_STRUCTURE.md §22 for interface spec, §29 for worked example.
 
 module mfiu #(
-    parameter NUM_ROWS  = 2,
-    parameter NUM_COLS  = 2,
-    parameter K_BITS    = 4,
-    parameter LANES     = 4,           // max effectual MACs captured per cycle
+    parameter NUM_ROWS  = 4,           // = N_A_FIBER
+    parameter NUM_COLS  = 4,           // = N_B_FIBER
+    parameter K_BITS    = 16,          // = BITMASK_W
+    parameter LANES     = 16,          // = N_MUL_ROW (max effectual MACs captured per cycle)
     // derived — do not override
     parameter ROW_IDX_W = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
     parameter COL_IDX_W = (NUM_COLS > 1) ? $clog2(NUM_COLS) : 1,

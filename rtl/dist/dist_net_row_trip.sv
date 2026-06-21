@@ -1,51 +1,52 @@
 // =============================================================================
 // dist_net_row_trip.sv — Per-PE-row TrIP multi-fiber A/B Distribution network
 // =============================================================================
-// Owner: NoC(QuillQ + 黃妍心)
-// Paper : Trapezoid (ISCA'24) Fig 6「A/B Distribution」, multi-fiber TrIP path
+// Owner: NoC(QuillQ + Huang Yan-Hsin)
+// Paper : Trapezoid (ISCA'24) Fig 6 "A/B Distribution", multi-fiber TrIP path
 //
-// === 這個檔在做什麼 (整合版,對齊 paper multi-fiber) ===
-// 把 MFIU 算出的「有效 (row,col,k) 索引」拿來,從 fiber value buffer 把對的
-// a / b 值 gather 到對的 multiplier lane:
+// === What this file does (integrated version, aligned to paper multi-fiber) ===
+// Take the effectual (row,col,k) indices computed by MFIU and gather the
+// matching a / b values from the fiber value buffer to the right multiplier lane:
 //
 //     a_lane[l] = a_values[ a_row_sel[l] ][ k_sel[l] ]
 //     b_lane[l] = b_values[ b_col_sel[l] ][ k_sel[l] ]
 //
-// 這是「2D gather」: 每條 lane 用 (fiber, k) 兩個座標去取值,對應 4×4 fiber
-// packing — 一排 16 lane 可以同時服務多個輸出 (r,c)。
+// This is a "2D gather": each lane fetches by two coords (fiber, k), matching the
+// 4x4 fiber packing - one row of 16 lanes can serve multiple outputs (r,c) at once.
 //
-// === 跟 Dense 版 dist_net_row.sv 的差別 ===
-//   Dense 版 : 單一 effectual_idx,1D gather  out[m]=in[idx[m]] (a/b 共用 idx)
-//   本檔TrIP : 三條 sel(row/col/k),2D gather (a 用 row、b 用 col、共用 k)
-//   → 兩個 module 並存:Dense IP 走 dist_net_row,TrIP 走本檔 (dataflow_ctrl 選)
+// === Difference from the Dense version dist_net_row.sv ===
+//   Dense   : single effectual_idx, 1D gather  out[m]=in[idx[m]] (a/b share idx)
+//   TrIP    : three sels (row/col/k), 2D gather (a uses row, b uses col, k shared)
+//   -> Both modules coexist: Dense IP uses dist_net_row, TrIP uses this file
+//      (selected by dataflow_ctrl)
 //
-// === 來源 ===
-// 演算法移植自 楊承豫 FPGA MVP 的 trip_distribution_network.v
-//   (原檔: 純組合、Verilog-2001、裸參數、LANES=4 的 2×2 MVP)
-// 本檔的整合化改寫:
-//   (1) 改成 SystemVerilog + import trapezoid_pkg (型別/參數 single source)
-//   (2) scale 到 spec: N_A_FIBER=4 / N_B_FIBER=4 / BITMASK_W=16 / LANES=16
-//   (3) 補 1 級 output register (DIST_STAGES=1) + in_valid→out_valid handshake
-//       → 對齊 pe_row 的 pipeline (見 trapezoid_pkg PE_ROW_STAGES)
-//   (4) iverilog packed-array 變數 index 限制 → 先攤成 unpacked flat array
+// === Origin ===
+// Algorithm ported from the FPGA MVP trip_distribution_network.v
+//   (original: pure combinational, Verilog-2001, raw params, LANES=4 2x2 MVP)
+// Integration rewrite in this file:
+//   (1) SystemVerilog + import trapezoid_pkg (single source for types/params)
+//   (2) scaled to spec: N_A_FIBER=4 / N_B_FIBER=4 / BITMASK_W=16 / LANES=16
+//   (3) add 1 output register stage (DIST_STAGES=1) + in_valid->out_valid handshake
+//       -> aligns with the pe_row pipeline (see trapezoid_pkg PE_ROW_STAGES)
+//   (4) iverilog variable-index limit on packed arrays -> flatten to unpacked first
 //
-// === 跟 楊 MFIU 介面對齊 (pe_row 接線時的轉換, Iris wrap 用) ===
-// 楊 mfiu 輸出是「flat packed bus」,本檔輸入是「SV 多維 packed array」:
-//   楊 a_row_sel_o[LANES*ROW_IDX_W-1:0]  →  本檔 a_row_sel[LANES][ROW_IDX_W]
-//   楊 b_col_sel_o[LANES*COL_IDX_W-1:0]  →  本檔 b_col_sel[LANES][COL_IDX_W]
-//   楊 k_sel_o    [LANES*K_IDX_W-1:0]    →  本檔 k_sel    [LANES][K_IDX_W]
-//   楊 lane_valid_o[LANES-1:0]           →  本檔 lane_valid[LANES]
-// (兩者 bit 對 bit 相同,只是打包形狀不同;接線時 lane l 取 [l*W +: W] 即可)
+// === Alignment with the MFIU interface (conversion for pe_row wiring, Iris wrap) ===
+// MFIU outputs a flat packed bus; this file inputs SV multi-dim packed arrays:
+//   mfiu a_row_sel_o[LANES*ROW_IDX_W-1:0]  ->  here a_row_sel[LANES][ROW_IDX_W]
+//   mfiu b_col_sel_o[LANES*COL_IDX_W-1:0]  ->  here b_col_sel[LANES][COL_IDX_W]
+//   mfiu k_sel_o    [LANES*K_IDX_W-1:0]    ->  here k_sel    [LANES][K_IDX_W]
+//   mfiu lane_valid_o[LANES-1:0]           ->  here lane_valid[LANES]
+// (bit-for-bit identical, only the packing shape differs; wire lane l via [l*W +: W])
 // =============================================================================
 
 module dist_net_row_trip
     import trapezoid_pkg::*;
 #(
-    parameter int NUM_A_FIBER = N_A_FIBER,    // 4  (同時 pack 的 A 列數)
-    parameter int NUM_B_FIBER = N_B_FIBER,    // 4  (同時 stream 的 B 行數)
-    parameter int K_SLOTS     = BITMASK_W,    // 16 (每條 fiber 的 k slot 數)
-    parameter int LANES       = N_MUL_ROW,    // 16 (= 一個 PE row 的乘法器數)
-    // ── derived (勿從外部 override) ──
+    parameter int NUM_A_FIBER = N_A_FIBER,    // 4  (A rows packed at once)
+    parameter int NUM_B_FIBER = N_B_FIBER,    // 4  (B cols streamed at once)
+    parameter int K_SLOTS     = BITMASK_W,    // 16 (k slots per fiber)
+    parameter int LANES       = N_MUL_ROW,    // 16 (= multipliers in one PE row)
+    // -- derived (do not override externally) --
     parameter int ROW_IDX_W   = (NUM_A_FIBER > 1) ? $clog2(NUM_A_FIBER) : 1,  // 2
     parameter int COL_IDX_W   = (NUM_B_FIBER > 1) ? $clog2(NUM_B_FIBER) : 1,  // 2
     parameter int K_IDX_W     = (K_SLOTS     > 1) ? $clog2(K_SLOTS)     : 1,  // 4
@@ -57,17 +58,17 @@ module dist_net_row_trip
     input  logic en,
     input  logic in_valid,
 
-    // ── fiber value buffer (2D: [fiber][k]) ──
+    // -- fiber value buffer (2D: [fiber][k]) --
     input  logic signed [NUM_A_FIBER-1:0][K_SLOTS-1:0][DATA_W-1:0] a_values,
     input  logic signed [NUM_B_FIBER-1:0][K_SLOTS-1:0][DATA_W-1:0] b_values,
 
-    // ── 從 MFIU 來的 per-lane routing metadata ──
+    // -- per-lane routing metadata from MFIU --
     input  logic [LANES-1:0]                  lane_valid,
     input  logic [LANES-1:0][ROW_IDX_W-1:0]   a_row_sel,
     input  logic [LANES-1:0][COL_IDX_W-1:0]   b_col_sel,
     input  logic [LANES-1:0][K_IDX_W-1:0]     k_sel,
 
-    // ── gather 後給 multiplier 的 a/b (registered) ──
+    // -- gathered a/b to the multiplier (registered) --
     output logic signed [LANES-1:0][DATA_W-1:0] a_lane_out,
     output logic signed [LANES-1:0][DATA_W-1:0] b_lane_out,
     output logic [LANES-1:0]                     lane_valid_out,
@@ -75,12 +76,12 @@ module dist_net_row_trip
 );
 
     // ========================================================================
-    // 0) 攤平 packed → unpacked flat array
-    //    iverilog 不允許「變數」index packed array 維度;unpacked 才行。
-    //    a_values[fiber][k]  →  a_flat[ fiber*K_SLOTS + k ]
+    // 0) Flatten packed -> unpacked flat array
+    //    iverilog disallows variable index on packed array dims; unpacked is OK.
+    //    a_values[fiber][k]  ->  a_flat[ fiber*K_SLOTS + k ]
     // ========================================================================
-    logic signed [DATA_W-1:0] a_flat [A_DEPTH];   // 64 個 a 值
-    logic signed [DATA_W-1:0] b_flat [B_DEPTH];   // 64 個 b 值
+    logic signed [DATA_W-1:0] a_flat [A_DEPTH];   // 64 a values
+    logic signed [DATA_W-1:0] b_flat [B_DEPTH];   // 64 b values
 
     genvar gr, gk;
     generate
@@ -96,7 +97,7 @@ module dist_net_row_trip
         end
     endgenerate
 
-    // metadata 也攤成 unpacked (同樣為了變數 index 安全)
+    // flatten metadata to unpacked too (also for variable-index safety)
     logic [ROW_IDX_W-1:0] row_u [LANES];
     logic [COL_IDX_W-1:0] col_u [LANES];
     logic [K_IDX_W-1:0]   k_u   [LANES];
@@ -113,10 +114,10 @@ module dist_net_row_trip
     endgenerate
 
     // ========================================================================
-    // 1) Combinational 2D gather (= 一排 16 顆 64-to-1 mux,a/b 各一組)
-    //    a_slot = row*K_SLOTS + k  (把 (fiber,k) 攤成 flat offset)
-    //    無效 lane 直接吐 0 → 下游乘法器算 0,不污染 reduction
-    //    廣播天然支援: 多條 lane 指同一 slot 沒問題 (TrGT stretch)
+    // 1) Combinational 2D gather (= one row of 16 64-to-1 muxes, one set each a/b)
+    //    a_slot = row*K_SLOTS + k  (flatten (fiber,k) to a flat offset)
+    //    invalid lane outputs 0 -> downstream multiplier yields 0, no reduction pollution
+    //    broadcast supported natively: multiple lanes may point to the same slot (TrGT stretch)
     // ========================================================================
     logic signed [DATA_W-1:0] a_lane_c [LANES];
     logic signed [DATA_W-1:0] b_lane_c [LANES];
@@ -136,7 +137,7 @@ module dist_net_row_trip
 
     // ========================================================================
     // 2) Output register (DIST_STAGES = 1) + valid pipeline
-    //    對齊 trapezoid_pkg::DIST_STAGES;斷開 64-to-1 mux 的長組合路徑
+    //    aligns with trapezoid_pkg::DIST_STAGES; breaks the long 64-to-1 mux combinational path
     // ========================================================================
     logic signed [DATA_W-1:0] a_lane_q [LANES];
     logic signed [DATA_W-1:0] b_lane_q [LANES];
@@ -156,12 +157,12 @@ module dist_net_row_trip
                 a_lane_q[r] <= a_lane_c[r];
                 b_lane_q[r] <= b_lane_c[r];
             end
-            vld_q     <= lane_valid;   // gather 後的 per-lane valid 一起打拍
+            vld_q     <= lane_valid;   // register the post-gather per-lane valid in step
             out_valid <= in_valid;
         end
     end
 
-    // unpacked → packed output port
+    // unpacked -> packed output port
     genvar go;
     generate
         for (go = 0; go < LANES; go = go + 1) begin : g_pack_out
@@ -171,7 +172,7 @@ module dist_net_row_trip
         end
     endgenerate
 
-    // synthesis-time sanity: 本檔假設 DIST_STAGES=1;若 pkg 改了要回來補 stage
+    // synthesis-time sanity: this file assumes DIST_STAGES=1; if pkg changes, add stages here
     initial begin
         if (DIST_STAGES != 1)
             $warning("dist_net_row_trip: DIST_STAGES=%0d but this module hard-codes 1 register stage", DIST_STAGES);

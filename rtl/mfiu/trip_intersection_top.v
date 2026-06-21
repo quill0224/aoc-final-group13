@@ -14,11 +14,11 @@
 // See HARDWARE_STRUCTURE.md §12.5.4 (MFIU), Phase 1.
 
 module trip_intersection_top #(
-    parameter NUM_ROWS   = 2,
-    parameter NUM_COLS   = 2,
-    parameter K_BITS     = 4,
-    parameter LANES      = 4,
-    parameter DATA_WIDTH = 16,
+    parameter NUM_ROWS   = 4,           // = N_A_FIBER
+    parameter NUM_COLS   = 4,           // = N_B_FIBER
+    parameter K_BITS     = 16,          // = BITMASK_W
+    parameter LANES      = 16,          // = N_MUL_ROW
+    parameter DATA_WIDTH = 8,           // = DATA_W
     parameter ID_WIDTH   = 4,
     // derived — do not override
     parameter ADDR_W_A   = (NUM_ROWS > 1) ? $clog2(NUM_ROWS) : 1,
