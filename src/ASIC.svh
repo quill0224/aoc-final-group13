@@ -15,6 +15,49 @@
 // ============================================================================
 
 // ----------------------------------------------------------------------------
+// 32-bit ASIC Command Register Definitions
+// ----------------------------------------------------------------------------
+// Command Structure:
+// [31]      Start (1-bit)  : 1 to start execution
+// [30:29]   Mode  (2-bits) : 00=Dense, 01=Sparse(TrIP)
+// [28:22]   M     (7-bits) : Max 127
+// [21:12]   K     (10-bits): Max 1023
+// [11:6]    N     (6-bits) : Max 63
+// [5:1]     Pkt   (5-bits) : Fixed to 16
+// [0]       Rsv   (1-bit)  : Reserved, 0
+// ----------------------------------------------------------------------------
+`define BUILD_ASIC_CMD(start, mode, m, k, n, pkt) \
+    ( (((start) & 1'b1)   << 31) | \
+      (((mode)  & 2'b11)  << 29) | \
+      (((m)     & 7'h7F)  << 22) | \
+      (((k)     & 10'h3FF)<< 12) | \
+      (((n)     & 6'h3F)  << 6)  | \
+      (((pkt)   & 5'h1F)  << 1) )
+
+// Function-like macro encapsulating static parameters (Start=1, Mode=1, Pkt=16)
+`define GEN_ASIC_CMD(m, k, n)   `BUILD_ASIC_CMD(1, 1, (m), (k), (n), 16)
+
+// Pre-defined Hardware Command Library
+`define CMD_M1_K1_N1    `GEN_ASIC_CMD(1, 1, 1)
+`define CMD_M2_K2_N2    `GEN_ASIC_CMD(2, 2, 2)
+`define CMD_M3_K3_N3    `GEN_ASIC_CMD(3, 3, 3)
+`define CMD_LAYER40     `GEN_ASIC_CMD(13, 288, 32)
+
+// Decoder Masks for Controller RTL
+`define CMD_START_MSB  31
+`define CMD_START_LSB  31
+`define CMD_MODE_MSB   30
+`define CMD_MODE_LSB   29
+`define CMD_M_MSB      28
+`define CMD_M_LSB      22
+`define CMD_K_MSB      21
+`define CMD_K_LSB      12
+`define CMD_N_MSB      11
+`define CMD_N_LSB      6
+`define CMD_PKT_MSB    5
+`define CMD_PKT_LSB    1
+
+// ----------------------------------------------------------------------------
 // Data Width
 // Matches AXI_DATA_BITS = 32
 // GLB read/write granularity = 32bits = 1 word
@@ -180,13 +223,11 @@
 // [31:28]=e[3:0] [27:25]=p[2:0] [24:22]=q[2:0] [21:19]=r[2:0] [18:16]=t[2:0]
 `define ASIC_MAPPING_PARAM_OFFSET       (`ADDR_MMIO + 32'h08)
 
-// [W] Tiling counts (software pre-computes from layer shape)
-// [5:0]  N_tiles (max 32)
-// [9:0]  K_tiles (max 288)
-// [6:0]  M_tiles (max 49)
-`define ASIC_N_TILES_OFFSET             (`ADDR_MMIO + 32'h0C)
-`define ASIC_K_TILES_OFFSET             (`ADDR_MMIO + 32'h10)
-`define ASIC_M_TILES_OFFSET             (`ADDR_MMIO + 32'h14)
+// [W] Unified 32-bit Command Register
+// Subsumes previous N_tiles, K_tiles, M_tiles individual registers
+`define ASIC_COMMAND_OFFSET             (`ADDR_MMIO + 32'h0C)
+`define ASIC_RESERVED_10_OFFSET         (`ADDR_MMIO + 32'h10) // Reserved
+`define ASIC_RESERVED_14_OFFSET         (`ADDR_MMIO + 32'h14) // Reserved
 
 // [W] Packets per tile
 `define ASIC_PKT_COUNT_OFFSET           (`ADDR_MMIO + 32'h18)

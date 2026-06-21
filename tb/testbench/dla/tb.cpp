@@ -222,11 +222,10 @@ void ctrl_set_GLB_C_base_addr(uint32_t val) { top->GLB_C_base_addr = val; }
 void ctrl_set_comp_A_len_in(uint32_t val) { top->comp_A_len_in = val; }
 void ctrl_set_comp_B_len_in(uint32_t val) { top->comp_B_len_in = val; }
 void ctrl_set_comp_C_len_in(uint32_t val) { top->comp_C_len_in = val; }
-void ctrl_set_N_tiles_in(uint32_t val) { top->N_tiles_in = val; }
-void ctrl_set_K_tiles_in(uint32_t val) { top->K_tiles_in = val; }
-void ctrl_set_M_tiles_in(uint32_t val) { top->M_tiles_in = val; }
-void ctrl_set_packet_count_in(uint32_t val) { top->packet_count_in = val; }
-void ctrl_set_operation_mode_in(uint8_t val) { top->operation_mode_in = val; }
+
+// [新增實作] 將數值對接至硬體 32-bit Command Port
+void ctrl_set_asic_cmd_in(uint32_t val) { top->asic_cmd_in = val; }
+
 void ctrl_set_e(uint8_t val) { top->e = val; }
 void ctrl_set_p(uint8_t val) { top->p = val; }
 void ctrl_set_q(uint8_t val) { top->q = val; }
