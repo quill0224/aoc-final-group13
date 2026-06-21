@@ -111,7 +111,7 @@ uint8_t  ctrl_get_global_flush(void);
 void intg_set_mock_pe_cfg_ready(uint8_t val);
 void intg_set_mock_pe_data_ready(uint8_t val);
 uint8_t  intg_get_pe_cfg_valid(void);
-uint8_t  intg_get_pe_cfg_length(void);
+uint16_t intg_get_pe_cfg_length(void);
 uint32_t intg_get_pe_cfg_bitmask(void);
 uint8_t  intg_get_pe_data_valid(void);
 uint32_t intg_get_pe_data_nzvalue(void);

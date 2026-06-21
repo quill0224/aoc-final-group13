@@ -82,6 +82,7 @@ extern "C" void run_workload() {
     int wait_for_data = 0;
     uint16_t latched_mask = 0;
     uint16_t latched_len = 0;
+    int latched_is_b = 0;   // [Iris 新增] 此封包是 A(0) / B(1),取自 header bit15
 
     uint32_t total_packets = 0;
     uint8_t prev_flush = 0;
@@ -92,34 +93,39 @@ extern "C" void run_workload() {
 
     while (!done && timeout-- > 0) {
 
-        // 1. Capture Config Header (First packet of each tile)
+        // 1. Capture Config Header
+        // [Iris 修改] 一次 dispatch = A 段(CMD_PKT 包)+ B 段(CMD_PKT 包)= 2*CMD_PKT。
+        //            在 A 段首包(packet_in_tile==0)與 B 段首包(==CMD_PKT)各抓一次來印。
         if (intg_get_pe_cfg_valid()) {
             total_packets++;
-            
-            if (packet_in_tile == 0) {
-                // Visualize the stationary vs sliding transition
-                if (cur_n == 0) {
+
+            if (packet_in_tile == 0 || packet_in_tile == (int)CMD_PKT(cmd)) {
+                // A 段首包(且該 K 的第一個 N)才印 IFMAP A LOCKED
+                if (packet_in_tile == 0 && cur_n == 0) {
                     LOG("=========================================================");
                     LOG(">> [SRAM_CTRL] IFMAP A (M=%d, K=%d) LOCKED in GLB.", cur_m, cur_k);
                 }
-                
-                latched_len = intg_get_pe_cfg_length();
+
+                latched_is_b = (intg_get_pe_cfg_length() >> 15) & 0x1; // [Iris 新增] header bit15 = A/B
+                latched_len  = intg_get_pe_cfg_length() & 0x1F;        // [Iris 修改] 遮掉 tag,只留長度
                 latched_mask = intg_get_pe_cfg_bitmask();
-                wait_for_data = 1; 
+                wait_for_data = 1;
             }
             packet_in_tile++;
         }
 
         // 2. Capture Data Payload (PE Input)
         if (intg_get_pe_data_valid() && wait_for_data) {
-            // This proves the Filter B is sliding while IFMAP A remains stationary
-            LOG("   -> [PE_INPUT] Stream Filter B (N=%02d) | Len:%2d, Mask:0x%04X, Value:0x%08X", 
+            // [Iris 修改] 依 header tag 標 A / B(原本固定印 "Filter B")
+            LOG("   -> [PE_INPUT] Stream %s (N=%02d) | Len:%2d, Mask:0x%04X, Value:0x%08X",
+                latched_is_b ? "Filter B" : "IFMAP A ",
                 cur_n, latched_len, latched_mask, intg_get_pe_data_nzvalue());
-            wait_for_data = 0; 
+            wait_for_data = 0;
         }
 
         // 3. Tile Index Advancement (Hardware-Mirror Logic)
-        if (packet_in_tile == (int)CMD_PKT(cmd)) {
+        // [Iris 修改] 一次 dispatch = A 段 + B 段 = 2*CMD_PKT 包,送完才前進 N
+        if (packet_in_tile == 2 * (int)CMD_PKT(cmd)) {
             packet_in_tile = 0;
             cur_n++; // Move N-index
             if (cur_n >= (int)total_n) {
@@ -136,7 +142,8 @@ extern "C" void run_workload() {
         uint8_t cur_flush = ctrl_get_global_flush();
         if (cur_flush && !prev_flush) {
             flush_count++;
-            LOG(">> [FLUSH] K-loop exhausted for M=%d. Redirecting Partial Sums to PPU.", cur_m);
+            // [Iris 修改] cur_m 在該 M 最後一個 dispatch 完成時已 +1,flush 屬於剛結束的 M → 印 cur_m-1
+            LOG(">> [FLUSH] K-loop exhausted for M=%d. Redirecting Partial Sums to PPU.", cur_m - 1);
             ppu_delay = 1;
         }
         prev_flush = cur_flush;
@@ -155,7 +162,8 @@ extern "C" void run_workload() {
 
         // 6. ASIC Completion Check
         if (ctrl_get_asic_done()) {
-            uint32_t expected_packets = total_m * total_k * total_n * CMD_PKT(cmd);
+            // [Iris 修改] A+B 兩段 → 每個 (M,K,N) dispatch 送 2*CMD_PKT 包
+            uint32_t expected_packets = total_m * total_k * total_n * 2 * CMD_PKT(cmd);
             LOG("---------------------------------------------------------");
             LOG("  Status                       : SUCCESS");
             LOG("  Total Execution Cycles       : %llu", (unsigned long long)sim_time);

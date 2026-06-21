@@ -265,7 +265,7 @@ uint8_t  ctrl_get_global_flush(void) { return top->obs_global_flush; }
 void intg_set_mock_pe_cfg_ready(uint8_t val) { top->mock_pe_cfg_ready = val; }
 void intg_set_mock_pe_data_ready(uint8_t val) { top->mock_pe_data_ready = val; }
 uint8_t  intg_get_pe_cfg_valid(void) { return top->obs_pe_cfg_valid; }
-uint8_t  intg_get_pe_cfg_length(void) { return top->obs_pe_cfg_length; }
+uint16_t intg_get_pe_cfg_length(void) { return top->obs_pe_cfg_length; } // [Iris] uint8_t→uint16_t:pe_cfg_length 是 16-bit,bit15 帶 A/B tag,uint8_t 會截掉
 uint32_t intg_get_pe_cfg_bitmask(void) { return top->obs_pe_cfg_bitmask; }
 uint8_t  intg_get_pe_data_valid(void) { return top->obs_pe_data_valid; }
 uint32_t intg_get_pe_data_nzvalue(void) { return top->obs_pe_data_nzvalue; }
