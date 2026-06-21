@@ -353,3 +353,14 @@ clean:
 	@rm -rf obj_dir
 	@$(MAKE) -C tb/testbench/dla clean 2>/dev/null || true
 	$(call msg_green,[ROOT] Done.)
+.PHONY: sim_mfiu
+sim_mfiu: $(G13_PKG) $(G13_RTL_DIR)/mfiu/mfiu.sv tb/tb_mfiu.cpp
+	@mkdir -p build
+	$(G13_VERILATOR) -Wall -Wno-UNUSEDPARAM --cc --exe --build -sv \
+		-I$(G13_RTL_DIR) \
+		$(G13_PKG) \
+		$(G13_RTL_DIR)/mfiu/mfiu.sv \
+		tb/tb_mfiu.cpp \
+		--top-module mfiu \
+		--Mdir build/mfiu_verilator
+	./build/mfiu_verilator/Vmfiu
