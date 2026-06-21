@@ -17,7 +17,7 @@
 // chunk 3 = bits[63:48] → packet 3
 //
 // 輸出 packet 格式（160-bit = 20 bytes = 5 words）：
-// Word 0: {length[15:0], bitmask[15:0]}
+// Word 0: {is_b[31], length[30:16], bitmask[15:0]}   // [Iris 新增] bit31=is_b(0=A/1=B)
 // Word 1: NZ[0..3] (packed INT8, LSB first)
 // Word 2: NZ[4..7]
 // Word 3: NZ[8..11]
@@ -37,7 +37,8 @@ const char* mask_path,
 const char* val_path,
 const char* hex_path,
 uint32_t word_base_addr,
-uint32_t max_packets = 0 // 0 = 不限
+uint32_t max_packets = 0, // 0 = 不限
+int is_b = 0             // [Iris 新增] 0=A(IFMAP)/1=B(Filter):寫進 Word0 bit31 當 A/B tag
 ) {
 FILE* f_mask = fopen(mask_path, "r");
 FILE* f_val = fopen(val_path, "r");
@@ -92,9 +93,9 @@ break;
 }
 }
 
-// Word 0: {length, bitmask}
+// Word 0: {is_b[31], length, bitmask}   // [Iris 修改] is_b 寫進 bit31
 fprintf(fout, "%08X\n",
-((uint32_t)length << 16) | (uint32_t)mask16);
+(((uint32_t)is_b & 0x1u) << 31) | ((uint32_t)length << 16) | (uint32_t)mask16);
 
 // Word 1~4: NZ values packed
 for (int w = 0; w < 4; w++) {

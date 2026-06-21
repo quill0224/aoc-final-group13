@@ -42,7 +42,8 @@ int main(int argc, char** argv) {
         VAL_PATH_B, 
         DRAM_HEX_PATH_B,
         0x4000,            // word_base_addr = 0x00010000 / 4
-        required_packets
+        required_packets,
+        1                  // [Iris 新增] is_b=1:B(Filter) 封包,Word0 bit31 標 1(A 呼叫沿用預設 is_b=0)
     );
 
     tb_init(argc, argv, "trace_INTEGRATION");

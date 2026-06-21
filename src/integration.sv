@@ -92,6 +92,18 @@ module integration (
     logic                                       mc_glb_ren_A, mc_glb_ren_B;
     logic [`GLB_ADDR_BITS-1:0]                  mc_glb_addr_A, mc_glb_addr_B;
 
+    // [Iris] MC egress 內部線:同時餵 pe_entry 與 tap 給 obs_*
+    logic                                       mc_pe_cfg_valid, mc_pe_data_valid;
+    logic [15:0]                                mc_pe_cfg_length, mc_pe_cfg_bitmask;
+    logic [31:0]                                mc_pe_data_nzvalue;
+    logic                                       pe_cfg_ready_w, pe_data_ready_w;   // pe_entry → MC
+    // [Iris] pe_entry → 下游 A/B buffer(尚未接;先拉出供觀察)
+    logic [15:0]                                pe_out_bitmask;
+    logic [15:0][7:0]                           pe_out_nz;
+    logic [4:0]                                 pe_out_len;
+    logic                                       pe_out_side, pe_out_valid;
+    logic [3:0]                                 pe_out_idx;
+
     // DMA <-> GLB & AXI
     logic                                       glb_en, glb_we;
     logic [3:0]                                 glb_wstrb;
@@ -218,15 +230,34 @@ module integration (
         .mc_glb_ren_B           (mc_glb_ren_B), 
         .mc_glb_addr_B          (mc_glb_addr_B),
         
-        // Exposed observation ports for Testbench
-        .pe_cfg_valid           (obs_pe_cfg_valid),
-        .pe_cfg_ready           (mock_pe_cfg_ready),  
-        .pe_cfg_length          (obs_pe_cfg_length),
-        .pe_cfg_bitmask         (obs_pe_cfg_bitmask),
+        // [Iris] un-mock:egress 改接內部線,ready 改由 pe_entry 驅動(原本接 obs_/mock_)
+        .pe_cfg_valid           (mc_pe_cfg_valid),
+        .pe_cfg_ready           (pe_cfg_ready_w),
+        .pe_cfg_length          (mc_pe_cfg_length),
+        .pe_cfg_bitmask         (mc_pe_cfg_bitmask),
 
-        .pe_data_valid          (obs_pe_data_valid),
-        .pe_data_ready          (mock_pe_data_ready), 
-        .pe_data_nzvalue        (obs_pe_data_nzvalue)
+        .pe_data_valid          (mc_pe_data_valid),
+        .pe_data_ready          (pe_data_ready_w),
+        .pe_data_nzvalue        (mc_pe_data_nzvalue)
+    );
+
+    // [Iris] un-mock:插入真正的消費端 pe_entry(取代 C TB 假裝的 mock PE)
+    pe_entry u_pe_entry (
+        .clk            (clk),
+        .rst_n          (~rst),
+        .pe_cfg_valid   (mc_pe_cfg_valid),
+        .pe_cfg_ready   (pe_cfg_ready_w),
+        .pe_cfg_length  (mc_pe_cfg_length),
+        .pe_cfg_bitmask (mc_pe_cfg_bitmask),
+        .pe_data_valid  (mc_pe_data_valid),
+        .pe_data_ready  (pe_data_ready_w),
+        .pe_data_nzvalue(mc_pe_data_nzvalue),
+        .out_bitmask    (pe_out_bitmask),
+        .out_nz         (pe_out_nz),
+        .out_len        (pe_out_len),
+        .out_side       (pe_out_side),
+        .out_idx        (pe_out_idx),
+        .out_valid      (pe_out_valid)
     );
 
     DMA u_dma (
@@ -258,6 +289,22 @@ module integration (
     );
 
     // Observations
-    assign obs_mc_start = mc_start;
+    assign obs_mc_start        = mc_start;
+    // [Iris] obs_pe_* 仍反映 MC egress(C TB trace 用),只是改從內部線 tap
+    assign obs_pe_cfg_valid    = mc_pe_cfg_valid;
+    assign obs_pe_cfg_length   = mc_pe_cfg_length;
+    assign obs_pe_cfg_bitmask  = mc_pe_cfg_bitmask;
+    assign obs_pe_data_valid   = mc_pe_data_valid;
+    assign obs_pe_data_nzvalue = mc_pe_data_nzvalue;
+
+    // [Iris] mock_pe_*_ready 已被 pe_entry 取代,僅 sink 避免 unused 警告
+    wire _unused_mock = &{1'b0, mock_pe_cfg_ready, mock_pe_data_ready};
+
+    // [Iris] DEBUG(sim-only):印出 pe_entry 真正組好的 fiber → 確認 A(side=0)/B(side=1) 都進來
+    always_ff @(posedge clk) begin
+        if (pe_out_valid)
+            $display("[PE_ENTRY @%0t] side=%0d idx=%0d len=%0d bm=0x%04h nz0=0x%02h",
+                     $time, pe_out_side, pe_out_idx, pe_out_len, pe_out_bitmask, pe_out_nz[0]);
+    end
 
 endmodule

@@ -75,7 +75,8 @@ V_SRCS := $(SRC_DIR)/integration.sv \
           $(SRC_DIR)/GLB.sv \
           $(SRC_DIR)/SRAM_rtl.sv \
           $(SRC_DIR)/axi_mem_model.sv \
-          $(SRC_DIR)/MC.sv
+          $(SRC_DIR)/MC.sv \
+          $(SRC_DIR)/pe_entry.sv
 
 else
 $(error Unknown CASE=$(CASE). Valid: case_SRAM case_GLB case_DMA case_CTRL case_MC case_INTEGRATION)
