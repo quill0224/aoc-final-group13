@@ -1,157 +1,169 @@
 // =============================================================================
-// pe_array.sv — 16 x PE row array (systolic, B vertical chain)
+// pe_array.sv — 16 條 PE row 的陣列(Trapezoid-Lite,新版)
 // =============================================================================
-// Function:
-//   Instantiate N_PE_ROW pe_row_full to form a 16x16 = 256 MAC array.
-//   Row i computes output matrix row i, C[i, :].
-//     A: row-stationary — each row consumes its own a_vec (fed by a_grid[i]),
-//        held stationary.
-//     B: vertical chain — enters at row 0; each row delays B by 1 cycle and
-//        passes to the next (pe_row_full's b_vec_out); all 16 rows reuse the
-//        same B (read from GLB once).
-//     C: each row computes independently -> c_out[i]; dump reads out a whole
-//        column at once.
+// 整個 PE 子系統:吃 MC egress 串流,內含
+//   pe_entry → pe_ab_buffer(共享) → 16 × pe_row(各自 mfiu_seq→crossbar→tail)
+// 取代舊的 SIGMA-style systolic 版(B 垂直鏈 + pe_row_full,已退役)。
 //
-// Control skew (systolic key point):
-//   B reaches row i exactly i cycles later than row 0, so row i's in_valid /
-//   cur_n / first_pass must also be skewed by i cycles to line up:
-//     in_valid : take previous row's b_valid_out (B chain carries its own
-//                valid, delayed 1/row)
-//     cur_n / first_pass : delay chain in this layer; row i gets the version
-//                          delayed i cycles
-//   dataflow_sel: broadcast to all rows. dump_en/dump_addr: broadcast during
-//   dump phase (no compute then; all 16 rows read the same column in sync ->
-//   c_out is the 16 values of that column across rows).
+// 分配(位置決定,無排程器):
+//   MC 先送 16 條 A、再送 16 欄 B;pe_entry 的 out_idx 在每個 phase 數 0..15,
+//   pe_ab_buffer 照 idx 落格;PE row r 讀 buffer 第 r 條 A(a_nz[r]),B 16 欄共享。
+//   → 「A 的第幾列 → 第幾條 row」= MC 送 A 的順序。
 //
-// Interface:
-//   dataflow_sel / in_valid / cur_n / first_pass / dump_en / dump_addr  control (drive row 0)
-//   a_grid     [N_PE_ROW][N_A_FIBER][BITMASK_W][DATA_W] in row-stationary A (multi-fiber)
-//   a_bm_grid  [N_PE_ROW][N_A_FIBER][BITMASK_W]         in A bitmask (multi-fiber)
-//   b_vec_top  [N_B_FIBER][BITMASK_W][DATA_W]           in B bundle into row 0 (other rows via chain)
-//   b_bm_top   [N_B_FIBER][BITMASK_W]                   in B bitmask bundle into row 0
-//   c_out      [N_PE_ROW][ACC_W]              out  per-row C value on dump (one column)
-//   c_valid                                   out  dump result valid (rows in sync)
+// 啟動 / 完成握手:
+//   start        = pe_ab_buffer.tile_ready(收滿一個 tile 拉 1 拍)→ 16 row 一起跑。
+//   pe_compute_done = 16 row 的 mfiu_seq.done 全部到齊(各 row 鎖存)再延遲 DRAIN 拍
+//                     (等 tail 的 local_buffer 累加落定)。
+//   ⚠️ controller 要等 pe_compute_done(不是只等 MC 的 k_done = 封包送完),
+//      否則下一批 tile 會在還沒算完時覆寫 pe_ab_buffer。
 //
-// Status: Dense IP (MFIU/dist are stand-ins); when the real TrIP arrives it
-//   drops in directly, no change needed here (row internal interface frozen).
+// dump:dump_en/dump_addr 由 controller/上層廣播;16 row 同步讀同一欄 →
+//   c_out[0..15] = 該欄跨 16 個輸出列的 psum,c_valid 同步。
+//
+// ⚠️ 含 mfiu(在 pe_row 內)→ 需 verilator elaborate(iverilog 不支援)。
 // =============================================================================
 
 module pe_array
     import trapezoid_pkg::*;
 (
-    input  logic                                                  clk,
-    input  logic                                                  rst_n,
+    input  logic                                clk,
+    input  logic                                rst_n,
 
-    // ── Control (drive row 0; array auto-skews it downward per row) ──
-    input  logic [1:0]                                            dataflow_sel,
-    input  logic                                                  in_valid,
-    input  logic [LOCAL_BUF_AW-1:0]                               cur_n,
-    input  logic                                                  first_pass,
-    input  logic                                                  dump_en,
-    input  logic [LOCAL_BUF_AW-1:0]                               dump_addr,
+    // ── MC egress(沿用 pe_entry 名稱;未來 integration 把裸 pe_entry 換成本模組)──
+    input  logic                                pe_cfg_valid,
+    output logic                                pe_cfg_ready,
+    input  logic [15:0]                         pe_cfg_length,    // [15]=is_b, [4:0]=len
+    input  logic [15:0]                         pe_cfg_bitmask,
+    input  logic                                pe_data_valid,
+    output logic                                pe_data_ready,
+    input  logic [31:0]                         pe_data_nzvalue,
 
-    // ── A: row-stationary, one set per row ──
-    //   a_load_valid / a_clear are broadcast to all rows: one pulse loads every
-    //   row's a_grid[gr] into its A register (load once, then hold).
-    input  logic                                                  a_load_valid,
-    input  logic signed [N_PE_ROW-1:0][N_A_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] a_grid,
-    input  logic        [N_PE_ROW-1:0][N_A_FIBER-1:0][BITMASK_W-1:0]             a_bm_grid,
-    input  logic                                                  a_clear,
+    // ── controller ──
+    input  logic [1:0]                          mode,             // = global_mode (MODE_TRIP=01)
+    input  logic                                first_pass,       // = pe_first_pass (k_cnt==0)
+    input  logic [LOCAL_BUF_AW-1:0]             cur_n_base,       // = pe_cur_n_base (n_cnt*16)
+    input  logic                                dump_en,
+    input  logic [LOCAL_BUF_AW-1:0]             dump_addr,
+    output logic                                pe_compute_done,  // → controller 等這個才換 tile
 
-    // ── B: feed row 0 only; other rows receive it via the vertical chain ──
-    input  logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0]               b_vec_top,
-    input  logic        [N_B_FIBER-1:0][BITMASK_W-1:0]                           b_bm_top,
+    // ── C 輸出(dump 時:一欄跨 16 列的 psum)──
+    output logic signed [N_PE_ROW-1:0][ACC_W-1:0] c_out,
+    output logic                                c_valid,
 
-    // ── C output (on dump, one column spanning 16 rows) ──
-    output logic [N_PE_ROW-1:0][ACC_W-1:0]                        c_out,
-    output logic                                                  c_valid
+    // ── 觀察用(sim):透出內部 pe_entry 組好的 fiber(沿用 integration 原 pe_out_* DEBUG/trace)──
+    output logic [15:0]                         dbg_ent_bitmask,
+    output logic [15:0][7:0]                    dbg_ent_nz,
+    output logic [4:0]                          dbg_ent_len,
+    output logic                                dbg_ent_side,
+    output logic [3:0]                          dbg_ent_idx,
+    output logic                                dbg_ent_valid
 );
 
-    // =====================================================================
-    // Control skew chain: cur_n_d[i] / fp_d[i] = input delayed (i+1) cycles
-    //   row 0 uses the raw input (delay 0); row i (>0) uses cur_n_d[i-1] (= delay i)
-    // =====================================================================
-    logic [LOCAL_BUF_AW-1:0] cur_n_d [N_PE_ROW];
-    logic                    fp_d    [N_PE_ROW];
-    integer di;
-    always_ff @(posedge clk or negedge rst_n) begin
-        if (!rst_n) begin
-            for (di = 0; di < N_PE_ROW; di = di + 1) begin
-                cur_n_d[di] <= '0; fp_d[di] <= 1'b0;
-            end
-        end else begin
-            cur_n_d[0] <= cur_n; fp_d[0] <= first_pass;
-            for (di = 1; di < N_PE_ROW; di = di + 1) begin
-                cur_n_d[di] <= cur_n_d[di-1];
-                fp_d[di]    <= fp_d[di-1];
-            end
-        end
-    end
+    localparam int DRAIN = 6;                  // tail drain margin(done → buffer 累加落定)
+    wire row_mode = (mode == MODE_TRIP);
 
     // =====================================================================
-    // B vertical chain + per-row output wires
+    // pe_entry:MC 串流 → 一條壓縮 fiber + strobe
     // =====================================================================
-    logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] bchain_vec [N_PE_ROW];
-    logic        [N_B_FIBER-1:0][BITMASK_W-1:0]             bchain_bm  [N_PE_ROW];
-    logic                                    bchain_vld [N_PE_ROW];
+    logic [15:0]      ent_bm;
+    logic [15:0][7:0] ent_nz;
+    logic [4:0]       ent_len;
+    logic             ent_side;
+    logic [3:0]       ent_idx;
+    logic             ent_valid;
 
-    // Per-row "input" source (row 0 = external; row i = previous row's chain / skewed control)
-    logic signed [N_B_FIBER-1:0][BITMASK_W-1:0][DATA_W-1:0] row_bvi [N_PE_ROW];
-    logic        [N_B_FIBER-1:0][BITMASK_W-1:0]             row_bbi [N_PE_ROW];
-    logic                                    row_ivi [N_PE_ROW];
-    logic [LOCAL_BUF_AW-1:0]                 row_cni [N_PE_ROW];
-    logic                                    row_fpi [N_PE_ROW];
+    pe_entry u_entry (
+        .clk(clk), .rst_n(rst_n),
+        .pe_cfg_valid(pe_cfg_valid), .pe_cfg_ready(pe_cfg_ready),
+        .pe_cfg_length(pe_cfg_length), .pe_cfg_bitmask(pe_cfg_bitmask),
+        .pe_data_valid(pe_data_valid), .pe_data_ready(pe_data_ready),
+        .pe_data_nzvalue(pe_data_nzvalue),
+        .out_bitmask(ent_bm), .out_nz(ent_nz), .out_len(ent_len),
+        .out_side(ent_side), .out_idx(ent_idx), .out_valid(ent_valid)
+    );
+
+    // =====================================================================
+    // pe_ab_buffer(共享):16 條 A + 16 欄 B,收滿拉 tile_ready
+    // =====================================================================
+    logic [15:0]      buf_a_bm [0:15];
+    logic [15:0][7:0] buf_a_nz [0:15];
+    logic [15:0]      buf_b_bm [0:15];
+    logic [15:0][7:0] buf_b_nz [0:15];
+    logic             tile_ready;
+
+    pe_ab_buffer u_buf (
+        .clk(clk), .rst_n(rst_n),
+        .in_bitmask(ent_bm), .in_nz(ent_nz), .in_len(ent_len),
+        .in_side(ent_side), .in_idx(ent_idx), .in_valid(ent_valid),
+        .tile_ready(tile_ready),
+        .a_bm(buf_a_bm), .a_nz(buf_a_nz), .a_len(),   // a_len/b_len 不用 → 留空
+        .b_bm(buf_b_bm), .b_nz(buf_b_nz), .b_len()
+    );
+
+    // 收滿一個 tile → 16 row 一起開跑(mfiu_seq 在 S_IDLE,start 1 拍)
+    wire start = tile_ready;
+
+    // =====================================================================
+    // 16 × pe_row(各自 mfiu_seq→crossbar→tail);A 取自己那條、B 共享
+    // =====================================================================
+    logic done_row [0:15];
+    logic cvld_row [0:15];
 
     genvar gr;
     generate
-        for (gr = 0; gr < N_PE_ROW; gr = gr + 1) begin : g_src
-            if (gr == 0) begin : g_head
-                assign row_bvi[gr] = b_vec_top;
-                assign row_bbi[gr] = b_bm_top;
-                assign row_ivi[gr] = in_valid;
-                assign row_cni[gr] = cur_n;
-                assign row_fpi[gr] = first_pass;
-            end else begin : g_chain
-                assign row_bvi[gr] = bchain_vec[gr-1];
-                assign row_bbi[gr] = bchain_bm[gr-1];
-                assign row_ivi[gr] = bchain_vld[gr-1];   // B chain carries its own valid (delay 1/row)
-                assign row_cni[gr] = cur_n_d[gr-1];       // = delay gr cycles
-                assign row_fpi[gr] = fp_d[gr-1];
-            end
-        end
-    endgenerate
-
-    // =====================================================================
-    // 16 PE rows
-    // =====================================================================
-    logic [N_PE_ROW-1:0] cvld;
-    generate
         for (gr = 0; gr < N_PE_ROW; gr = gr + 1) begin : g_row
-            pe_row_full u_row (
-                .clk           (clk),
-                .rst_n         (rst_n),
-                .dataflow_sel  (dataflow_sel),
-                .in_valid      (row_ivi[gr]),
-                .cur_n         (row_cni[gr]),
-                .first_pass    (row_fpi[gr]),
-                .dump_en       (dump_en),       // dump broadcast
-                .dump_addr     (dump_addr),
-                .a_load_valid  (a_load_valid),  // broadcast: one pulse loads all rows' A
-                .a_vec         (a_grid[gr]),
-                .a_bitmask     (a_bm_grid[gr]),
-                .a_clear       (a_clear),       // broadcast
-                .b_vec_in      (row_bvi[gr]),
-                .b_bitmask_in  (row_bbi[gr]),
-                .b_vec_out     (bchain_vec[gr]),
-                .b_bitmask_out (bchain_bm[gr]),
-                .b_valid_out   (bchain_vld[gr]),
-                .c_valid       (cvld[gr]),
-                .c_out         (c_out[gr])
+            pe_row u_row (
+                .clk(clk), .rst_n(rst_n),
+                .mode(row_mode), .start(start), .done(done_row[gr]),
+                .a_bm_row(buf_a_bm[gr]), .b_bm(buf_b_bm),
+                .a_nz_row(buf_a_nz[gr]), .b_nz(buf_b_nz),
+                .first_pass(first_pass), .cur_n_base(cur_n_base),
+                .dump_en(dump_en), .dump_addr(dump_addr),
+                .c_valid(cvld_row[gr]), .c_out(c_out[gr])
             );
         end
     endgenerate
 
-    // All rows dump in sync (broadcast dump) → use row 0 as representative
-    assign c_valid = cvld[0];
+    // 16 row 同步 dump → 用 row0 當代表
+    assign c_valid = cvld_row[0];
+
+    // =====================================================================
+    // pe_compute_done:鎖存每條 row 的 done(脈衝)→ 全到齊 → 延遲 DRAIN 拍
+    //   start(新 tile)清掉鎖存;controller 等 pe_compute_done 才推進下一批。
+    // =====================================================================
+    logic   done_q [0:15];
+    integer i;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            for (i = 0; i < N_PE_ROW; i = i + 1) done_q[i] <= 1'b0;
+        end else begin
+            for (i = 0; i < N_PE_ROW; i = i + 1) begin
+                if (start)             done_q[i] <= 1'b0;        // 新 tile:清
+                else if (done_row[i])  done_q[i] <= 1'b1;        // 此 row 算完:鎖存
+            end
+        end
+    end
+
+    logic all_done;
+    integer j;
+    always_comb begin
+        all_done = 1'b1;
+        for (j = 0; j < N_PE_ROW; j = j + 1) all_done &= done_q[j];
+    end
+
+    logic [DRAIN-1:0] drain_sr;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) drain_sr <= '0;
+        else        drain_sr <= {drain_sr[DRAIN-2:0], all_done};
+    end
+    assign pe_compute_done = drain_sr[DRAIN-1];
+
+    // 觀察 tap:= 內部 pe_entry 輸出(給 integration 沿用原 pe_out_* DEBUG,不影響功能)
+    assign dbg_ent_bitmask = ent_bm;
+    assign dbg_ent_nz      = ent_nz;
+    assign dbg_ent_len     = ent_len;
+    assign dbg_ent_side    = ent_side;
+    assign dbg_ent_idx     = ent_idx;
+    assign dbg_ent_valid   = ent_valid;
 
 endmodule

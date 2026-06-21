@@ -77,7 +77,19 @@ V_SRCS := $(SRC_DIR)/integration.sv \
           $(SRC_DIR)/SRAM_rtl.sv \
           $(SRC_DIR)/axi_mem_model.sv \
           $(SRC_DIR)/MC.sv \
-          $(RTL_DIR)/pe/pe_entry.sv
+          $(RTL_DIR)/trapezoid_pkg.sv \
+          $(RTL_DIR)/mfiu/mfiu.sv \
+          $(RTL_DIR)/pe/mac_unit.sv \
+          $(RTL_DIR)/dist/reduction_tree_radix16.sv \
+          $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+          $(RTL_DIR)/pe/local_buffer_row.sv \
+          $(RTL_DIR)/dist/crossbar.sv \
+          $(RTL_DIR)/pe/pe_mfiu_seq.sv \
+          $(RTL_DIR)/pe/pe_ab_buffer.sv \
+          $(RTL_DIR)/pe/pe_entry.sv \
+          $(RTL_DIR)/pe/pe_row_tail.sv \
+          $(RTL_DIR)/pe/pe_row.sv \
+          $(RTL_DIR)/pe/pe_array.sv
 
 else
 $(error Unknown CASE=$(CASE). Valid: case_SRAM case_GLB case_DMA case_CTRL case_MC case_INTEGRATION)

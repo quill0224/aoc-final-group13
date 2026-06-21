@@ -60,7 +60,6 @@ module integration (
     // =========================================================================
     // Dummy Wires (To suppress Verilator PINCONNECTEMPTY warnings)
     // =========================================================================
-    wire [1:0]                                  dummy_global_mode;
     wire [`PE_ARRAY_H*`PE_ARRAY_W-1:0]          dummy_PE_en;
     wire [10:0]                                 dummy_PE_config;
     wire                                        dummy_set_XID, dummy_set_YID, dummy_set_LN;
@@ -103,6 +102,14 @@ module integration (
     logic [4:0]                                 pe_out_len;
     logic                                       pe_out_side, pe_out_valid;
     logic [3:0]                                 pe_out_idx;
+
+    // [Iris] controller→pe_array 控制線 + pe_array 輸出(取代裸 pe_entry)
+    logic [1:0]                                 pe_mode_w;        // = controller.global_mode
+    logic                                       pe_first_pass_w;  // = controller.pe_first_pass
+    logic [8:0]                                 pe_cur_n_base_w;  // = controller.pe_cur_n_base (LOCAL_BUF_AW=9)
+    logic                                       pe_compute_done_w;
+    logic signed [15:0][31:0]                   pe_c_out_w;       // [N_PE_ROW-1:0][ACC_W-1:0]
+    logic                                       pe_c_valid_w;
 
     // DMA <-> GLB & AXI
     logic                                       glb_en, glb_we;
@@ -184,8 +191,10 @@ module integration (
         .mc_packet_count        (mc_packet_count), 
         .k_done                 (k_done),
         
-        .global_mode            (dummy_global_mode), 
+        .global_mode            (pe_mode_w),
         .global_flush           (obs_global_flush),
+        .pe_first_pass          (pe_first_pass_w),
+        .pe_cur_n_base          (pe_cur_n_base_w),
         .PE_en                  (dummy_PE_en), 
         .PE_config              (dummy_PE_config), 
         .PEA_A_ready            (PEA_A_ready), 
@@ -241,10 +250,15 @@ module integration (
         .pe_data_nzvalue        (mc_pe_data_nzvalue)
     );
 
-    // [Iris] un-mock:插入真正的消費端 pe_entry(取代 C TB 假裝的 mock PE)
-    pe_entry u_pe_entry (
+    // [Iris] 把裸 pe_entry 換成 pe_array(內含 pe_entry + pe_ab_buffer + 16×pe_row)。
+    //   MC egress 與原 pe_entry 完全相同接法 → MC→(內部 pe_entry) 行為不變;
+    //   dbg_ent_* 透出內部 pe_entry 輸出 → 沿用原 pe_out_* DEBUG;
+    //   controller mode/first_pass/cur_n_base 接上;dump 暫綁 0(掃描邏輯未做);
+    //   pe_compute_done / c_out 先觀察(controller S6 握手 + dump 掃描待後續)。
+    pe_array u_pe_array (
         .clk            (clk),
         .rst_n          (~rst),
+        // MC egress(與原 pe_entry 相同)
         .pe_cfg_valid   (mc_pe_cfg_valid),
         .pe_cfg_ready   (pe_cfg_ready_w),
         .pe_cfg_length  (mc_pe_cfg_length),
@@ -252,12 +266,22 @@ module integration (
         .pe_data_valid  (mc_pe_data_valid),
         .pe_data_ready  (pe_data_ready_w),
         .pe_data_nzvalue(mc_pe_data_nzvalue),
-        .out_bitmask    (pe_out_bitmask),
-        .out_nz         (pe_out_nz),
-        .out_len        (pe_out_len),
-        .out_side       (pe_out_side),
-        .out_idx        (pe_out_idx),
-        .out_valid      (pe_out_valid)
+        // controller 控制
+        .mode           (pe_mode_w),
+        .first_pass     (pe_first_pass_w),
+        .cur_n_base     (pe_cur_n_base_w),
+        .dump_en        (1'b0),
+        .dump_addr      (9'd0),
+        .pe_compute_done(pe_compute_done_w),
+        .c_out          (pe_c_out_w),
+        .c_valid        (pe_c_valid_w),
+        // 觀察 tap(沿用原 pe_out_* DEBUG)
+        .dbg_ent_bitmask(pe_out_bitmask),
+        .dbg_ent_nz     (pe_out_nz),
+        .dbg_ent_len    (pe_out_len),
+        .dbg_ent_side   (pe_out_side),
+        .dbg_ent_idx    (pe_out_idx),
+        .dbg_ent_valid  (pe_out_valid)
     );
 
     DMA u_dma (
@@ -297,8 +321,10 @@ module integration (
     assign obs_pe_data_valid   = mc_pe_data_valid;
     assign obs_pe_data_nzvalue = mc_pe_data_nzvalue;
 
-    // [Iris] mock_pe_*_ready 已被 pe_entry 取代,僅 sink 避免 unused 警告
+    // [Iris] mock_pe_*_ready 已被 pe_array 內部 pe_entry 取代,僅 sink 避免 unused 警告
     wire _unused_mock = &{1'b0, mock_pe_cfg_ready, mock_pe_data_ready};
+    // [Iris] pe_array 輸出暫未接(compute_done 握手 / dump 讀出待後續)→ sink
+    wire _unused_pa   = &{1'b0, pe_compute_done_w, pe_c_valid_w, pe_c_out_w};
 
     // [Iris] DEBUG(sim-only):印出 pe_entry 真正組好的 fiber → 確認 A(side=0)/B(side=1) 都進來
     always_ff @(posedge clk) begin
