@@ -34,6 +34,12 @@ void glb_set_DI(uint32_t val);
 uint32_t glb_get_DO(void);
 #endif
 
+#if defined(case_DMA) || defined(case_INTEGRATION)
+// 開放給 DMA 與 INTEGRATION 共用的模擬 DRAM 讀寫介面
+void glb_mock_write(uint32_t byte_addr, uint32_t data);
+uint32_t glb_mock_read(uint32_t byte_addr);
+#endif
+
 #if defined(case_DMA)
 void dma_set_en(uint8_t val);
 void dma_set_mode(uint8_t val);
@@ -59,8 +65,6 @@ void axi_set_AWREADY(uint8_t val);
 void axi_set_WREADY(uint8_t val);
 void axi_set_BVALID(uint8_t val);
 void axi_set_BRESP(uint8_t val);
-void glb_mock_write(uint32_t byte_addr, uint32_t data);
-uint32_t glb_mock_read(uint32_t byte_addr);
 #endif
 
 #if defined(case_CTRL) || defined(case_INTEGRATION)
@@ -74,11 +78,14 @@ void ctrl_set_GLB_C_base_addr(uint32_t val);
 void ctrl_set_comp_A_len_in(uint32_t val);
 void ctrl_set_comp_B_len_in(uint32_t val);
 void ctrl_set_comp_C_len_in(uint32_t val);
-void ctrl_set_N_tiles_in(uint32_t val);
-void ctrl_set_K_tiles_in(uint32_t val);
-void ctrl_set_M_tiles_in(uint32_t val);
-void ctrl_set_packet_count_in(uint32_t val);
-void ctrl_set_operation_mode_in(uint8_t val);
+
+// void ctrl_set_N_tiles_in(uint32_t val);
+// void ctrl_set_K_tiles_in(uint32_t val);
+// void ctrl_set_M_tiles_in(uint32_t val);
+// void ctrl_set_packet_count_in(uint32_t val);
+// void ctrl_set_operation_mode_in(uint8_t val);
+void ctrl_set_asic_cmd_in(uint32_t val);
+
 void ctrl_set_e(uint8_t val);
 void ctrl_set_p(uint8_t val);
 void ctrl_set_q(uint8_t val);
@@ -97,18 +104,44 @@ uint8_t  ctrl_get_mc_start(void);
 uint8_t  ctrl_get_global_flush(void);
 #endif
 
+// ------------------------------------------------------------
+// INTEGRATION 專屬擴充 API (對接 MC 交握觀測腳位)
+// ------------------------------------------------------------
+#if defined(case_INTEGRATION)
+void intg_set_mock_pe_cfg_ready(uint8_t val);
+void intg_set_mock_pe_data_ready(uint8_t val);
+uint8_t  intg_get_pe_cfg_valid(void);
+uint16_t intg_get_pe_cfg_length(void);
+uint32_t intg_get_pe_cfg_bitmask(void);
+uint8_t  intg_get_pe_data_valid(void);
+uint32_t intg_get_pe_data_nzvalue(void);
+// [Iris] pe_array dump 讀出 + psum 觀測
+void     intg_set_dump_en(uint8_t val);
+void     intg_set_dump_addr(uint32_t val);
+uint8_t  intg_get_pe_compute_done(void);
+uint8_t  intg_get_c_valid(void);
+int32_t  intg_get_c_out(int row);
+#endif
+
 #if defined(case_MC)
 void mc_set_start(uint8_t val);
 void mc_set_mode(uint8_t val);
 void mc_set_glb_base_A(uint32_t val);
-void mc_set_glb_base_B(uint32_t val);
 void mc_set_packet_count(uint32_t val);
+void mc_set_glb_rdata_A(uint32_t val);
+void mc_set_pe_cfg_ready(uint8_t val);
+void mc_set_pe_data_ready(uint8_t val);
+
 uint8_t  mc_get_k_done(void);
 uint8_t  mc_get_glb_ren_A(void);
 uint32_t mc_get_glb_addr_A(void);
-uint8_t  mc_get_glb_ren_B(void);
-uint32_t mc_get_glb_addr_B(void);
+uint8_t  mc_get_pe_cfg_valid(void);
+uint8_t  mc_get_pe_cfg_ready(void);   
+uint8_t  mc_get_pe_cfg_length(void);
+uint32_t mc_get_pe_cfg_bitmask(void);
 uint8_t  mc_get_pe_data_valid(void);
+uint8_t  mc_get_pe_data_ready(void);  
+uint32_t mc_get_pe_data_nzvalue(void);
 #endif
 
 #define LOG(msg, ...) \

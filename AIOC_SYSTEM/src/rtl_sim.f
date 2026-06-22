@@ -53,4 +53,19 @@
 ../src/async_CDC_1.sv
 ../src/async_CDC_16.sv
 ../src/ONE_CDC.sv
+// ---- EPU: PE sparse-GEMM engine + AXI-S6 wrapper (trapezoid_pkg first) ----
+../../rtl/trapezoid_pkg.sv
+../../rtl/mfiu/mfiu.sv
+../../rtl/dist/crossbar.sv
+../../rtl/dist/reduction_tree_radix16.sv
+../../rtl/pe/mac_unit.sv
+../../rtl/pe/sram_128x32_1r1w.sv
+../../rtl/pe/local_buffer_row.sv
+../../rtl/pe/pe_row_tail.sv
+../../rtl/pe/pe_mfiu_seq.sv
+../../rtl/pe/pe_entry.sv
+../../rtl/pe/pe_ab_buffer.sv
+../../rtl/pe/pe_row.sv
+../../rtl/pe/pe_array.sv
+../../rtl/EPU_wrapper.sv
 //usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/N16ADFP_StdIO.v

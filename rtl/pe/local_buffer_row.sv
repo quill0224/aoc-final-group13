@@ -1,50 +1,54 @@
 // =============================================================================
-// local_buffer_row.sv — per-PE-row 輸出累加 buffer(4-bank,SRAM-based)
+// local_buffer_row.sv — per-PE-row output accumulation buffer (4-bank, SRAM-based)
 // =============================================================================
-// 功能:
-//   儲存一條 PE row(固定 m)所有 output column n 的 C 部分和,容量
-//   512 column × INT32(4 bank × 128 × 32-bit)。每拍接受最多 4 筆
-//   write request(sum + column 位址),依位址路由至對應 bank:
-//     first_pass=1 → 覆蓋寫入(該 column 的第一段 K,等效清零,不發讀)
-//     first_pass=0 → 累加(read-modify-write:讀舊值 + sum 寫回)
-//   另提供 dump 介面讀出單一 column 的最終值(寫回 GLB 用)。
+// Function:
+//   Stores the C partial sums for all output columns n of one PE row (fixed m).
+//   Capacity 512 columns x INT32 (4 banks x 128 x 32-bit). Accepts up to 4 write
+//   requests per cycle (sum + column address), routed to the matching bank:
+//     first_pass=1 -> overwrite (first K segment of the column; effectively clears, no read)
+//     first_pass=0 -> accumulate (read-modify-write: read old value + sum, write back)
+//   Also provides a dump interface to read out a single column's final value (for GLB write-back).
+//   Dump is read-and-CLEAR: the dumped address is written 0 one cycle after the read
+//   (read on the read port at T, clear on the write port at T+1 -> macro-safe), so the
+//   next output block (M-tile) starts from a clean 0 buffer (no cross-tile residue).
 //
-// 位址映射:
-//   column 位址 addr[8:0] → bank = addr[1:0],bank 內 offset = addr[8:2]。
-//   同一拍多筆 request 落在互異 bank 時並行寫入。
+// Address mapping:
+//   column address addr[8:0] -> bank = addr[1:0], in-bank offset = addr[8:2].
+//   Multiple requests in one cycle hitting distinct banks are written in parallel.
 //
-// 介面:
-//   clk / rst_n / en         時脈;非同步 reset(active-low);pipeline 致能
-//   wr_valid   [4]      in   各 lane 此拍是否有 request
-//   wr_sum     [4][32]  in   各 lane 的部分和(signed)
-//   wr_addr    [4][9]   in   各 lane 的 column 位址
-//   first_pass          in   1 = 覆蓋寫入;0 = RMW 累加
-//   acc_en              in   此拍 wr_* 有效(與上游資料 valid 同拍)
-//   dump_en / dump_addr in   讀出請求 / column 位址
-//   c_valid             out  dump 結果有效(dump_en 後第 2 拍)
-//   c_out      [32]     out  dump 結果(signed)
+// Interface:
+//   clk / rst_n / en         clock; async reset (active-low); pipeline enable
+//   wr_valid   [4]      in   per-lane request present this cycle
+//   wr_sum     [4][32]  in   per-lane partial sum (signed)
+//   wr_addr    [4][9]   in   per-lane column address
+//   first_pass          in   1 = overwrite; 0 = RMW accumulate
+//   acc_en              in   wr_* valid this cycle (same cycle as upstream data valid)
+//   dump_en / dump_addr in   read-out request / column address
+//   c_valid             out  dump result valid (2 cycles after dump_en)
+//   c_out      [32]     out  dump result (signed)
 //
-// 時序:
-//   累加 RMW = 2 拍 pipeline:T 拍發讀,T+1 拍「舊值 + sum」寫回;
-//   每拍可接受新 request(fully pipelined)。
-//   連續兩拍寫同一 column 時,SRAM 讀值尚未更新(讀延遲 1 拍)→
-//   以 write-forward bypass 改用前一拍的寫回值,結果仍正確。
-//   dump:dump_en 於 T 拍 → c_valid / c_out 於 T+2 拍有效。
+// Timing:
+//   Accumulate RMW = 2-cycle pipeline: cycle T issues read, cycle T+1 writes back "old + sum";
+//   a new request can be accepted every cycle (fully pipelined).
+//   Two back-to-back writes to the same column: SRAM read value is not yet updated
+//   (1-cycle read latency) -> write-forward bypass uses the previous cycle's written value,
+//   so the result is still correct.
+//   dump: dump_en at cycle T -> c_valid / c_out valid at cycle T+2.
 //
-// 假設與限制:
-//   - 同一拍的有效 request 須落在互異 bank(wr_addr[1:0] 互異);
-//     同 bank 衝突不序列化(模擬期 assertion 檢查)。上游 pe_row 負責
-//     把 tree 的 16-lane 輸出壓縮為符合此條件的 ≤4 筆。
-//   - dump_en 不可與 acc_en 同拍(共用讀埠)。
-//   - ACC_W = 32,對齊 bank(128×32 SRAM)資料寬度。
+// Assumptions and constraints:
+//   - Valid requests in one cycle must hit distinct banks (wr_addr[1:0] distinct);
+//     same-bank conflicts are not serialized (checked by sim-time assertion). Upstream pe_row
+//     compresses the tree's 16-lane output into <=4 requests meeting this condition.
+//   - dump_en must not coincide with acc_en (shared read port).
+//   - ACC_W = 32, aligned to bank (128x32 SRAM) data width.
 //
-// 資料路徑位置:
-//   上游:pe_row 的 16→4 壓縮層送入 ≤4 筆 banked write request(wr_*),
-//        acc_en 與 tree 輸出 valid 同拍;first_pass / dump_* 由 dataflow
-//        控制邏輯(經 pe_row 延遲對齊)給入。
-//   本級:pe_row_full 的 S8(輸出累加)。
-//   下游:c_out → GLB 寫回路徑。
-//   bank 為 sram_128x32_1r1w wrapper,合成時定義 USE_SRAM_MACRO 接真實 macro。
+// Datapath location:
+//   Upstream: pe_row's 16->4 compression layer feeds <=4 banked write requests (wr_*),
+//        acc_en aligned with tree output valid; first_pass / dump_* driven by dataflow
+//        control logic (delay-aligned through pe_row).
+//   This stage: S8 (output accumulation) of pe_row_full.
+//   Downstream: c_out -> GLB write-back path.
+//   bank is a sram_128x32_1r1w wrapper; define USE_SRAM_MACRO at synthesis to hook the real macro.
 // =============================================================================
 
 module local_buffer_row
@@ -130,6 +134,7 @@ module local_buffer_row
     logic                    s1_first;
     logic                    dump_pend;
     logic [1:0]              dump_bank_q;
+    logic [OFFW-1:0]         dump_off_q;   // clear-on-dump:記住要清 0 的 offset
 
     // RMW bypass: remember what each bank wrote last cycle, for back-to-back same-address accumulation (classifier N=1)
     logic             prev_wen   [NB];
@@ -170,6 +175,7 @@ module local_buffer_row
             s1_first    <= 1'b0;
             dump_pend   <= 1'b0;
             dump_bank_q <= '0;
+            dump_off_q  <= '0;
             c_valid     <= 1'b0;
             c_out       <= '0;
         end else if (en) begin
@@ -184,6 +190,7 @@ module local_buffer_row
             s1_first    <= first_pass;
             dump_pend   <= dump_en;
             dump_bank_q <= dump_bank;
+            dump_off_q  <= dump_off;
             // dump output: read has 1-cycle latency → register one more cycle here
             c_valid <= dump_pend;
             c_out   <= $signed(bk_rdata[dump_bank_q]);
@@ -207,6 +214,16 @@ module local_buffer_row
                 bk_wdata[b] = s1_sum[b];               // overwrite (first_pass)
             else
                 bk_wdata[b] = rd_val[b] + s1_sum[b];   // accumulate (RMW, incl. bypass)
+
+            // clear-on-dump:dump 讀出的下一拍把該位址寫 0(讀已在前一拍鎖進 c_out,
+            // 不影響輸出),讓下一個 M-tile 從乾淨的 0 開始,避免跨 M-tile 殘值。
+            // 讀在 T(讀埠)、清在 T+1(寫埠)→ 非同拍同址,macro 也安全。
+            // dump 與 acc 不同拍(上層保證),故覆寫該 bank 寫埠安全。
+            if (dump_pend && (dump_bank_q == 2'(b))) begin
+                bk_wen[b]   = en;
+                bk_waddr[b] = dump_off_q;
+                bk_wdata[b] = '0;
+            end
         end
     end
 

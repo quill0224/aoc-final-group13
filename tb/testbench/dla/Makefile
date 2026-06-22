@@ -11,6 +11,7 @@ CASE ?= case_SRAM
 THIS_DIR := $(abspath .)
 ROOT_DIR := $(abspath ../../..)
 SRC_DIR := $(ROOT_DIR)/src
+RTL_DIR := $(ROOT_DIR)/rtl
 TESTS_DIR := $(abspath ../../tests)
 CASE_DIR := $(TESTS_DIR)/$(CASE)
 
@@ -60,22 +61,35 @@ V_SRCS := $(SRC_DIR)/DMA.sv \
           $(SRC_DIR)/SRAM_rtl.sv
 
 else ifeq ($(CASE), case_CTRL)
-TOP_MODULE := top_controller
-V_SRCS := $(SRC_DIR)/top_controller.sv
+TOP_MODULE := controller
+V_SRCS := $(SRC_DIR)/controller.sv
 
 else ifeq ($(CASE), case_MC)
 TOP_MODULE := MC
 V_SRCS     := $(SRC_DIR)/MC.sv
 
 else ifeq ($(CASE), case_INTEGRATION)
-TOP_MODULE := top_integration
-V_SRCS := $(SRC_DIR)/top_integration.sv \
-          $(SRC_DIR)/top_controller.sv \
+TOP_MODULE := integration
+V_SRCS := $(SRC_DIR)/integration.sv \
+          $(SRC_DIR)/controller.sv \
           $(SRC_DIR)/DMA.sv \
           $(SRC_DIR)/GLB.sv \
           $(SRC_DIR)/SRAM_rtl.sv \
           $(SRC_DIR)/axi_mem_model.sv \
-          $(SRC_DIR)/MC.sv
+          $(SRC_DIR)/MC.sv \
+          $(RTL_DIR)/trapezoid_pkg.sv \
+          $(RTL_DIR)/mfiu/mfiu.sv \
+          $(RTL_DIR)/pe/mac_unit.sv \
+          $(RTL_DIR)/dist/reduction_tree_radix16.sv \
+          $(RTL_DIR)/pe/sram_128x32_1r1w.sv \
+          $(RTL_DIR)/pe/local_buffer_row.sv \
+          $(RTL_DIR)/dist/crossbar.sv \
+          $(RTL_DIR)/pe/pe_mfiu_seq.sv \
+          $(RTL_DIR)/pe/pe_ab_buffer.sv \
+          $(RTL_DIR)/pe/pe_entry.sv \
+          $(RTL_DIR)/pe/pe_row_tail.sv \
+          $(RTL_DIR)/pe/pe_row.sv \
+          $(RTL_DIR)/pe/pe_array.sv
 
 else
 $(error Unknown CASE=$(CASE). Valid: case_SRAM case_GLB case_DMA case_CTRL case_MC case_INTEGRATION)
@@ -173,7 +187,7 @@ help:
 	@echo " make run_SRAM        - SRAM_rtl unit test"
 	@echo " make run_GLB         - GLB unit test"
 	@echo " make run_DMA         - DMA fetch/writeback test"
-	@echo " make run_CTRL        - top_controller FSM test"
+	@echo " make run_CTRL        - controller FSM test"
 	@echo " make run_MC          - MC AGU and latency test"
 	@echo " make run_INTEGRATION - end-to-end system test"
 	@echo " make run_unit_all    - run all cases sequentially"

@@ -1,36 +1,42 @@
 // =============================================================================
-// sram_128x32_1r1w.sv — 128 × 32-bit 同步 SRAM(1R1W)wrapper
+// sram_128x32_1r1w.sv — 128 x 32-bit synchronous SRAM (1R1W) wrapper
 // =============================================================================
-// 功能:
-//   128 字 × 32-bit 同步 SRAM,讀埠與寫埠各自獨立(1R1W),同一拍可
-//   同時讀一個位址、寫另一個位址。對上層提供與實作無關的乾淨介面
-//   (active-high、無電源/測試腳),底層接法由本 wrapper 統一處理。
+// Function:
+//   128-word x 32-bit synchronous SRAM with independent read and write ports
+//   (1R1W); in the same cycle it can read one address and write another.
+//   Presents a clean, implementation-agnostic interface to the layer above
+//   (active-high, no power/test pins); this wrapper handles the low-level
+//   connections.
 //
-// 介面:
-//   clk            in   讀寫共用時脈(上緣觸發)
-//   ren / raddr    in   讀致能;讀位址 [6:0]
-//   rdata          out  讀資料 [31:0]
-//   wen / waddr    in   寫致能;寫位址 [6:0]
-//   wdata          in   寫資料 [31:0]
+// Interface:
+//   clk            in   shared read/write clock (rising-edge triggered)
+//   ren / raddr    in   read enable; read address [6:0]
+//   rdata          out  read data [31:0]
+//   wen / waddr    in   write enable; write address [6:0]
+//   wdata          in   write data [31:0]
 //
-// 時序:
-//   寫入:wen=1 之該拍時脈上緣寫入。
-//   讀出:read latency = 1(T 拍給位址,T+1 拍 rdata 有效)。
-//   同拍同位址讀+寫:behavioral 版讀回舊值;macro 版以元件規格為準,
-//   上層不應依賴此行為(local_buffer_row 以 write-forward bypass 迴避)。
+// Timing:
+//   Write: written on the rising edge of the cycle where wen=1.
+//   Read:  read latency = 1 (address at cycle T, rdata valid at T+1).
+//   Same-cycle same-address read+write: behavioral version reads the old
+//   value; macro version follows the cell datasheet, so the layer above must
+//   not rely on this behavior (local_buffer_row avoids it via write-forward
+//   bypass).
 //
-// 組態(`USE_SRAM_MACRO`):
-//   有定義 → instantiate TS6N16ADFPCLLLVTA128X32M4FWSHOD(兩埠 macro)。
-//            active-low 腳(WEB/REB)取反;BWEB 全 0(全位元寫);
-//            margin / test / 電源腳(RCT/WCT/KP/SLP/DSLP/SD)綁 0;
-//            PUDELAY 為 output,不接。
-//   未定義 → behavioral 模型(reg 陣列),供 iverilog / Verilator 模擬。
-//   兩種組態介面時序一致,模擬與合成共用同一份上層 RTL。
+// Configuration (`USE_SRAM_MACRO`):
+//   Defined   -> instantiate TS6N16ADFPCLLLVTA128X32M4FWSHOD (two-port macro).
+//                active-low pins (WEB/REB) inverted; BWEB all 0 (write all
+//                bits); margin/test/power pins (RCT/WCT/KP/SLP/DSLP/SD) tied 0;
+//                PUDELAY is an output, left unconnected.
+//   Undefined -> behavioral model (reg array) for iverilog / Verilator sim.
+//   Both configurations have identical interface timing, so simulation and
+//   synthesis share the same upper-level RTL.
 //
-// 資料路徑位置:
-//   上游/下游皆為 local_buffer_row:作為其儲存 bank(每條 PE row 4 顆),
-//   讀寫請求由其 RMW pipeline 驅動(T 拍發讀、T+1 拍寫回),
-//   rdata 回到其累加 / dump 邏輯。不直接面對 PE row 的其他單元。
+// Datapath location:
+//   Both upstream and downstream is local_buffer_row: serves as its storage
+//   bank (4 per PE row), read/write requests driven by its RMW pipeline
+//   (read at cycle T, write-back at T+1), rdata returns to its accumulate /
+//   dump logic. Does not directly face other units of the PE row.
 // =============================================================================
 
 module sram_128x32_1r1w (
