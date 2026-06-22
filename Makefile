@@ -356,7 +356,7 @@ clean:
 .PHONY: sim_mfiu
 sim_mfiu: $(G13_PKG) $(G13_RTL_DIR)/mfiu/mfiu.sv tb/tb_mfiu.cpp
 	@mkdir -p build
-	$(G13_VERILATOR) -Wall -Wno-UNUSEDPARAM --cc --exe --build -sv \
+	$(G13_VERILATOR) -Wall -Wno-UNUSEDPARAM --trace-fst --cc --exe --build -sv \
 		-I$(G13_RTL_DIR) \
 		$(G13_PKG) \
 		$(G13_RTL_DIR)/mfiu/mfiu.sv \
