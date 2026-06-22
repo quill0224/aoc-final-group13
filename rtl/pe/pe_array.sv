@@ -14,13 +14,13 @@
 //   start        = pe_ab_buffer.tile_ready(收滿一個 tile 拉 1 拍)→ 16 row 一起跑。
 //   pe_compute_done = 16 row 的 mfiu_seq.done 全部到齊(各 row 鎖存)再延遲 DRAIN 拍
 //                     (等 tail 的 local_buffer 累加落定)。
-//   ⚠️ controller 要等 pe_compute_done(不是只等 MC 的 k_done = 封包送完),
-//      否則下一批 tile 會在還沒算完時覆寫 pe_ab_buffer。
+//   controller 要等 pe_compute_done(不是只等 MC 的 k_done = 封包送完),
+//   否則下一批 tile 會在還沒算完時覆寫 pe_ab_buffer。
 //
 // dump:dump_en/dump_addr 由 controller/上層廣播;16 row 同步讀同一欄 →
 //   c_out[0..15] = 該欄跨 16 個輸出列的 psum,c_valid 同步。
 //
-// ⚠️ 含 mfiu(在 pe_row 內)→ 需 verilator elaborate(iverilog 不支援)。
+// 含 mfiu(在 pe_row 內)→ 需 verilator elaborate(iverilog 不支援)。
 // =============================================================================
 
 module pe_array
