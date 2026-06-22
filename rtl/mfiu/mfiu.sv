@@ -1,5 +1,5 @@
-// a_last=1 and complete_col=1: OUT then go back to IDLE
-// b_group_last=1 and complete_col=1: OUT then go to LOAD_A
+// a_last=1: OUT then go back to IDLE
+// b_group_last=1: OUT then go back to WAIT_B
 module mfiu
     import trapezoid_pkg::*;
 (
@@ -18,7 +18,6 @@ module mfiu
     output logic [$clog2(N_MUL_ROW+1)-1:0]         effectual_count,
     output logic [N_MUL_ROW-1:0][3:0]              a_meta_data,
     output logic [N_MUL_ROW-1:0][5:0]              b_meta_data,
-    output logic [$clog2(N_B_FIBER)-1:0]           b_utilization,
     output logic                                   meta_valid
 );
 
@@ -34,13 +33,11 @@ module mfiu
 
     logic                                a_last_q;
     logic                                b_group_last_q;
-    logic                                complete_col;
     logic [N_MUL_ROW-1:0]                a_bitmask_q;
     logic [N_B_FIBER-1:0][N_MUL_ROW-1:0] b_bitmask_q;
     logic [$clog2(N_B_FIBER)-1:0]        b_col_valid_q;
 
     logic [$clog2(N_MUL_ROW+1)-1:0]      effectual_count_d;
-    logic [$clog2(N_B_FIBER)-1:0]        b_utilization_d;
     logic [3:0]                          a_meta_data_d [0:N_MUL_ROW-1];
     logic [5:0]                          b_meta_data_d [0:N_MUL_ROW-1];
     logic [N_MUL_ROW-1:0][3:0]           a_meta_data_d_pack;
@@ -52,13 +49,7 @@ module mfiu
     integer b_prefix_count;
     integer lane_count;
     integer valid_b_cols;
-    integer used_b_cols;
-    integer candidate_count;
-    integer col_intersection_count;
     integer clear_idx;
-    logic   packing_done;
-
-    assign complete_col = (b_utilization == b_col_valid_q);
 
     genvar pack_i;
     generate
@@ -96,14 +87,12 @@ module mfiu
             end
 
             OUT: begin
-                if (!complete_col) begin
-                    state_d = WAIT_B;
-                end else if (a_last_q) begin
+                if (a_last_q) begin
                     state_d = IDLE;
                 end else if (b_group_last_q) begin
-                    state_d = LOAD_A;
-                end else begin
                     state_d = WAIT_B;
+                end else begin
+                    state_d = LOAD_A;
                 end
             end
 
@@ -115,16 +104,10 @@ module mfiu
 
     always_comb begin
         effectual_count_d = '0;
-        b_utilization_d = '0;
         a_prefix_count = 0;
         b_prefix_count = 0;
         lane_count = 0;
         valid_b_cols = 0;
-        used_b_cols = 1;
-        candidate_count = 0;
-        col_intersection_count = 0;
-        packing_done = 1'b0;
-
         for (clear_idx = 0; clear_idx < N_MUL_ROW; clear_idx = clear_idx + 1) begin
             a_meta_data_d[clear_idx] = '0;
             b_meta_data_d[clear_idx] = '0;
@@ -137,35 +120,8 @@ module mfiu
             valid_b_cols = N_B_FIBER;
         end
 
-        // Dynamic B column packing: choose the largest prefix of valid B columns
-        // whose total A&B intersection count fits in the N_MUL_ROW metadata lanes.
-        used_b_cols = 0;
-        candidate_count = 0;
-        packing_done = 1'b0;
         for (j = 0; j < N_B_FIBER; j = j + 1) begin
-            col_intersection_count = 0;
-            if ((j < valid_b_cols) && !packing_done) begin
-                for (k = 0; k < N_MUL_ROW; k = k + 1) begin
-                    if (a_bitmask_q[k] && b_bitmask_q[j][k]) begin
-                        col_intersection_count = col_intersection_count + 1;
-                    end
-                end
-
-                if ((candidate_count + col_intersection_count) <= N_MUL_ROW) begin
-                    candidate_count = candidate_count + col_intersection_count;
-                    used_b_cols = j + 1;
-                end else begin
-                    packing_done = 1'b1;
-                end
-            end
-        end
-        if (used_b_cols == 0) begin
-            used_b_cols = 1;
-        end
-        b_utilization_d = $bits(b_utilization_d)'(used_b_cols - 1);
-
-        for (j = 0; j < N_B_FIBER; j = j + 1) begin
-            if (j < used_b_cols) begin
+            if (j < valid_b_cols) begin
                 a_prefix_count = 0;
                 b_prefix_count = 0;
                 for (k = 0; k < N_MUL_ROW; k = k + 1) begin
@@ -189,7 +145,7 @@ module mfiu
             end
         end
 
-        effectual_count_d = $bits(effectual_count_d)'(lane_count);
+        effectual_count_d = lane_count[$clog2(N_MUL_ROW+1)-1:0];
     end
 
     always_ff @(posedge clk or negedge rst_n) begin
@@ -203,7 +159,6 @@ module mfiu
             effectual_count <= '0;
             a_meta_data <= '0;
             b_meta_data <= '0;
-            b_utilization <= '0;
             meta_valid <= 1'b0;
         end else begin
             state_q <= state_d;
@@ -211,20 +166,19 @@ module mfiu
 
             if ((state_q == LOAD_A) && a_in_valid) begin
                 a_bitmask_q <= a_bitmask;
+                a_last_q <= a_last;
             end
 
             if ((state_q == WAIT_B) && b_in_valid) begin
                 b_bitmask_q <= b_bitmask;
                 b_col_valid_q <= b_col_valid;
                 b_group_last_q <= b_group_last;
-                a_last_q <= a_last;
             end
 
             if (state_q == CAL) begin
                 effectual_count <= effectual_count_d;
                 a_meta_data <= a_meta_data_d_pack;
                 b_meta_data <= b_meta_data_d_pack;
-                b_utilization <= b_utilization_d;
             end
         end
     end
