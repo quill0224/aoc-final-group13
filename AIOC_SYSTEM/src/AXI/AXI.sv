@@ -629,35 +629,41 @@ end
                       (state_r == M0_S6_r)? RVALID_S6   : 1'd0;
 
 //M1 READ
-  assign ARREADY_M1 = (state_r == M1_S0_r)? ARREADY_S0  : 
-                      (state_r == M1_S1_r)? ARREADY_S1  : 
-                      (state_r == M1_S2_r)? ARREADY_S2  : 
-                      (state_r == M1_S5_r)? ARREADY_S5  : 1'd0;
+  assign ARREADY_M1 = (state_r == M1_S0_r)? ARREADY_S0  :
+                      (state_r == M1_S1_r)? ARREADY_S1  :
+                      (state_r == M1_S2_r)? ARREADY_S2  :
+                      (state_r == M1_S5_r)? ARREADY_S5  :
+                      (state_r == M1_S6_r)? ARREADY_S6  : 1'd0;
 
-  assign RID_M1    =  (state_r == M1_S0_r)? RID_S0[3:0] : 
-                      (state_r == M1_S1_r)? RID_S1[3:0] : 
-                      (state_r == M1_S2_r)? RID_S2[3:0] : 
-                      (state_r == M1_S5_r)? RID_S5[3:0] : 4'd0; 
+  assign RID_M1    =  (state_r == M1_S0_r)? RID_S0[3:0] :
+                      (state_r == M1_S1_r)? RID_S1[3:0] :
+                      (state_r == M1_S2_r)? RID_S2[3:0] :
+                      (state_r == M1_S5_r)? RID_S5[3:0] :
+                      (state_r == M1_S6_r)? RID_S6[3:0] : 4'd0;
 
-  assign RDATA_M1  =  (state_r == M1_S0_r)? RDATA_S0    : 
+  assign RDATA_M1  =  (state_r == M1_S0_r)? RDATA_S0    :
                       (state_r == M1_S1_r)? RDATA_S1    :
-                      (state_r == M1_S2_r)? RDATA_S2    : 
-                      (state_r == M1_S5_r)? RDATA_S5    : 32'd0;
+                      (state_r == M1_S2_r)? RDATA_S2    :
+                      (state_r == M1_S5_r)? RDATA_S5    :
+                      (state_r == M1_S6_r)? RDATA_S6    : 32'd0;
 
   assign RRESP_M1  =  (state_r == M1_S0_r)? RRESP_S0    :
-                      (state_r == M1_S1_r)? RRESP_S1    :   
+                      (state_r == M1_S1_r)? RRESP_S1    :
                       (state_r == M1_S2_r)? RRESP_S2    :
-                      (state_r == M1_S5_r)? RRESP_S5    : 2'd0;
+                      (state_r == M1_S5_r)? RRESP_S5    :
+                      (state_r == M1_S6_r)? RRESP_S6    : 2'd0;
 
   assign RLAST_M1  =  (state_r == M1_S0_r)? RLAST_S0    :
-                      (state_r == M1_S1_r)? RLAST_S1    : 
+                      (state_r == M1_S1_r)? RLAST_S1    :
                       (state_r == M1_S2_r)? RLAST_S2    :
-                      (state_r == M1_S5_r)? RLAST_S5    : 1'd0;
+                      (state_r == M1_S5_r)? RLAST_S5    :
+                      (state_r == M1_S6_r)? RLAST_S6    : 1'd0;
 
-  assign RVALID_M1 =  (state_r == M1_S0_r)? RVALID_S0   : 
-                      (state_r == M1_S1_r)? RVALID_S1   : 
-                      (state_r == M1_S2_r)? RVALID_S2   : 
-                      (state_r == M1_S5_r)? RVALID_S5   : 1'd0;
+  assign RVALID_M1 =  (state_r == M1_S0_r)? RVALID_S0   :
+                      (state_r == M1_S1_r)? RVALID_S1   :
+                      (state_r == M1_S2_r)? RVALID_S2   :
+                      (state_r == M1_S5_r)? RVALID_S5   :
+                      (state_r == M1_S6_r)? RVALID_S6   : 1'd0;
 
 //M2 READ
   assign  ARREADY_M2  = (state_r == M2_S5_r) ? ARREADY_S5    : (state_r == M2_S2_r) ? ARREADY_S2  : 1'b0;

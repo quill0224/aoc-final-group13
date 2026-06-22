@@ -1616,19 +1616,42 @@ assign interrupt = interrupt_dma;
         .RREADY  (RREADY_S5)
 );
 
-// ================== EPU Wrapper (Removed) ==================
-    // EPU has been removed. Tie off AXI Slave 6 interface to prevent hangs.
-    assign AWREADY_S6 = 1'b0;
-    assign WREADY_S6  = 1'b0;
-    assign BID_S6     = 8'd0;
-    assign BRESP_S6   = 2'd0;
-    assign BVALID_S6  = 1'b0;
-    assign ARREADY_S6 = 1'b0;
-    assign RID_S6     = 8'd0;
-    assign RDATA_S6   = 32'd0;
-    assign RRESP_S6   = 2'd0;
-    assign RLAST_S6   = 1'b0;
-    assign RVALID_S6  = 1'b0;
+// ================== EPU Wrapper ==================
+    // PE sparse-GEMM engine as AXI slave S6. axi_clk domain (S6 has no CDC).
+    // axi_rst is active-high at top level -> wrapper takes ARESETn = ~axi_rst.
+    EPU_wrapper u_EPU_wrapper (
+        .ACLK       (axi_clk),
+        .ARESETn    (~axi_rst),
+        .AWID_S6    (AWID_S6),
+        .AWADDR_S6  (AWADDR_S6),
+        .AWLEN_S6   (AWLEN_S6),
+        .AWSIZE_S6  (AWSIZE_S6),
+        .AWBURST_S6 (AWBURST_S6),
+        .AWVALID_S6 (AWVALID_S6),
+        .AWREADY_S6 (AWREADY_S6),
+        .WDATA_S6   (WDATA_S6),
+        .WSTRB_S6   (WSTRB_S6),
+        .WLAST_S6   (WLAST_S6),
+        .WVALID_S6  (WVALID_S6),
+        .WREADY_S6  (WREADY_S6),
+        .BID_S6     (BID_S6),
+        .BRESP_S6   (BRESP_S6),
+        .BVALID_S6  (BVALID_S6),
+        .BREADY_S6  (BREADY_S6),
+        .ARID_S6    (ARID_S6),
+        .ARADDR_S6  (ARADDR_S6),
+        .ARLEN_S6   (ARLEN_S6),
+        .ARSIZE_S6  (ARSIZE_S6),
+        .ARBURST_S6 (ARBURST_S6),
+        .ARVALID_S6 (ARVALID_S6),
+        .ARREADY_S6 (ARREADY_S6),
+        .RID_S6     (RID_S6),
+        .RDATA_S6   (RDATA_S6),
+        .RRESP_S6   (RRESP_S6),
+        .RLAST_S6   (RLAST_S6),
+        .RVALID_S6  (RVALID_S6),
+        .RREADY_S6  (RREADY_S6)
+    );
 
 assign arWire_S5_CDC = {ARID_S5,ARADDR_S5,ARLEN_S5,ARSIZE_S5,ARBURST_S5,ARVALID_S5_CDC};
 async_CDC_1  dram_wrapper_ar(
