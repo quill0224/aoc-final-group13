@@ -56,6 +56,7 @@ module controller (
     output logic [`GLB_ADDR_BITS-1:0]           mc_glb_base_B,
     output logic [`PKT_CNT_BITS-1:0]            mc_packet_count,
     input  logic                                k_done,
+    input  logic                                pe_tile_done,   // PE 算完一個 tile(整合用;case_CTRL 已 stale 不編)
 
     output logic [1:0]                          global_mode,
     output logic                                global_flush,
@@ -101,6 +102,7 @@ module controller (
         S4_SEND_PE_CONFIG = 4'd4,   
         S5_MC_DISPATCH    = 4'd5,   
         S6_WAIT_K_DONE    = 4'd6,
+        S6B_WAIT_PE       = 4'd14,  // 等 PE 算完此 tile 再推進(避免覆寫 pe_ab_buffer)
         S7_UPDATE_N       = 4'd7,   // Check N loop (Inner)
         S8_UPDATE_K       = 4'd8,   // Check K loop (Middle)
         S9_FLUSH          = 4'd9,   // K loop done -> Psum complete -> Flush
@@ -199,7 +201,10 @@ module controller (
                 ns = S6_WAIT_K_DONE;
             end
             S6_WAIT_K_DONE: begin
-                if (k_done) ns = S7_UPDATE_N;
+                if (k_done) ns = S6B_WAIT_PE;
+            end
+            S6B_WAIT_PE: begin
+                if (pe_tile_done) ns = S7_UPDATE_N;   // 等 PE 真的算完才換下一個 tile
             end
             S7_UPDATE_N: begin
                 if (n_cnt < N_tiles - 1) ns = S3_DMA_FETCH_B; // N 未完，滑動 B

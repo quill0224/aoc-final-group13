@@ -45,6 +45,7 @@ module pe_array
     input  logic                                dump_en,
     input  logic [LOCAL_BUF_AW-1:0]             dump_addr,
     output logic                                pe_compute_done,  // → controller 等這個才換 tile
+    output logic                                pe_tile_done,     // 每個 tile 算完跳 1 拍(controller S6B 用來序列化 tile)
 
     // ── C 輸出(dump 時:一欄跨 16 列的 psum)──
     output logic signed [N_PE_ROW-1:0][ACC_W-1:0] c_out,
@@ -157,6 +158,19 @@ module pe_array
         else        drain_sr <= {drain_sr[DRAIN-2:0], all_done};
     end
     assign pe_compute_done = drain_sr[DRAIN-1];
+
+    // 每個 tile 算完跳 1 拍 pe_tile_done:armed 於 start 拉起,於 pe_compute_done
+    // 升緣(此 tile 真的算完)發脈衝。controller 用它把 tile 序列化,避免下一批覆寫 buffer。
+    logic armed_q, cd_q;
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin armed_q <= 1'b0; cd_q <= 1'b0; end
+        else begin
+            cd_q <= pe_compute_done;
+            if (start)             armed_q <= 1'b1;
+            else if (pe_tile_done) armed_q <= 1'b0;
+        end
+    end
+    assign pe_tile_done = armed_q & pe_compute_done & ~cd_q;
 
     // 觀察 tap:= 內部 pe_entry 輸出(給 integration 沿用原 pe_out_* DEBUG,不影響功能)
     assign dbg_ent_bitmask = ent_bm;

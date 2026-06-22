@@ -188,6 +188,18 @@ module tb_pe_row_tail;
         repeat (4) @(negedge clk);
         check_all();
 
+        // clear-on-dump 驗證:check_all 已把每個 touched 位址 dump 過一次 → 該被清成 0
+        begin : clr_chk
+            logic signed [ACC_W-1:0] cv0;
+            dump_read(9'd0, cv0);   // addr0(原 90)dump 過後應讀回 0
+            if (cv0 !== '0) begin
+                errors = errors + 1;
+                $display("[FAIL] clear-on-dump: addr 0 dump 後應為 0, got %0d", cv0);
+            end else begin
+                $display("[ OK ] clear-on-dump: addr 0 dump 後讀回 0");
+            end
+        end
+
         if (errors == 0) $display("\n==== tb_pe_row_tail PASS ====\n");
         else             $display("\n==== tb_pe_row_tail FAIL: %0d error(s) ====\n", errors);
         $finish;

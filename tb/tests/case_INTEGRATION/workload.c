@@ -39,6 +39,35 @@ static void issue_asic_command(uint32_t cmd) {
     }
 }
 
+// [Iris] dump 讀出:flush 後等 PE 算完(pe_compute_done),逐欄掃 dump_addr 抽 16 row 的 psum。
+// 此時 controller 停在 S10_WAIT_PPU(等 ppu_done),不會有 acc,dump 與 acc 不衝突。
+static void dump_pe_psum(int m_tile, uint32_t total_n) {
+    int ncols = (int)total_n * 16;     // N_TILE_SIZE = 16
+    int g = 0, nz = 0;
+    while (!intg_get_pe_compute_done() && g < 5000) { tick(); g++; }
+    if (!intg_get_pe_compute_done())
+        LOG("   [DUMP] WARN: pe_compute_done not seen for M-tile %d", m_tile);
+    for (int col = 0; col < ncols; col++) {
+        intg_set_dump_en(1);
+        intg_set_dump_addr((uint32_t)col);
+        tick();
+        intg_set_dump_en(0);
+        // c_valid 只高 1 拍(local_buffer dump 延遲約 2 拍)→ 輪詢抓它高的那拍才讀
+        int gv = 0;
+        while (!intg_get_c_valid() && gv < 8) { tick(); gv++; }
+        if (intg_get_c_valid()) {
+            for (int row = 0; row < 16; row++) {
+                int32_t v = intg_get_c_out(row);
+                if (v != 0) {
+                    LOG("   [DUMP] M-tile %d col %2d row %2d : psum=%d", m_tile, col, row, v);
+                    nz++;
+                }
+            }
+        }
+    }
+    LOG("   [DUMP] M-tile %d: %d non-zero psum read out", m_tile, nz);
+}
+
 extern "C" void run_workload() {
     LOG("=== DLA INTEGRATION TEST: INPUT STATIONARY DATAFLOW TRACKER ===");
     
@@ -144,6 +173,7 @@ extern "C" void run_workload() {
             flush_count++;
             // [Iris 修改] cur_m 在該 M 最後一個 dispatch 完成時已 +1,flush 屬於剛結束的 M → 印 cur_m-1
             LOG(">> [FLUSH] K-loop exhausted for M=%d. Redirecting Partial Sums to PPU.", cur_m - 1);
+            dump_pe_psum(cur_m - 1, total_n);   // [Iris] 把該 M-tile 的 PE psum 抽出來看
             ppu_delay = 1;
         }
         prev_flush = cur_flush;

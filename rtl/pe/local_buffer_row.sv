@@ -8,6 +8,9 @@
 //     first_pass=1 -> overwrite (first K segment of the column; effectively clears, no read)
 //     first_pass=0 -> accumulate (read-modify-write: read old value + sum, write back)
 //   Also provides a dump interface to read out a single column's final value (for GLB write-back).
+//   Dump is read-and-CLEAR: the dumped address is written 0 one cycle after the read
+//   (read on the read port at T, clear on the write port at T+1 -> macro-safe), so the
+//   next output block (M-tile) starts from a clean 0 buffer (no cross-tile residue).
 //
 // Address mapping:
 //   column address addr[8:0] -> bank = addr[1:0], in-bank offset = addr[8:2].
@@ -131,6 +134,7 @@ module local_buffer_row
     logic                    s1_first;
     logic                    dump_pend;
     logic [1:0]              dump_bank_q;
+    logic [OFFW-1:0]         dump_off_q;   // clear-on-dump:記住要清 0 的 offset
 
     // RMW bypass: remember what each bank wrote last cycle, for back-to-back same-address accumulation (classifier N=1)
     logic             prev_wen   [NB];
@@ -171,6 +175,7 @@ module local_buffer_row
             s1_first    <= 1'b0;
             dump_pend   <= 1'b0;
             dump_bank_q <= '0;
+            dump_off_q  <= '0;
             c_valid     <= 1'b0;
             c_out       <= '0;
         end else if (en) begin
@@ -185,6 +190,7 @@ module local_buffer_row
             s1_first    <= first_pass;
             dump_pend   <= dump_en;
             dump_bank_q <= dump_bank;
+            dump_off_q  <= dump_off;
             // dump output: read has 1-cycle latency → register one more cycle here
             c_valid <= dump_pend;
             c_out   <= $signed(bk_rdata[dump_bank_q]);
@@ -208,6 +214,16 @@ module local_buffer_row
                 bk_wdata[b] = s1_sum[b];               // overwrite (first_pass)
             else
                 bk_wdata[b] = rd_val[b] + s1_sum[b];   // accumulate (RMW, incl. bypass)
+
+            // clear-on-dump:dump 讀出的下一拍把該位址寫 0(讀已在前一拍鎖進 c_out,
+            // 不影響輸出),讓下一個 M-tile 從乾淨的 0 開始,避免跨 M-tile 殘值。
+            // 讀在 T(讀埠)、清在 T+1(寫埠)→ 非同拍同址,macro 也安全。
+            // dump 與 acc 不同拍(上層保證),故覆寫該 bank 寫埠安全。
+            if (dump_pend && (dump_bank_q == 2'(b))) begin
+                bk_wen[b]   = en;
+                bk_waddr[b] = dump_off_q;
+                bk_wdata[b] = '0;
+            end
         end
     end
 

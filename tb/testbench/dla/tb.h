@@ -115,6 +115,12 @@ uint16_t intg_get_pe_cfg_length(void);
 uint32_t intg_get_pe_cfg_bitmask(void);
 uint8_t  intg_get_pe_data_valid(void);
 uint32_t intg_get_pe_data_nzvalue(void);
+// [Iris] pe_array dump 讀出 + psum 觀測
+void     intg_set_dump_en(uint8_t val);
+void     intg_set_dump_addr(uint32_t val);
+uint8_t  intg_get_pe_compute_done(void);
+uint8_t  intg_get_c_valid(void);
+int32_t  intg_get_c_out(int row);
 #endif
 
 #if defined(case_MC)

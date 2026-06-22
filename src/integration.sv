@@ -53,8 +53,15 @@ module integration (
 
     // [PE Data Channel]
     output logic                                obs_pe_data_valid,
-    input  logic                                mock_pe_data_ready, 
-    output logic [31:0]                         obs_pe_data_nzvalue
+    input  logic                                mock_pe_data_ready,
+    output logic [31:0]                         obs_pe_data_nzvalue,
+
+    // [Iris] pe_array dump 讀出(C TB 當 mock PPU 驅動)+ psum 觀測
+    input  logic                                dbg_dump_en,
+    input  logic [8:0]                          dbg_dump_addr,
+    output logic                                obs_pe_compute_done,
+    output logic                                obs_c_valid,
+    output logic signed [15:0][31:0]            obs_c_out
 );
 
     // =========================================================================
@@ -107,9 +114,7 @@ module integration (
     logic [1:0]                                 pe_mode_w;        // = controller.global_mode
     logic                                       pe_first_pass_w;  // = controller.pe_first_pass
     logic [8:0]                                 pe_cur_n_base_w;  // = controller.pe_cur_n_base (LOCAL_BUF_AW=9)
-    logic                                       pe_compute_done_w;
-    logic signed [15:0][31:0]                   pe_c_out_w;       // [N_PE_ROW-1:0][ACC_W-1:0]
-    logic                                       pe_c_valid_w;
+    logic                                       pe_tile_done_w;   // pe_array → controller(tile 算完脈衝,序列化用)
 
     // DMA <-> GLB & AXI
     logic                                       glb_en, glb_we;
@@ -188,8 +193,9 @@ module integration (
         .mc_mode                (mc_mode), 
         .mc_glb_base_A          (mc_glb_base_A), 
         .mc_glb_base_B          (mc_glb_base_B),
-        .mc_packet_count        (mc_packet_count), 
+        .mc_packet_count        (mc_packet_count),
         .k_done                 (k_done),
+        .pe_tile_done           (pe_tile_done_w),
         
         .global_mode            (pe_mode_w),
         .global_flush           (obs_global_flush),
@@ -270,11 +276,12 @@ module integration (
         .mode           (pe_mode_w),
         .first_pass     (pe_first_pass_w),
         .cur_n_base     (pe_cur_n_base_w),
-        .dump_en        (1'b0),
-        .dump_addr      (9'd0),
-        .pe_compute_done(pe_compute_done_w),
-        .c_out          (pe_c_out_w),
-        .c_valid        (pe_c_valid_w),
+        .dump_en        (dbg_dump_en),
+        .dump_addr      (dbg_dump_addr),
+        .pe_compute_done(obs_pe_compute_done),
+        .pe_tile_done   (pe_tile_done_w),
+        .c_out          (obs_c_out),
+        .c_valid        (obs_c_valid),
         // 觀察 tap(沿用原 pe_out_* DEBUG)
         .dbg_ent_bitmask(pe_out_bitmask),
         .dbg_ent_nz     (pe_out_nz),
@@ -323,8 +330,6 @@ module integration (
 
     // [Iris] mock_pe_*_ready 已被 pe_array 內部 pe_entry 取代,僅 sink 避免 unused 警告
     wire _unused_mock = &{1'b0, mock_pe_cfg_ready, mock_pe_data_ready};
-    // [Iris] pe_array 輸出暫未接(compute_done 握手 / dump 讀出待後續)→ sink
-    wire _unused_pa   = &{1'b0, pe_compute_done_w, pe_c_valid_w, pe_c_out_w};
 
     // [Iris] DEBUG(sim-only):印出 pe_entry 真正組好的 fiber → 確認 A(side=0)/B(side=1) 都進來
     always_ff @(posedge clk) begin

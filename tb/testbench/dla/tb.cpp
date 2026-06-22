@@ -142,6 +142,7 @@ void tb_init(int argc, char** argv, const char* test_name) {
     // 整合測試下，k_done, DMA_done 已被內部化，不需且不可對外設值
     top->asic_en = 0; top->PEA_A_ready = 0; top->PEA_B_ready = 0; top->ppu_done = 0;
     top->mock_pe_cfg_ready = 0; top->mock_pe_data_ready = 0;
+    top->dbg_dump_en = 0; top->dbg_dump_addr = 0;
     #elif defined(case_MC)
     top->mc_start = 0; top->mc_mode = 0; top->mc_glb_base_A = 0; top->mc_packet_count = 0;
     #endif
@@ -269,6 +270,13 @@ uint16_t intg_get_pe_cfg_length(void) { return top->obs_pe_cfg_length; } // [Iri
 uint32_t intg_get_pe_cfg_bitmask(void) { return top->obs_pe_cfg_bitmask; }
 uint8_t  intg_get_pe_data_valid(void) { return top->obs_pe_data_valid; }
 uint32_t intg_get_pe_data_nzvalue(void) { return top->obs_pe_data_nzvalue; }
+
+// [Iris] pe_array dump 讀出:C TB 當 mock PPU,flush 後掃 dump_addr 抽 psum
+void     intg_set_dump_en(uint8_t val)    { top->dbg_dump_en = val; }
+void     intg_set_dump_addr(uint32_t val) { top->dbg_dump_addr = val; }
+uint8_t  intg_get_pe_compute_done(void)   { return top->obs_pe_compute_done; }
+uint8_t  intg_get_c_valid(void)           { return top->obs_c_valid; }
+int32_t  intg_get_c_out(int row)          { return (int32_t)top->obs_c_out[row]; }
 #endif
 #endif
 
