@@ -111,7 +111,8 @@ module integration (
     logic [3:0]                                 pe_out_idx;
 
     // [Iris] controller→pe_array 控制線 + pe_array 輸出(取代裸 pe_entry)
-    logic [1:0]                                 pe_mode_w;        // = controller.global_mode
+    logic [1:0]                                 pe_mode_w;        // = controller.global_mode (encoding from ASIC.svh)
+    wire                                        pe_mode_trip = (pe_mode_w == `MODE_TRIP);  // 1=TrIP → pe_array (controller is the source of truth)
     logic                                       pe_first_pass_w;  // = controller.pe_first_pass
     logic [8:0]                                 pe_cur_n_base_w;  // = controller.pe_cur_n_base (LOCAL_BUF_AW=9)
     logic                                       pe_tile_done_w;   // pe_array → controller(tile 算完脈衝,序列化用)
@@ -273,7 +274,7 @@ module integration (
         .pe_data_ready  (pe_data_ready_w),
         .pe_data_nzvalue(mc_pe_data_nzvalue),
         // controller 控制
-        .mode           (pe_mode_w),
+        .mode           (pe_mode_trip),
         .first_pass     (pe_first_pass_w),
         .cur_n_base     (pe_cur_n_base_w),
         .dump_en        (dbg_dump_en),

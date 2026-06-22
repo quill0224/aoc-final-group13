@@ -39,7 +39,7 @@ module pe_array
     input  logic [31:0]                         pe_data_nzvalue,
 
     // ── controller ──
-    input  logic [1:0]                          mode,             // = global_mode (MODE_TRIP=01)
+    input  logic                                mode,             // 1=TrIP (computed from controller global_mode at integration boundary)
     input  logic                                first_pass,       // = pe_first_pass (k_cnt==0)
     input  logic [LOCAL_BUF_AW-1:0]             cur_n_base,       // = pe_cur_n_base (n_cnt*16)
     input  logic                                dump_en,
@@ -61,7 +61,6 @@ module pe_array
 );
 
     localparam int DRAIN = 6;                  // tail drain margin(done → buffer 累加落定)
-    wire row_mode = (mode == MODE_TRIP);
 
     // =====================================================================
     // pe_entry:MC 串流 → 一條壓縮 fiber + strobe
@@ -115,7 +114,7 @@ module pe_array
         for (gr = 0; gr < N_PE_ROW; gr = gr + 1) begin : g_row
             pe_row u_row (
                 .clk(clk), .rst_n(rst_n),
-                .mode(row_mode), .start(start), .done(done_row[gr]),
+                .mode(mode), .start(start), .done(done_row[gr]),
                 .a_bm_row(buf_a_bm[gr]), .b_bm(buf_b_bm),
                 .a_nz_row(buf_a_nz[gr]), .b_nz(buf_b_nz),
                 .first_pass(first_pass), .cur_n_base(cur_n_base),
