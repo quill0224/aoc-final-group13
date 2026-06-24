@@ -1,54 +1,19 @@
 // =============================================================================
-// reduction_tree_radix16.sv — radix-16 reduction tree (sub-tree slicing)
+// reduction_tree_radix16.sv - segmented 16-lane reduction tree
 // =============================================================================
-// Function:
-//   Partition the 16 partial products into contiguous segments (sub-trees) by
-//   cut_after, and sum each segment in parallel within a single cycle.
-//   cut_after[i]=1 marks a boundary between lane i and lane i+1 (lane i is the
-//   last lane of its segment); cut_after=0 means all 16 lanes form one segment
-//   (16->1 full sum). Up to 16 segments (each lane its own segment). Partials
-//   are sign-extended to ACC_W before summing; intermediate results do not
-//   overflow.
+// Partitions 16 partial products into contiguous segments and sums each
+// segment. cut_after[i]=1 places a boundary after lane i. With no boundaries,
+// all lanes form one segment.
 //
-// Output semantics:
-//   subtree_valid[p]=1 means position p is a segment's last lane;
-//   subtree_sums[p] = sum of all partials in that segment. Other positions
-//   have valid=0, sums=0. Segment-end positions are unique, so each output
-//   position carries at most one segment result.
+// subtree_valid[p] marks the final lane of a segment, and subtree_sums[p]
+// contains that segment's signed sum. Other output positions are zero.
 //
-// Interface:
-//   clk / rst_n / en           clock; async reset (active-low); en=0 holds output
-//   partials  [16][PROD_W] in  16 partial products (signed)
-//   cut_after [14:0]       in  segment boundaries, aligned with partials
-//   subtree_sums  [16][ACC_W] out  per-segment sums (signed, registered)
-//   subtree_valid [16]        out  segment-end position markers (registered)
+// The reduction is combinational followed by one output register, giving
+// one-cycle latency and one input set per cycle when en is asserted.
 //
-// Timing:
-//   Fully combinational compute + output register: latency = 1 cycle,
-//   throughput = one set per cycle (cut_after may differ each cycle,
-//   cycles are independent).
-//
-// Structure:
-//   1) leaf_mask: prefix-sum of cut_after, tagging each lane with its segment id.
-//   2) 4 binary merge stages (8->4->2->1 node): each node maintains running
-//      state (val / mask / pos / is_single) for its left and right ends, and
-//      uses 8 cases (left/right segment id equal or not x each side closed or
-//      not) to decide merge, pass-through, or dump.
-//   3) When a segment is fully contained within the tree, dump it at that level:
-//      the sum is written directly to the segment-end position (multi-tap
-//      output); after the root, a final flush emits the leftmost and rightmost
-//      segments.
-//
-// Scope:
-//   Reduce only (segment sums). TrGT / TrGS comparator / merge modes are not
-//   in this module.
-//
-// Datapath position:
-//   Upstream: mul array feeds 16 partial products; cut_after comes from MFIU,
-//             delay-aligned by an upper level to the same cycle as partials.
-//   This stage: S7 (segment sum) of pe_row_full.
-//   Downstream: 16->4 compression layer -> local_buffer_row (segment results
-//               delivered by segment-end position).
+// Internally, a prefix sum assigns a segment ID to each lane. Four binary
+// merge levels combine equal-ID edges and emit completed segment sums at the
+// corresponding segment-end positions.
 // =============================================================================
 
 module reduction_tree_radix16
@@ -58,17 +23,17 @@ module reduction_tree_radix16
     input  logic                                    rst_n,
     input  logic                                    en,
 
-    // ── Data inputs ──
+    // Inputs
     input  logic signed [N_MUL_ROW-1:0][PROD_W-1:0] partials,
     input  logic        [N_MUL_ROW-2:0]             cut_after,
 
-    // ── Outputs (registered) ──
+    // Registered outputs
     output logic signed [N_MUL_ROW-1:0][ACC_W-1:0]  subtree_sums,
     output logic        [N_MUL_ROW-1:0]             subtree_valid
 );
 
     // ============================================================
-    // Stage 0:Combinational compute leaf_mask & sign-extend partials
+    // Assign segment IDs and sign-extend partial products.
     // ============================================================
     //   leaf_mask[i] = sum(cut_after[0..i-1])
     //   leaf_mask[0] = 0
@@ -87,7 +52,7 @@ module reduction_tree_radix16
         end
     endgenerate
 
-    // leaf_mask computed via carry-chain (combinational running sum)
+    // Combinational prefix sum.
     assign leaf_mask[0] = 4'd0;
     genvar gm;
     generate
@@ -138,7 +103,7 @@ module reduction_tree_radix16
     /* verilator lint_on WIDTHTRUNC */
 
     // ============================================================
-    // Combine function shared logic (expanded inline / "local" style, iverilog-friendly)
+    // Merge-case reference used by stages 2 through 4.
     //   8 cases:
     //     Case A (L.mask_r == R.mask_l, boundary merge):
     //       A1: L and R both single → combine into single
@@ -151,8 +116,7 @@ module reduction_tree_radix16
     //       B3: L not single, R single → L.val_r contained, dump L.val_r
     //       B4: both not single → L.val_r and R.val_l both contained, 2 dumps
     // ============================================================
-    // To run on iverilog (no struct-friendly support), each combine is
-    // expressed with a group of signals producing:
+    // Each combine is expanded into scalar signals:
     //   new state (7 fields) + up to 2 dumps (each with valid/pos/val)
 
     // ============================================================
@@ -520,7 +484,7 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Final flush: after root, dump out root.val_l and root.val_r
+    // Emit segments still present at the root.
     //   - if is_single, val_l == val_r, dump only once
     //   - if not single, dump twice (different positions)
     // ============================================================
@@ -547,7 +511,7 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Collect dumps from all stages into subtree_sums[16] / subtree_valid[16]
+    // Collect segment results from all merge levels.
     //   Each position has at most one dump source (sub-tree end position is unique)
     //   Gathered via priority OR
     // ============================================================
@@ -610,7 +574,7 @@ module reduction_tree_radix16
     end
 
     // ============================================================
-    // Output register(1 cycle latency)
+    // One-cycle output register
     // ============================================================
     integer ko;
     always_ff @(posedge clk or negedge rst_n) begin

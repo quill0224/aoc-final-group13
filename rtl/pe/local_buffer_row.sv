@@ -1,54 +1,19 @@
 // =============================================================================
-// local_buffer_row.sv — per-PE-row output accumulation buffer (4-bank, SRAM-based)
+// local_buffer_row.sv - per-row partial-sum buffer
 // =============================================================================
-// Function:
-//   Stores the C partial sums for all output columns n of one PE row (fixed m).
-//   Capacity 512 columns x INT32 (4 banks x 128 x 32-bit). Accepts up to 4 write
-//   requests per cycle (sum + column address), routed to the matching bank:
-//     first_pass=1 -> overwrite (first K segment of the column; effectively clears, no read)
-//     first_pass=0 -> accumulate (read-modify-write: read old value + sum, write back)
-//   Also provides a dump interface to read out a single column's final value (for GLB write-back).
-//   Dump is read-and-CLEAR: the dumped address is written 0 one cycle after the read
-//   (read on the read port at T, clear on the write port at T+1 -> macro-safe), so the
-//   next output block (M-tile) starts from a clean 0 buffer (no cross-tile residue).
+// Stores 512 signed 32-bit partial sums in four 128-word SRAM banks.
+// Address bits [1:0] select the bank and the remaining bits select the row.
 //
-// Address mapping:
-//   column address addr[8:0] -> bank = addr[1:0], in-bank offset = addr[8:2].
-//   Multiple requests in one cycle hitting distinct banks are written in parallel.
+// first_pass=1 overwrites the addressed entries. first_pass=0 performs a
+// pipelined read-modify-write accumulation. A one-entry write-forward path per
+// bank handles back-to-back updates to the same address.
 //
-// Interface:
-//   clk / rst_n / en         clock; async reset (active-low); pipeline enable
-//   wr_valid   [4]      in   per-lane request present this cycle
-//   wr_sum     [4][32]  in   per-lane partial sum (signed)
-//   wr_addr    [4][9]   in   per-lane column address
-//   first_pass          in   1 = overwrite; 0 = RMW accumulate
-//   acc_en              in   wr_* valid this cycle (same cycle as upstream data valid)
-//   dump_en / dump_addr in   read-out request / column address
-//   c_valid             out  dump result valid (2 cycles after dump_en)
-//   c_out      [32]     out  dump result (signed)
+// dump_en reads one entry and clears it on the following cycle. c_valid and
+// c_out are produced two cycles after dump_en.
 //
-// Timing:
-//   Accumulate RMW = 2-cycle pipeline: cycle T issues read, cycle T+1 writes back "old + sum";
-//   a new request can be accepted every cycle (fully pipelined).
-//   Two back-to-back writes to the same column: SRAM read value is not yet updated
-//   (1-cycle read latency) -> write-forward bypass uses the previous cycle's written value,
-//   so the result is still correct.
-//   dump: dump_en at cycle T -> c_valid / c_out valid at cycle T+2.
-//
-// Assumptions and constraints:
-//   - Valid requests in one cycle must hit distinct banks (wr_addr[1:0] distinct);
-//     same-bank conflicts are not serialized (checked by sim-time assertion). Upstream pe_row
-//     compresses the tree's 16-lane output into <=4 requests meeting this condition.
-//   - dump_en must not coincide with acc_en (shared read port).
-//   - ACC_W = 32, aligned to bank (128x32 SRAM) data width.
-//
-// Datapath location:
-//   Upstream: pe_row's 16->4 compression layer feeds <=4 banked write requests (wr_*),
-//        acc_en aligned with tree output valid; first_pass / dump_* driven by dataflow
-//        control logic (delay-aligned through pe_row).
-//   This stage: S8 (output accumulation) of pe_row_full.
-//   Downstream: c_out -> GLB write-back path.
-//   bank is a sram_128x32_1r1w wrapper; define USE_SRAM_MACRO at synthesis to hook the real macro.
+// Constraints:
+//   - Write requests in the same cycle must target different banks.
+//   - dump_en and acc_en must not be asserted together.
 // =============================================================================
 
 module local_buffer_row
@@ -58,14 +23,14 @@ module local_buffer_row
     input  logic                                            rst_n,
     input  logic                                            en,
 
-    // ── Up to 4 banked write requests (upstream already compressed to ≤4, distinct banks) ──
+    // Up to four write requests
     input  logic        [N_BANK_LBUF-1:0]                   wr_valid,
     input  logic signed [N_BANK_LBUF-1:0][ACC_W-1:0]        wr_sum,
     input  logic        [N_BANK_LBUF-1:0][LOCAL_BUF_AW-1:0] wr_addr,
-    input  logic                                            first_pass, // first K segment: overwrite
+    input  logic                                            first_pass, // overwrite instead of accumulate
     input  logic                                            acc_en,
 
-    // ── dump (must not occur in the same cycle as acc_en) ──
+    // Read-and-clear interface
     input  logic                                            dump_en,
     input  logic        [LOCAL_BUF_AW-1:0]                  dump_addr,
     output logic                                            c_valid,
@@ -75,8 +40,7 @@ module local_buffer_row
     localparam int NB   = N_BANK_LBUF;        // 4
     localparam int OFFW = LOCAL_BUF_AW - 2;   // 7 (128 deep/bank)
 
-    // ── Layer 0: unpack inputs + pre-decode bank/offset (avoids iverilog's limit on
-    //    bit-selecting a variable-indexed element inside always; split out via generate-assign) ──
+    // Unpack requests and decode bank/offset.
     logic                    wv_u    [NB];
     logic signed [ACC_W-1:0] ws_u    [NB];
     logic [1:0]              wbank_u [NB];
@@ -91,7 +55,7 @@ module local_buffer_row
         end
     endgenerate
 
-    // ── Layer 1+2: route each request to its corresponding bank ──
+    // Route each request to its selected bank.
     logic                    req_v   [NB];
     logic signed [ACC_W-1:0] req_sum [NB];
     logic [OFFW-1:0]         req_off [NB];
@@ -113,13 +77,13 @@ module local_buffer_row
         end
     endgenerate
 
-    // dump decode
+    // Dump address decode
     logic [1:0]      dump_bank;
     logic [OFFW-1:0] dump_off;
     assign dump_bank = dump_addr[1:0];
     assign dump_off  = dump_addr[LOCAL_BUF_AW-1:2];
 
-    // ── per-bank SRAM interface wires ──
+    // SRAM interfaces
     logic            bk_ren   [NB];
     logic [OFFW-1:0] bk_raddr [NB];
     logic [31:0]     bk_rdata [NB];
@@ -127,28 +91,28 @@ module local_buffer_row
     logic [OFFW-1:0] bk_waddr [NB];
     logic [31:0]     bk_wdata [NB];
 
-    // ── Stage-1 registers ──
+    // Request pipeline registers
     logic                    s1_v    [NB];
     logic signed [ACC_W-1:0] s1_sum  [NB];
     logic [OFFW-1:0]         s1_off  [NB];
     logic                    s1_first;
     logic                    dump_pend;
     logic [1:0]              dump_bank_q;
-    logic [OFFW-1:0]         dump_off_q;   // clear-on-dump:記住要清 0 的 offset
+    logic [OFFW-1:0]         dump_off_q;
 
-    // RMW bypass: remember what each bank wrote last cycle, for back-to-back same-address accumulation (classifier N=1)
+    // Last write per bank for read-after-write forwarding.
     logic             prev_wen   [NB];
     logic [OFFW-1:0]  prev_waddr [NB];
     logic [ACC_W-1:0] prev_wdata [NB];
 
-    // ── Stage 0: issue READ (RMW read for acc, or dump read) ──
+    // Issue an accumulation or dump read.
     always_comb begin
         for (int b = 0; b < NB; b = b + 1) begin
             bk_ren[b]   = 1'b0;
             bk_raddr[b] = '0;
         end
         if (en && acc_en && !first_pass) begin
-            // RMW: each bank with a request reads its old value first
+            // Read the previous partial sum for each active bank.
             for (int b = 0; b < NB; b = b + 1) begin
                 if (req_v[b]) begin
                     bk_ren[b]   = 1'b1;
@@ -161,7 +125,7 @@ module local_buffer_row
         end
     end
 
-    // ── Latch request / dump into Stage 1 ──
+    // Latch the request while SRAM read data is produced.
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             for (int b = 0; b < NB; b = b + 1) begin
@@ -183,7 +147,7 @@ module local_buffer_row
                 s1_v[b]       <= acc_en & req_v[b];
                 s1_sum[b]     <= req_sum[b];
                 s1_off[b]     <= req_off[b];
-                prev_wen[b]   <= bk_wen[b];     // remember this cycle's write for next-cycle bypass
+                prev_wen[b]   <= bk_wen[b];
                 prev_waddr[b] <= bk_waddr[b];
                 prev_wdata[b] <= bk_wdata[b];
             end
@@ -191,18 +155,17 @@ module local_buffer_row
             dump_pend   <= dump_en;
             dump_bank_q <= dump_bank;
             dump_off_q  <= dump_off;
-            // dump output: read has 1-cycle latency → register one more cycle here
+            // Register the synchronous SRAM dump result.
             c_valid <= dump_pend;
             c_out   <= $signed(bk_rdata[dump_bank_q]);
         end
     end
 
-    // ── Stage 1: compute write data, drive bank write-back (incl. RMW bypass) ──
+    // Compute accumulation results and drive writes.
     logic signed [ACC_W-1:0] rd_val [NB];
     always_comb begin
         for (int b = 0; b < NB; b = b + 1) begin
-            // RMW bypass: if this cycle's read offset == last cycle's written offset, the SRAM is not
-            // updated yet (1-cycle read latency) → use last cycle's written value (classifier N=1 back-to-back accum hits this)
+            // Forward the previous write when the SRAM read would return stale data.
             if (prev_wen[b] && (s1_off[b] == prev_waddr[b]))
                 rd_val[b] = $signed(prev_wdata[b]);
             else
@@ -211,14 +174,11 @@ module local_buffer_row
             bk_wen[b]   = en & s1_v[b];
             bk_waddr[b] = s1_off[b];
             if (s1_first)
-                bk_wdata[b] = s1_sum[b];               // overwrite (first_pass)
+                bk_wdata[b] = s1_sum[b];
             else
-                bk_wdata[b] = rd_val[b] + s1_sum[b];   // accumulate (RMW, incl. bypass)
+                bk_wdata[b] = rd_val[b] + s1_sum[b];
 
-            // clear-on-dump:dump 讀出的下一拍把該位址寫 0(讀已在前一拍鎖進 c_out,
-            // 不影響輸出),讓下一個 M-tile 從乾淨的 0 開始,避免跨 M-tile 殘值。
-            // 讀在 T(讀埠)、清在 T+1(寫埠)→ 非同拍同址,macro 也安全。
-            // dump 與 acc 不同拍(上層保證),故覆寫該 bank 寫埠安全。
+            // Clear the dumped entry after its read data has been captured.
             if (dump_pend && (dump_bank_q == 2'(b))) begin
                 bk_wen[b]   = en;
                 bk_waddr[b] = dump_off_q;
@@ -227,7 +187,7 @@ module local_buffer_row
         end
     end
 
-    // ── 4 SRAM banks ──
+    // Four SRAM banks
     generate
         for (gb = 0; gb < NB; gb = gb + 1) begin : g_bank
             sram_128x32_1r1w u_bank (
@@ -242,10 +202,9 @@ module local_buffer_row
         end
     endgenerate
 
-    // ── Design-assumption checks (skipped in synthesis) ──
+    // Simulation-only interface checks
     // synthesis translate_off
-    // This block is a sim-only assertion; here rst_n only gates as a sync condition (not a real reset).
-    // Combined with the other flops' async rst_n it triggers verilator SYNCASYNCNET, so disable it locally.
+    // rst_n is sampled here only to gate the checks.
     /* verilator lint_off SYNCASYNCNET */
     always @(posedge clk) if (rst_n && en && acc_en) begin
         for (int ai = 0; ai < NB; ai = ai + 1)

@@ -1,42 +1,10 @@
 // =============================================================================
-// sram_128x32_1r1w.sv — 128 x 32-bit synchronous SRAM (1R1W) wrapper
+// sram_128x32_1r1w.sv - 128 x 32-bit synchronous 1R1W SRAM
 // =============================================================================
-// Function:
-//   128-word x 32-bit synchronous SRAM with independent read and write ports
-//   (1R1W); in the same cycle it can read one address and write another.
-//   Presents a clean, implementation-agnostic interface to the layer above
-//   (active-high, no power/test pins); this wrapper handles the low-level
-//   connections.
-//
-// Interface:
-//   clk            in   shared read/write clock (rising-edge triggered)
-//   ren / raddr    in   read enable; read address [6:0]
-//   rdata          out  read data [31:0]
-//   wen / waddr    in   write enable; write address [6:0]
-//   wdata          in   write data [31:0]
-//
-// Timing:
-//   Write: written on the rising edge of the cycle where wen=1.
-//   Read:  read latency = 1 (address at cycle T, rdata valid at T+1).
-//   Same-cycle same-address read+write: behavioral version reads the old
-//   value; macro version follows the cell datasheet, so the layer above must
-//   not rely on this behavior (local_buffer_row avoids it via write-forward
-//   bypass).
-//
-// Configuration (`USE_SRAM_MACRO`):
-//   Defined   -> instantiate TS6N16ADFPCLLLVTA128X32M4FWSHOD (two-port macro).
-//                active-low pins (WEB/REB) inverted; BWEB all 0 (write all
-//                bits); margin/test/power pins (RCT/WCT/KP/SLP/DSLP/SD) tied 0;
-//                PUDELAY is an output, left unconnected.
-//   Undefined -> behavioral model (reg array) for iverilog / Verilator sim.
-//   Both configurations have identical interface timing, so simulation and
-//   synthesis share the same upper-level RTL.
-//
-// Datapath location:
-//   Both upstream and downstream is local_buffer_row: serves as its storage
-//   bank (4 per PE row), read/write requests driven by its RMW pipeline
-//   (read at cycle T, write-back at T+1), rdata returns to its accumulate /
-//   dump logic. Does not directly face other units of the PE row.
+// Independent synchronous read and write ports with one-cycle read latency.
+// Define USE_SRAM_MACRO to instantiate the ADFP SRAM macro; otherwise a
+// behavioral array is used. The caller must not depend on same-address
+// read/write behavior.
 // =============================================================================
 
 module sram_128x32_1r1w (
@@ -52,16 +20,11 @@ module sram_128x32_1r1w (
 );
 
 `ifdef USE_SRAM_MACRO
-    // =========================================================================
-    // Synthesis: connect the real ADFP macro (1R1W two-port 128×32)
-    //   Write port: AA=write addr / D=data / BWEB=per-bit write mask (active-low, 0=write) / WEB=write enable (active-low) / CLKW
-    //   Read port:  AB=read addr / REB=read enable (active-low) / CLKR / Q=data out
-    //   Test/power pins tied to normal-operation values; PUDELAY is an output, left unconnected
-    // =========================================================================
+    // ADFP two-port SRAM macro.
     TS6N16ADFPCLLLVTA128X32M4FWSHOD u_macro (
         .AA      (waddr),        // write addr [6:0]
         .D       (wdata),        // write data [31:0]
-        .BWEB    ({32{1'b0}}),   // write all bits (active-low → 0=write; if sim does not write, change to 32'hFFFFFFFF)
+        .BWEB    ({32{1'b0}}),   // active-low bit write mask: write all bits
         .WEB     (~wen),         // write enable, active-low
         .CLKW    (clk),
         .AB      (raddr),        // read addr [6:0]
@@ -77,9 +40,7 @@ module sram_128x32_1r1w (
         .Q       (rdata)         // read data out [31:0]
     );
 `else
-    // =========================================================================
-    // Simulation: behavioral 1R1W (read latency = 1 cycle)
-    // =========================================================================
+    // Behavioral model with one-cycle read latency.
     logic [31:0] mem [0:127];
     always_ff @(posedge clk) begin
         if (wen) mem[waddr] <= wdata;     // write port

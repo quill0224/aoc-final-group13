@@ -1,17 +1,11 @@
 // =============================================================================
-// pe_row.sv
+// pe_row.sv - one PE-row datapath
 // =============================================================================
-// 把三個模組串成「一條 PE row 的計算鏈」:
-//   pe_mfiu_seq(+mfiu) → crossbar → pe_row_tail
+//   pe_mfiu_seq -> crossbar -> pe_row_tail
 //
-//   * A/B 來源是「共享的 pe_ab_buffer」(在 pe_array 層、16 條 row 共用一顆):
-//       a_bm_row / a_nz_row = buffer 第 r 條 A fiber(此 row 專屬)
-//       b_bm[*]   / b_nz[*]  = 16 條 B 欄(所有 row 共享)
-//   * mode/first_pass/cur_n_base/dump_* 由 controller 廣播。
-//   * done = 此 row 的 mfiu_seq 把所有 B-group 跑完(注意:tail 後段還有 ~4 拍
-//     drain;陣列層的 pe_compute_done 應 = AND(16 row done) 再延遲 drain margin,
-//     才能保證 local_buffer 累加落定 / 可換下一批 tile)。
-//
+// Each row owns one A fiber and shares all 16 B fibers. done indicates that
+// the sequencer has issued every B batch; pe_array adds a drain delay before
+// reporting tile completion.
 // =============================================================================
 
 module pe_row
@@ -20,37 +14,37 @@ module pe_row
     input  logic                      clk,
     input  logic                      rst_n,
 
-    // ── controller ──
+    // Control
     input  logic                      mode,          // 1=TrIP
     input  logic                      start,         // = pe_ab_buffer.tile_ready(開始處理本 tile)
-    output logic                      done,           // 本 row 的 mfiu_seq 跑完所有 B-group
+    output logic                      done,
 
-    // ── 共享 pe_ab_buffer(此 row 的 A + 共享 B)──
-    input  logic [N_MUL_ROW-1:0]      a_bm_row,       // = buffer.a_bm[r]
-    input  logic [N_MUL_ROW-1:0]      b_bm [0:15],    // = buffer.b_bm(共享)
-    input  logic [15:0][7:0]          a_nz_row,       // = buffer.a_nz[r]
-    input  logic [15:0][7:0]          b_nz [0:15],    // = buffer.b_nz(共享)
+    // A fiber for this row and B fibers shared by all rows
+    input  logic [N_MUL_ROW-1:0]      a_bm_row,
+    input  logic [N_MUL_ROW-1:0]      b_bm [0:15],
+    input  logic [15:0][7:0]          a_nz_row,
+    input  logic [15:0][7:0]          b_nz [0:15],
 
-    // ── controller 廣播給 tail ──
+    // Accumulation and dump control
     input  logic                      first_pass,
     input  logic [LOCAL_BUF_AW-1:0]   cur_n_base,
     input  logic                      dump_en,
     input  logic [LOCAL_BUF_AW-1:0]   dump_addr,
 
-    // ── 輸出(此 row = 輸出列 m)──
+    // Dump output for this matrix row
     output logic                      c_valid,
     output logic signed [ACC_W-1:0]   c_out
 );
 
-    // ── pe_mfiu_seq → crossbar ──
+    // pe_mfiu_seq -> crossbar
     logic                      m_valid;
     logic [LANE_COUNT_W-1:0]   m_eff;
     logic [N_MUL_ROW-1:0][3:0] m_a_meta;
     logic [N_MUL_ROW-1:0][5:0] m_b_meta;
     logic [3:0]                m_grp_base;
-    logic [2:0]                m_grp_ncol;     // crossbar 不用(欄位由 grp_base+b_meta 自算)
+    logic [2:0]                m_grp_ncol;
 
-    // ── crossbar → pe_row_tail ──
+    // crossbar -> pe_row_tail
     logic [7:0] x_a_val      [0:15];
     logic [7:0] x_b_val      [0:15];
     logic [3:0] x_lane_col   [0:15];
@@ -85,7 +79,7 @@ module pe_row
         .c_valid(c_valid), .c_out(c_out)
     );
 
-    // grp_ncol 目前未用
+    // The crossbar derives lane columns from grp_base and b_meta.
     wire _unused = &{1'b0, m_grp_ncol};
 
 endmodule

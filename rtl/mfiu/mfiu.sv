@@ -1,5 +1,18 @@
-// a_last=1 and complete_col=1: OUT then go back to IDLE
-// b_group_last=1 and complete_col=1: OUT then go to LOAD_A
+// =============================================================================
+// mfiu.sv - multi-fiber intersection unit
+// =============================================================================
+// Intersects one A bitmask with up to N_B_FIBER B bitmasks. Consecutive B
+// columns are packed while their total intersection count fits in
+// N_MUL_ROW lanes.
+//
+// For each active lane:
+//   a_meta_data       compressed index within the A fiber
+//   b_meta_data[5:4]  B-column index within the current batch
+//   b_meta_data[3:0]  compressed index within that B fiber
+//
+// b_col_valid and b_utilization encode column count minus one. meta_valid is
+// asserted for one cycle when the registered metadata is available.
+// =============================================================================
 module mfiu
     import trapezoid_pkg::*;
 (
@@ -73,7 +86,7 @@ module mfiu
 
         unique case (state_q)
             IDLE: begin
-                // mode=0 is standardIP mode: MFIU stays idle and does not latch inputs.
+                // StandardIP bypasses the MFIU.
                 if (en && mode) begin
                     state_d = LOAD_A;
                 end
@@ -130,15 +143,13 @@ module mfiu
             b_meta_data_d[clear_idx] = '0;
         end
 
-        // b_col_valid is an encoded valid-count field:
-        // 2'b00/01/10/11 means 1/2/3/4 valid B columns.
+        // Encoded column count: 0..3 represents 1..4 valid B columns.
         valid_b_cols = int'(b_col_valid_q) + 1;
         if (valid_b_cols > N_B_FIBER) begin
             valid_b_cols = N_B_FIBER;
         end
 
-        // Dynamic B column packing: choose the largest prefix of valid B columns
-        // whose total A&B intersection count fits in the N_MUL_ROW metadata lanes.
+        // Select the longest B-column prefix that fits in the metadata lanes.
         used_b_cols = 0;
         candidate_count = 0;
         packing_done = 1'b0;
@@ -170,10 +181,8 @@ module mfiu
                 b_prefix_count = 0;
                 for (k = 0; k < N_MUL_ROW; k = k + 1) begin
                     if (a_bitmask_q[k] && b_bitmask_q[j][k] && (lane_count < N_MUL_ROW)) begin
-                        // a_meta_data is the 0-based compressed A index. With
-                        // N_MUL_ROW=16 the maximum emitted index is 15, so
-                        // 4 bits are sufficient; effectual_count still needs
-                        // $clog2(N_MUL_ROW+1) bits because it can be 16.
+                        // Metadata indices are zero-based positions in the
+                        // compressed A and B value arrays.
                         a_meta_data_d[lane_count] = 4'(a_prefix_count);
                         b_meta_data_d[lane_count][5:4] = 2'(j);
                         b_meta_data_d[lane_count][3:0] = 4'(b_prefix_count);

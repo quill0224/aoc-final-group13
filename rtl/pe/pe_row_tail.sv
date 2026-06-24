@@ -1,24 +1,18 @@
 // =============================================================================
-// pe_row_tail.sv — PE row 尾段 (mac×16 + reduction + output accumulate)  [Step B-3]
+// pe_row_tail.sv - multiply, segmented reduction, and accumulation
 // =============================================================================
-// 接 crossbar 的 per-lane 壓縮值,完成一個 PE row 的後段運算:
-//   S6  mac×16        : product[l] = uint8(a_val[l]) × int8(b_val[l])
-//   S7  reduction tree: 依 cut_after 把「同一輸出欄」的連續 lane 加成一個 partial
-//   S8a 16→4 壓縮     : 取出 ≤4 個 segment 和 + 各自輸出欄位址(off 繼承無效尾)
-//   S8b local_buffer  : 跨 K-tile 累加(first_pass 覆寫 / 否則 RMW),dump 讀出
+// Multiplies 16 gathered operand pairs, reduces contiguous lanes belonging to
+// the same output column, and accumulates up to four segment sums into the
+// per-row local buffer.
 //
-//   * 一個 PE row 一顆;lite 設計 bank = 輸出欄(1 A-row / PE row)。
-//   * 重用 mac_unit / reduction_tree_radix16 / local_buffer_row(皆已驗證)。
-//   * 無效尾 lane(crossbar 設 lane_col=0)用 off 繼承:沿用 pe_row_full S8a,
-//     合併段 dump 在 lane15 時帶最後一個有效欄,不會誤送到第 0 欄。
-//   * Option A(配合 controller 迴圈順序 M→K→N,K 中 N 內):buffer 同時 hold
-//     整列所有 N 欄、撐過整個 K 迴圈,到 K 全累加完(controller global_flush)才逐欄
-//     dump。位址 = cur_n_base(=n_cnt*16) + out_col。dump_en 不可與 acc_en 同拍。
+// lane_col determines the segment boundaries. Invalid trailing lanes inherit
+// the last valid column so a segment ending at lane 15 keeps the correct
+// address. Buffer address = cur_n_base + lane_col.
 //
-// pipeline:
-//   crossbar(comb,T) → mac(T+1) → tree(T+2) → S8a/buf(@T+2)
-//   cut_after                : 延遲 DLY_CUT =1 對齊 tree 的 partials
-//   out_col/has_match/first_pass/cur_n_base : 延遲 DLY_ADDR=2 對齊 S8a/buffer 寫入
+// Pipeline:
+//   T    crossbar output and segment metadata
+//   T+1  registered products
+//   T+2  registered segment sums and buffer request
 // =============================================================================
 
 module pe_row_tail
@@ -27,36 +21,34 @@ module pe_row_tail
     input  logic                     clk,
     input  logic                     rst_n,
 
-    // ── from crossbar (B-2) ── 沿用既有名稱
-    input  logic                     in_valid,           // = crossbar.valid_out(本拍有一個 group)
-    input  logic [7:0]               a_val      [0:15],  // uint8 → mac.a
-    input  logic [7:0]               b_val      [0:15],  // 帶 int8 → mac.b(port 端 re-sign)
-    input  logic [3:0]               lane_col   [0:15],  // tile 內真實輸出欄 0..15
+    // Crossbar output
+    input  logic                     in_valid,
+    input  logic [7:0]               a_val      [0:15],
+    input  logic [7:0]               b_val      [0:15],
+    input  logic [3:0]               lane_col   [0:15],
     input  logic                     lane_valid [0:15],
 
-    // ── from controller (src/controller.sv) ──
-    input  logic                     first_pass,         // = (k_cnt==0):該欄第一個 K-tile→覆寫;否則累加
-    input  logic [LOCAL_BUF_AW-1:0]  cur_n_base,         // = n_cnt * N_TILE_SIZE:本 N-tile 的基底欄
-    input  logic                     dump_en,            // K 全累加完(global_flush)後逐欄讀出;不可與 acc 同拍
-    input  logic [LOCAL_BUF_AW-1:0]  dump_addr,          // 0..N_tiles*16-1
+    // Accumulation and dump control
+    input  logic                     first_pass,
+    input  logic [LOCAL_BUF_AW-1:0]  cur_n_base,
+    input  logic                     dump_en,
+    input  logic [LOCAL_BUF_AW-1:0]  dump_addr,
 
-    // ── output (= dump 讀出,給 golden 比對 / GLB)──
+    // Dump output
     output logic                     c_valid,
     output logic signed [ACC_W-1:0]  c_out
 );
 
-    // 內部管線恆前進(沿用 pe_row_full 慣例)
+    // The datapath runs continuously; validity is tracked separately.
     wire en = 1'b1;
 
-    // 延遲深度(對齊控制訊號到資料路;crossbar 純組合 → 比 pe_row_full 少一級 dist)
-    localparam int DLY_CUT  = MUL_STAGES;                 // 1: crossbar 輸出 → tree 的 partials
-    localparam int DLY_ADDR = MUL_STAGES + TREE_STAGES;   // 2: → S8a / buffer 寫入
-    localparam int CW       = 4;                          // 輸出欄寬(0..15)
+    // Control-delay lengths matching the multiplier and tree registers.
+    localparam int DLY_CUT  = MUL_STAGES;
+    localparam int DLY_ADDR = MUL_STAGES + TREE_STAGES;
+    localparam int CW       = 4;
 
     // =====================================================================
-    // 分組 metadata(組合,在 crossbar 輸出當拍 T)
-    //   cut_after[i] = 相鄰有效 lane 屬不同輸出欄 → 在 i 與 i+1 間切段
-    //   out_col[l]   = 該 lane 的輸出欄;無效尾 lane 繼承最後一個有效欄
+    // Segment boundaries and output-column metadata.
     // =====================================================================
     logic [N_MUL_ROW-2:0] cut_comb;
     genvar gu;
@@ -67,7 +59,7 @@ module pe_row_tail
         end
     endgenerate
 
-    // 每 lane 輸出欄(無效尾繼承)
+    // Invalid trailing lanes inherit the last valid output column.
     logic [CW-1:0] out_col [0:15];
     logic [CW-1:0] last_col;
     integer io;
@@ -78,12 +70,12 @@ module pe_row_tail
                 out_col[io] = lane_col[io];
                 last_col    = lane_col[io];
             end else begin
-                out_col[io] = last_col;   // 無效尾 → 繼承,避免 lane_col=0 誤送第 0 欄
+                out_col[io] = last_col;
             end
         end
     end
 
-    // 有無任何有效 lane(無 match 不寫 buffer)
+    // Suppress buffer writes for an empty intersection.
     logic has_match_comb;
     integer ih;
     always_comb begin
@@ -91,7 +83,7 @@ module pe_row_tail
         for (ih = 0; ih < N_MUL_ROW; ih = ih + 1) has_match_comb |= lane_valid[ih];
     end
 
-    // pack out_col → flat 給延遲線
+    // Pack column metadata for the delay line.
     logic [N_MUL_ROW*CW-1:0] off_flat;
     generate
         for (gu = 0; gu < N_MUL_ROW; gu = gu + 1) begin : g_off_pack
@@ -100,9 +92,9 @@ module pe_row_tail
     endgenerate
 
     // =====================================================================
-    // 延遲線
+    // Control delay lines
     // =====================================================================
-    // cut_after → DLY_CUT(對齊 tree 的 partials)
+    // Align segment boundaries with registered products.
     logic [N_MUL_ROW-2:0] cut_dly [DLY_CUT];
     integer dc;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -115,7 +107,7 @@ module pe_row_tail
     end
     wire [N_MUL_ROW-2:0] cut_aligned = cut_dly[DLY_CUT-1];
 
-    // out_col / has_match / first_pass / cur_n_base → DLY_ADDR(對齊 S8a / buffer 寫入)
+    // Align buffer metadata with registered tree outputs.
     logic [N_MUL_ROW*CW-1:0] off_dly [DLY_ADDR];
     logic                    hm_dly  [DLY_ADDR];
     logic                    fp_dly  [DLY_ADDR];
@@ -141,7 +133,7 @@ module pe_row_tail
     wire                    fp_aligned         = fp_dly[DLY_ADDR-1];
     wire [LOCAL_BUF_AW-1:0] cur_n_base_aligned = cnb_dly[DLY_ADDR-1];
 
-    // valid pipe:in_valid → (T+1) mac → (T+2) tree
+    // Valid pipeline through multiplier and tree registers.
     logic v_s6, v_s7;
     always_ff @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin v_s6 <= 1'b0; v_s7 <= 1'b0; end
@@ -149,7 +141,7 @@ module pe_row_tail
     end
 
     // =====================================================================
-    // S6: Mul × 16(product 直接寫進 packed partials 即完成 unpacked→packed 打包)
+    // Sixteen registered multipliers
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][PROD_W-1:0] partials;
     genvar gi;
@@ -159,15 +151,15 @@ module pe_row_tail
                 .clk     (clk),
                 .rst_n   (rst_n),
                 .en      (en),
-                .a       (a_val[gi]),     // uint8
-                .b       (b_val[gi]),     // int8(crossbar 端為 unsigned bus,mac port re-sign)
+                .a       (a_val[gi]),
+                .b       (b_val[gi]),
                 .product (partials[gi])
             );
         end
     endgenerate
 
     // =====================================================================
-    // S7: reduction tree — cut_after 來自 B-fiber(輸出欄)分組
+    // Segmented reduction
     // =====================================================================
     logic signed [N_MUL_ROW-1:0][ACC_W-1:0] tree_sums;
     logic        [N_MUL_ROW-1:0]            tree_valid_pos;
@@ -183,7 +175,7 @@ module pe_row_tail
     );
 
     // =====================================================================
-    // S8a: 16→4 壓縮 — 每段 out_addr = cur_n_base + out_col(Option A)
+    // Compact segment results into four local-buffer requests.
     // =====================================================================
     logic                    ts_v    [N_MUL_ROW];
     logic signed [ACC_W-1:0] ts_sum  [N_MUL_ROW];
@@ -193,7 +185,7 @@ module pe_row_tail
         for (gt = 0; gt < N_MUL_ROW; gt = gt + 1) begin : g_un_tree
             assign ts_v[gt]   = tree_valid_pos[gt];
             assign ts_sum[gt] = tree_sums[gt];
-            // out_addr = cur_n_base(=n_cnt*16,低 4 位為 0) + out_col;bank=addr[1:0]=out_col[1:0]
+            // Convert the tile-local column to a local-buffer address.
             assign ts_addr[gt] = cur_n_base_aligned
                                + {{(LOCAL_BUF_AW-CW){1'b0}}, off_aligned[gt*CW +: CW]};
         end
@@ -230,7 +222,7 @@ module pe_row_tail
     endgenerate
 
     // =====================================================================
-    // S8b: local buffer — acc_en 由 has_match 把關(無 match 不寫)
+    // Per-row accumulation buffer
     // =====================================================================
     wire acc_en = v_s7 & has_match_aligned;
 
