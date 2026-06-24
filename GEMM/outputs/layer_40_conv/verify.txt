@@ -1,0 +1,12 @@
+layer_name: features.40
+layer_type: Conv2d
+verify_method: gemm_vs_pytorch
+compare_domain: quantized_int_repr
+max_abs_error: 0
+mean_abs_error: 0
+num_mismatch: 0
+mismatch_ratio: 0
+atol: 0
+rtol: 0
+pass: true
+first_mismatch_indices: none

@@ -102,3 +102,11 @@ analysis/results/*/
 # Allow committed snapshots (canonical reference runs)
 !analysis/results/baseline/
 *.vvp
+
+obj_dir/
+dla/obj_dir/
+tb/testbench/dla/results/
+tb/testbench/dla/dram_test_A.hex
+tb/testbench/dla/dram_test_B.hex
+tb/testbench/dla/dram_test.hex
+tb/testbench/dla/dram.hex

@@ -1,0 +1,20 @@
+layer_name: features.40
+layer_type: Conv2d
+file_format: decimal_txt_no_header
+one_value_per_line: true
+input_file: input_activation_nchw.txt
+input_shape: 1 512 14 14
+input_dtype: quint8
+input_layout: NCHW
+weight_file: weight_oihw.txt
+weight_shape: 512 512 3 3
+weight_dtype: qint8
+weight_layout: OIHW
+bias_file: bias.txt
+bias_shape: 512
+bias_dtype: float32
+output_file: output_nchw.txt
+output_shape: 1 512 14 14
+output_dtype: quint8
+output_layout: NCHW
+flatten_order: row-major contiguous

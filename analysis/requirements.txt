@@ -1,6 +1,0 @@
-pandas
-numpy
-matplotlib
-tabulate          # for DataFrame.to_markdown()
-onnx              # only needed if using analysis/eyeriss/parse_onnx
-torch>=2.0        # for parse_pytorch (already in quantization/)

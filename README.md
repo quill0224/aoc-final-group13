@@ -126,6 +126,7 @@ gh pr create --fill --web                  # 開瀏覽器發 PR
 | GitHub | 姓名 | 主責 |
 |--------|------|------|
 | @quill0224 | Quill | TBD |
-| TBD | TBD | TBD |
+| @JackyPeng066 | 彭俞凱 | Architecture/Dataflow/MFIU |
+| @colin0423 | 陳秉弘 | Quantization/Analysis/Architecture |
 | TBD | TBD | TBD |
 

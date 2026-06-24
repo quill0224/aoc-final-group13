@@ -1,201 +1,204 @@
 // =============================================================================
-// tb_pe_row.sv — PE row 基本功能測試 (Dense IP, K=16 single-tile)
+// tb_pe_row.sv — standalone self-checking TB for pe_row
 // =============================================================================
-// 測 module: rtl/pe/pe_row.v
-//   內部含: 16 個 mac_unit + radix-16 merge tree + accumulator + B-forwarding
-// Owner: 黃妍心
+// 驗證一條 PE row 的完整計算鏈:pe_mfiu_seq(+mfiu) -> crossbar -> pe_row_tail。
+// 這補上 tb_pe_row_tail 沒測到的 mfiu(交集)+ crossbar(取值)那段
+// (tb_pe_row_tail 是直接餵合成的 crossbar 輸出)。
 //
-// 跑法: make tb_pe_row
-// 看波形: gtkwave tb_pe_row.vcd
-//
-// 測什麼 (抗架構變動原則 — 只測核心 dot product 行為):
-//   T1: reset 後 c_valid=0, c_out=0
-//   T2: a=[1,1,...,1], b=[1,1,...,1] → c_out = 16
-//   T3: a=[1,2,...,16], b=[16,15,...,1] → c_out = 816
-//        (1*16 + 2*15 + ... + 16*1 = 17*sum(1..16) - sum(1²..16²)
-//                                  = 17*136 - 1496 = 2312 - 1496 = 816)
-//   T4: acc_clear 行為 — 前一個 dot product 不會污染後一個
-//
-// 不測 (留給 tb_pe_array.sv,等架構穩定再說):
-//   ❌ B vertical forwarding (b_vec_out 的輸出時序)
-//   ❌ K > 16 跨 K-tile 累加
-//   ❌ multi-row 行為
-//
-// 時序 (Pipeline 7 stages):
-//   pe_row 從 in_valid 拉起算 7 拍後 c_out 才有結果。
-//
-//   cycle 0:  in_valid=1, a_vec, b_vec_in 餵進去
-//   cycle 1:  S1 latch (a_q, b_q 抓到值)
-//   cycle 2:  S2 mul (partials 抓到值)
-//   cycle 3:  S3 tree stage 1
-//   cycle 4:  S4 tree stage 2
-//   cycle 5:  S5 tree stage 3
-//   cycle 6:  S6 tree stage 4 → tree_valid=1, tree_sum 有值
-//             ← 此拍要拉 acc_dump=1 (跟 tree_valid 對齊)
-//   cycle 7:  c_out 抓到 acc + tree_sum,c_valid=1
-//
-//   acc_clear 對齊到 cycle 0 (跟 in_valid 同拍),確保 acc 在 cycle 1 清為 0
+// 作法:用 dense 陣列描述 A fiber 與 16 條 B 欄,TB 內壓成 bitmask+壓縮 nz 餵 DUT,
+// 同時用 dense 算 golden:psum[n] = Σ_k uint8(A[k]) * int8(B[n][k]),只在 A、B
+// 都非零(交集)時累加;first_pass 覆寫、否則 RMW 累加;位址 = cur_n_base + n。
+// 每個欄只有「至少一個交集」才會被寫(對齊 HW:無 effectual 就不產 segment)。
+// 含 mfiu,需 verilator(iverilog 不支援其 packed-2D 變數索引)。
 // =============================================================================
-
 `timescale 1ns/1ps
 
 module tb_pe_row;
     import trapezoid_pkg::*;
 
-    logic                                    clk = 0;
-    logic                                    rst_n;
-    logic                                    in_valid;
-    logic                                    acc_clear;
-    logic                                    acc_dump;
-    logic signed [N_MUL_ROW-1:0][DATA_W-1:0] a_vec;
-    logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_in;
-    logic signed [N_MUL_ROW-1:0][DATA_W-1:0] b_vec_out;
-    logic                                    b_valid_out;
-    logic                                    c_valid;
-    logic signed [ACC_W-1:0]                 c_out;
-
-    int fails;
-    int expected;
-    int i;
-
-    // 500 MHz → 2 ns period
-    always #1 clk = ~clk;
+    logic                    clk, rst_n;
+    logic                    mode, start, done;
+    logic [N_MUL_ROW-1:0]    a_bm_row;
+    logic [N_MUL_ROW-1:0]    b_bm [0:15];
+    logic [15:0][7:0]        a_nz_row;
+    logic [15:0][7:0]        b_nz [0:15];
+    logic                    first_pass;
+    logic [LOCAL_BUF_AW-1:0] cur_n_base;
+    logic                    dump_en;
+    logic [LOCAL_BUF_AW-1:0] dump_addr;
+    logic                    c_valid;
+    logic signed [ACC_W-1:0] c_out;
 
     pe_row dut (
-        .clk         (clk),
-        .rst_n       (rst_n),
-        .in_valid    (in_valid),
-        .acc_clear   (acc_clear),
-        .acc_dump    (acc_dump),
-        .a_vec       (a_vec),
-        .b_vec_in    (b_vec_in),
-        .b_vec_out   (b_vec_out),
-        .b_valid_out (b_valid_out),
-        .c_valid     (c_valid),
-        .c_out       (c_out)
+        .clk(clk), .rst_n(rst_n),
+        .mode(mode), .start(start), .done(done),
+        .a_bm_row(a_bm_row), .b_bm(b_bm),
+        .a_nz_row(a_nz_row), .b_nz(b_nz),
+        .first_pass(first_pass), .cur_n_base(cur_n_base),
+        .dump_en(dump_en), .dump_addr(dump_addr),
+        .c_valid(c_valid), .c_out(c_out)
     );
 
-    // 把 a_vec / b_vec_in 全填同一值
-    task set_a_all(input signed [DATA_W-1:0] v);
-        for (i = 0; i < N_MUL_ROW; i = i + 1) a_vec[i] = v;
-    endtask
-    task set_b_all(input signed [DATA_W-1:0] v);
-        for (i = 0; i < N_MUL_ROW; i = i + 1) b_vec_in[i] = v;
-    endtask
+    initial clk = 1'b0;
+    always #5 clk = ~clk;
 
-    // a = [1, 2, ..., 16]
-    task set_a_ascending;
-        for (i = 0; i < N_MUL_ROW; i = i + 1) a_vec[i] = i + 1;
-    endtask
-    // b = [16, 15, ..., 1]
-    task set_b_descending;
-        for (i = 0; i < N_MUL_ROW; i = i + 1) b_vec_in[i] = N_MUL_ROW - i;
-    endtask
+    // dense 描述(TB 輸入端):A fiber + 16 條 B 欄,各 16 個 k 槽
+    logic [7:0] a_dense [0:15];
+    logic [7:0] b_dense [0:15][0:15];   // [col][k];int8 以位元樣式存(0xFF = -1)
 
-    // 驅動 1 拍 in_valid + 等 6 拍 + 拉 acc_dump + 等 1 拍 check
-    // 這是「K=16 single tile」的標準 sequence
-    task run_dot_product(input do_clear);
-        @(negedge clk);
-        in_valid  = 1;
-        acc_clear = do_clear;
-        acc_dump  = 0;
+    // 參考模型 + dump 結果
+    logic signed [ACC_W-1:0] exp     [0:511];
+    logic                    exp_tch [0:511];
+    integer errors;
 
-        @(negedge clk);   // cycle 1
-        in_valid  = 0;
-        acc_clear = 0;
-
-        repeat (5) @(negedge clk);  // cycle 2-6
-
-        // cycle 6:此拍 tree_valid=1,要拉 acc_dump
-        acc_dump = 1;
-
-        @(negedge clk);   // cycle 7:c_out 應該已抓到結果
-        acc_dump = 0;
-        #0.1;             // settle
-    endtask
-
-    `define CHECK(cond, msg) \
-        if (!(cond)) begin \
-            $display("[FAIL] %s: c_out=%0d expected=%0d c_valid=%0b", \
-                     msg, c_out, expected, c_valid); \
-            fails = fails + 1; \
-        end else begin \
-            $display("[PASS] %s: c_out=%0d c_valid=%0b", msg, c_out, c_valid); \
+    task automatic clear_dense;
+        integer c, k;
+        begin
+            for (k = 0; k < 16; k = k + 1) a_dense[k] = 8'd0;
+            for (c = 0; c < 16; c = c + 1)
+                for (k = 0; k < 16; k = k + 1) b_dense[c][k] = 8'd0;
         end
+    endtask
 
+    // 壓 dense -> bitmask+nz 餵 DUT,同時把 golden 寫進 exp
+    task automatic send_tile(input logic fp, input logic [LOCAL_BUF_AW-1:0] base);
+        integer c, k, ra, rb;
+        logic signed [8:0]       av;
+        logic signed [7:0]       bv;
+        logic signed [ACC_W-1:0] sum;
+        logic                    touched;
+        begin
+            // A fiber 壓縮
+            a_bm_row = '0; a_nz_row = '0; ra = 0;
+            for (k = 0; k < 16; k = k + 1) begin
+                if (a_dense[k] != 8'd0) begin
+                    a_bm_row[k]      = 1'b1;
+                    a_nz_row[ra[3:0]] = a_dense[k];
+                    ra = ra + 1;
+                end
+            end
+            // 每條 B 欄壓縮 + golden(用宣告 signed 的中間變數,避免無號乘)
+            for (c = 0; c < 16; c = c + 1) begin
+                b_bm[c] = '0; b_nz[c] = '0; rb = 0;
+                sum = '0; touched = 1'b0;
+                for (k = 0; k < 16; k = k + 1) begin
+                    if (b_dense[c][k] != 8'd0) begin
+                        b_bm[c][k]       = 1'b1;
+                        b_nz[c][rb[3:0]] = b_dense[c][k];
+                        rb = rb + 1;
+                    end
+                    if ((a_dense[k] != 8'd0) && (b_dense[c][k] != 8'd0)) begin
+                        touched = 1'b1;
+                        av = $signed({1'b0, a_dense[k]});  // uint8
+                        bv = b_dense[c][k];                // int8(位元重新解讀為 signed)
+                        sum = sum + av * bv;
+                    end
+                end
+                if (touched) begin
+                    if (fp) exp[base + c[LOCAL_BUF_AW-1:0]]  = sum;
+                    else    exp[base + c[LOCAL_BUF_AW-1:0]] += sum;
+                    exp_tch[base + c[LOCAL_BUF_AW-1:0]] = 1'b1;
+                end
+            end
+            // 驅動一拍 start
+            @(negedge clk);
+            mode = 1'b1; first_pass = fp; cur_n_base = base; start = 1'b1;
+            @(negedge clk);
+            start = 1'b0;
+            // 等 mfiu_seq done,再放 tail 排空(mac+tree+S8a+local_buffer RMW)
+            wait_done();
+        end
+    endtask
+
+    task automatic wait_done;
+        integer g;
+        begin
+            g = 0;
+            while ((done !== 1'b1) && (g < 300)) begin @(negedge clk); g = g + 1; end
+            repeat (8) @(negedge clk);
+        end
+    endtask
+
+    task automatic dump_read(input logic [LOCAL_BUF_AW-1:0] addr,
+                             output logic signed [ACC_W-1:0] val);
+        integer g;
+        begin
+            @(negedge clk); dump_en = 1'b1; dump_addr = addr;
+            @(negedge clk); dump_en = 1'b0;
+            g = 0;
+            while ((c_valid !== 1'b1) && (g < 8)) begin @(negedge clk); g = g + 1; end
+            val = c_out;
+            if (c_valid !== 1'b1) $display("[WARN] c_valid never high for addr %0d", addr);
+        end
+    endtask
+
+    task automatic check_all;
+        integer a; logic signed [ACC_W-1:0] got;
+        begin
+            for (a = 0; a < 512; a = a + 1) begin
+                if (exp_tch[a]) begin
+                    dump_read(a[LOCAL_BUF_AW-1:0], got);
+                    if (got !== exp[a]) begin
+                        errors = errors + 1;
+                        $display("[FAIL] addr %0d: got %0d, exp %0d", a, got, exp[a]);
+                    end else begin
+                        $display("[ OK ] addr %0d = %0d", a, got);
+                    end
+                end
+            end
+        end
+    endtask
+
+    integer i;
     initial begin
-        $dumpfile("tb_pe_row.vcd");
-        $dumpvars(0, tb_pe_row);
-        fails = 0;
+        errors = 0;
+        for (i = 0; i < 512; i = i + 1) begin exp[i] = '0; exp_tch[i] = 1'b0; end
+        mode = 1'b1; start = 1'b0; first_pass = 1'b0; cur_n_base = '0;
+        dump_en = 1'b0; dump_addr = '0;
+        clear_dense();
+        rst_n = 1'b0;
+        repeat (4) @(negedge clk);
+        rst_n = 1'b1;
+        repeat (2) @(negedge clk);
 
-        // 初始化
-        rst_n = 0;
-        in_valid = 0; acc_clear = 0; acc_dump = 0;
-        set_a_all(8'sd0);
-        set_b_all(8'sd0);
-        repeat (3) @(posedge clk);
-        @(negedge clk); rst_n = 1;
+        // ---- Tile 1 (base=0, first_pass=1):多欄交集 + 無交集欄 + 負權重 + 第二群 ----
+        clear_dense();
+        a_dense[0] = 8'd10; a_dense[3] = 8'd20; a_dense[7] = 8'd5;        // A fiber
+        b_dense[0][0] = 8'd2;  b_dense[0][3] = 8'd3;                       // col0: 10*2+20*3=80
+        b_dense[1][7] = 8'd4;                                             // col1: 5*4=20
+        b_dense[2][3] = 8'hFF;                                            // col2: 20*(-1)=-20
+        b_dense[3][5] = 8'd9;                                             // col3: A@5 無 -> 不寫
+        b_dense[8][0] = 8'd6;                                             // col8(第二群): 10*6=60
+        send_tile(1'b1, 9'd0);
 
-        // ---------------------------------------------------------
-        // T1: reset 後 c_valid=0, c_out=0
-        // ---------------------------------------------------------
-        @(posedge clk); #0.1;
-        expected = 0;
-        `CHECK((c_out === 32'sd0) && (c_valid === 1'b0), "T1 reset state")
+        // ---- Tile 2 (base=0, first_pass=0):同欄累加 ----
+        clear_dense();
+        a_dense[0] = 8'd10; a_dense[3] = 8'd20; a_dense[7] = 8'd5;
+        b_dense[0][0] = 8'd1;                                             // col0 += 10 -> 90
+        b_dense[2][3] = 8'd2;                                             // col2 += 40 -> 20
+        send_tile(1'b0, 9'd0);
 
-        // ---------------------------------------------------------
-        // T2: a=[1,1,...,1] · b=[1,1,...,1] = 16
-        //     ∑_{i=0..15} 1*1 = 16
-        // ---------------------------------------------------------
-        set_a_all(8'sd1);
-        set_b_all(8'sd1);
-        run_dot_product(1);  // acc_clear 同步拉,清前面殘留
-        expected = 16;
-        `CHECK(c_out === 32'sd16, "T2 ones-dot-ones = 16")
+        // ---- Tile 3 (base=16, first_pass=1):cur_n_base 位移 ----
+        clear_dense();
+        a_dense[0] = 8'd7; b_dense[0][0] = 8'd7;                          // addr16 = 49
+        send_tile(1'b1, 9'd16);
 
-        // ---------------------------------------------------------
-        // T3: a=[1,2,...,16] · b=[16,15,...,1] = 816
-        //     ∑_{i=1..16} i*(17-i) = 17*∑i - ∑i² = 17*136 - 1496 = 816
-        // ---------------------------------------------------------
-        set_a_ascending;
-        set_b_descending;
-        run_dot_product(1);
-        expected = 816;
-        `CHECK(c_out === 32'sd816, "T3 [1..16]·[16..1] = 816")
+        // ---- Tile 4 (base=16, first_pass=1):覆寫 addr16(49 -> 4)----
+        clear_dense();
+        a_dense[0] = 8'd2; b_dense[0][0] = 8'd2;                          // addr16 = 4
+        send_tile(1'b1, 9'd16);
 
-        // ---------------------------------------------------------
-        // T4: acc_clear 行為 — 連跑兩個 dot product,各自獨立
-        //     先跑 T2 (=16),再跑 T2 (=16),但中間 acc_clear,
-        //     確認第二次結果還是 16 (沒被前面累加)
-        // ---------------------------------------------------------
-        set_a_all(8'sd1);
-        set_b_all(8'sd1);
-        run_dot_product(1);  // 第一次,acc_clear
-        // 不檢查第一次(T2 已測過),直接第二次
-        run_dot_product(1);  // 第二次,再 acc_clear
-        expected = 16;
-        `CHECK(c_out === 32'sd16, "T4 acc_clear isolates between dot products")
+        repeat (4) @(negedge clk);
+        check_all();
 
-        // ---------------------------------------------------------
-        // 結束
-        // ---------------------------------------------------------
-        $display("");
-        if (fails == 0) begin
-            $display("==============================");
-            $display("ALL TESTS PASSED");
-            $display("==============================");
-        end else begin
-            $display("==============================");
-            $display("%0d TEST(S) FAILED", fails);
-            $display("==============================");
-        end
+        if (errors == 0) $display("\n==== tb_pe_row PASS ====\n");
+        else             $display("\n==== tb_pe_row FAIL: %0d error(s) ====\n", errors);
         $finish;
     end
 
-    // Timeout 防呆
     initial begin
-        #50000;
-        $display("[ERR] timeout");
+        #200000;
+        $display("[TIMEOUT] tb_pe_row did not finish");
         $finish;
     end
 
