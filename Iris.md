@@ -1,9 +1,9 @@
 # PE ARRAY Note
 本部分負責整個加速器的**運算核心(PE Array)**： 16×16 個 MAC 的 INT8 量化稀疏矩陣乘法引擎，以 Trapezoid 的 **TrIP** 稀疏資料流為基礎，它接收記憶體控制器(MC)送來的壓縮矩陣資料，完成 C = A × B 的乘加運算，輸出 partial sum 交由下游的 PPU 處理。
 
-**要解決的問題：** 量化後的神經網路權重與 activation 常是 mildly sparse(有相當比例為 0)，傳統 dense 2D 陣列(如 TPU)對每個元素都乘，遇到 0 的乘法等於白做，浪費乘法器與週期。
-**做法與效益：** PE array 不直接硬乘，而是先用 **bitmask 交集**找出 A、B 在同一個 k 位置都非零的「有效運算」，只把這些有效乘法分配進 256 個乘法器，並動態打包多欄 B，讓 16 條乘法 lane 即使在稀疏時也盡量填滿。相同 MAC 數量下，乘法器的時間花在真正有用的乘法而非乘 0，因而在稀疏 INT8 GEMM 上得到更高的乘法器利用率與有效吞吐量(論文 Fig 8 的 MS×MS 例子：同一筆運算 TPU 僅用到 25%、SIGMA 50%，TrIP 可達 100% 乘法器利用率)。
-**在系統中的位置與負責範圍：** 上游由 MC 以封包串流傳入壓縮的 A/B fiber，下游將累加完成的 psum 經 dump 寫回 GLB / PPU，整體由 controller 以握手訊號驅動。
+- **要解決的問題：** 量化後的神經網路權重與 activation 常是 mildly sparse(有相當比例為 0)，傳統 dense 2D 陣列(如 TPU)對每個元素都乘，遇到 0 的乘法等於白做，浪費乘法器與週期。
+- **做法與效益：** PE array 不直接硬乘，而是先用 **bitmask 交集**找出 A、B 在同一個 k 位置都非零的「有效運算」，只把這些有效乘法分配進 256 個乘法器，並動態打包多欄 B，讓 16 條乘法 lane 即使在稀疏時也盡量填滿。相同 MAC 數量下，乘法器的時間花在真正有用的乘法而非乘 0，因而在稀疏 INT8 GEMM 上得到更高的乘法器利用率與有效吞吐量(論文 Fig 8 的 MS×MS 例子：同一筆運算 TPU 僅用到 25%、SIGMA 50%，TrIP 可達 100% 乘法器利用率)。
+- **在系統中的位置與負責範圍：** 上游由 MC 以封包串流傳入壓縮的 A/B fiber，下游將累加完成的 psum 經 dump 寫回 GLB / PPU，整體由 controller 以握手訊號驅動。
 (以下為資料流與各模組的詳細說明。)
 
 ## 資料流(MC egress → C 輸出)
@@ -12,7 +12,7 @@
 2. **pe_ab_buffer**(16 row 共用) — 存一個 tile 的 16 條 A fiber + 16 欄 B fiber，收滿發出 `tile_ready` 訊號。
 3. 16 條 **pe_row** 一起開跑(`start = tile_ready`)，row r 吃自己那條 A(`a_nz[r]`)，16 欄 B 共享。
    分配由位置決定(無排程器): MC 送 A 的順序 = 「A 第幾列 → 第幾條 row」。
-4. 每條 row: **pe_mfiu_seq**(批次把 A + B 餵進 `mfiu` 做交集)→ **crossbar**(metadata 將位置資訊轉成實際 A/B 值) → **pe_row_tail**(mac×16 → reduction tree → local buffer 跨 K 累加)。
+4. 每條 row： **pe_mfiu_seq**(批次把 A + B 餵進 `mfiu` 做交集)→ **crossbar**(metadata 將位置資訊轉成實際 A/B 值) → **pe_row_tail**(mac×16 → reduction tree → local buffer 跨 K 累加)。
 5. K 全累加完後 controller 廣播 **dump**，逐欄讀出:`c_out[0..15]` 該欄跨 16 個輸出列的 psum。
 
 握手機制：`pe_compute_done` = 16 row 的 `done` 全到齊、再延遲 drain margin(等 buffer 累加完成)，controller 等到它才換下一批 tile，避免覆寫 `pe_ab_buffer`。
@@ -137,7 +137,7 @@ pe_array.sv                            top
 | `out_bitmask` / `out_nz` / `out_len` | out | 16 / [16][8] / 5 | 組好的壓縮 fiber |
 | `out_side` / `out_idx` / `out_valid` | out | 1 / 4 / 1 | A=0 B=1 / phase 內序號 / 1 拍 strobe |
 
-> ![pe_entry_fsm](pics/pe_entry_fsm.png)
+<img src="pics/pe_entry_fsm.png" width="60%">
 
 ### pe/pe_ab_buffer.sv — 共享 A/B fiber buffer
 
@@ -175,7 +175,7 @@ pe_array.sv                            top
 | `out_a_meta` / `out_b_meta` | out | [16][4] / [16][6] | 各 lane 的 A index / {B 欄號, B index} |
 | `out_grp_base` / `out_grp_ncol` | out | 4 / 3 | 本批起始真實欄 / 實際欄數(1..4) |
 
-> ![buffer2mfiu_fsm](pics/buffer2mfiu_fsm.png)
+<img src="pics/buffer2mfiu_fsm.png" width="80%">
 
 ### mfiu/mfiu.sv — multi-fiber bitmask 交集核心
 
@@ -197,7 +197,7 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 | `a_meta_data` / `b_meta_data` | out | [16][4] / [16][6] | 壓縮 A index / {B 欄號[5:4], B index[3:0]} |
 | `b_utilization` / `meta_valid` | out | 2 / 1 | 實際打包欄數編碼 / meta 有效 |
 
-> ![mfiu_fsm](pics/mfiu_fsm.png)
+<img src="pics/mfiu_fsm.png" width="80%">
 
 ### pe/pe_row_tail.sv — row 尾段(mac + reduction + accumulate)
 本模組負責接收來自 Crossbar 的資訊，並完成乘積累加等尾段處理：
@@ -239,8 +239,9 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 - 此處的 Data Hazard 為 Read-After-Write（RAW Hazard），讀取上一個 cycle 才剛寫入的值可能會讀到舊值，因爲 SRAM 會讀到舊值，那 bypass 機制就是當連續兩筆要寫同一個位址時，直接把上一拍算好的結果拉一條捷徑（Bypass）傳給下一拍，根本不去等 SRAM。
 - 在結果 dump 階段，本模組採用讀後清除 (Read-and-Clear) 機制，於讀取有效數值後之次一週期，硬體將自動對該位址寫入零值，供下一矩陣分塊 (Tile) 運算使用，實作時曾經沒清除，導致輸出仍是舊值。
 
-1. 實作上要注意避免記憶體衝突: 同拍有效寫入須落在互異 bank
-2. Structural Hazard 議題: 避免共用 read port，`dump_en`（輸出整批結果） 不可與 `acc_en`(累加操作) 同時操作。
+備註：
+1. 實作上要注意避免記憶體衝突：同拍有效寫入須落在互異 bank
+2. Structural Hazard 議題：避免共用 read port，`dump_en`（輸出整批結果） 不可與 `acc_en`(累加操作) 同時操作。
 
 | 訊號 | 方向 | 寬度 | 說明 |
 |------|------|------|------|
@@ -313,7 +314,7 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 - 模式
     - reduction: val_out = val_left + val_right
     - merge: val_out = min(val_left, val_right)
-- Ref: 
+- Ref: 參考資料[1]
 
 > ![tree](pics/tree.png)
 
@@ -337,3 +338,6 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 - cut_after[6] = 1 ➔ (Lane 6 結算 C[2][30])
 
 因此 cut_after 遇到 1 時就結算來自同欄的輸出，也可發現 col 是連續傳的，不會有需要處理不連續和加總的問題
+
+## 參考資料
+1. F. Muñoz-Martínez et al., "Flexagon: A Multi-Dataflow Sparse-Sparse Matrix Multiplication Accelerator for Efficient DNN Processing," in Proceedings of the 28th ACM International Conference on Architectural Support for Programming Languages and Operating Systems (ASPLOS), 2023.
