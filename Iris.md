@@ -1,4 +1,10 @@
-# PE ARRAY RTL Note
+# PE ARRAY Note
+本部分負責整個加速器的**運算核心(PE Array)**： 16×16 個 MAC 的 INT8 量化稀疏矩陣乘法引擎，以 Trapezoid 的 **TrIP** 稀疏資料流為基礎，它接收記憶體控制器(MC)送來的壓縮矩陣資料，完成 C = A × B 的乘加運算，輸出 partial sum 交由下游的 PPU 處理。
+
+**要解決的問題：** 量化後的神經網路權重與 activation 常是 mildly sparse(有相當比例為 0)，傳統 dense 2D 陣列(如 TPU)對每個元素都乘，遇到 0 的乘法等於白做，浪費乘法器與週期。
+**做法與效益：** PE array 不直接硬乘，而是先用 **bitmask 交集**找出 A、B 在同一個 k 位置都非零的「有效運算」，只把這些有效乘法分配進 256 個乘法器，並動態打包多欄 B，讓 16 條乘法 lane 即使在稀疏時也盡量填滿。相同 MAC 數量下，乘法器的時間花在真正有用的乘法而非乘 0，因而在稀疏 INT8 GEMM 上得到更高的乘法器利用率與有效吞吐量(論文 Fig 8 的 MS×MS 例子：同一筆運算 TPU 僅用到 25%、SIGMA 50%，TrIP 可達 100% 乘法器利用率)。
+**在系統中的位置與負責範圍：** 上游由 MC 以封包串流傳入壓縮的 A/B fiber，下游將累加完成的 psum 經 dump 寫回 GLB / PPU，整體由 controller 以握手訊號驅動。
+(以下為資料流與各模組的詳細說明。)
 
 ## 資料流(MC egress → C 輸出)
 紀錄上游 memory controller 如何送整批的資料給 16 條 pe row 算
@@ -7,10 +13,9 @@
 3. 16 條 **pe_row** 一起開跑(`start = tile_ready`)，row r 吃自己那條 A(`a_nz[r]`)，16 欄 B 共享。
    分配由位置決定(無排程器): MC 送 A 的順序 = 「A 第幾列 → 第幾條 row」。
 4. 每條 row: **pe_mfiu_seq**(批次把 A + B 餵進 `mfiu` 做交集)→ **crossbar**(metadata 將位置資訊轉成實際 A/B 值) → **pe_row_tail**(mac×16 → reduction tree → local buffer 跨 K 累加)。
-5. K 全累加完後 controller 廣播 **dump**，逐欄讀出:`c_out[0..15]` = 該欄跨 16 個輸出列的 psum。
+5. K 全累加完後 controller 廣播 **dump**，逐欄讀出:`c_out[0..15]` 該欄跨 16 個輸出列的 psum。
 
-握手機制:`pe_compute_done` = 16 row 的 `done` 全到齊、再延遲 drain margin(等 buffer 累加完成),
-controller 等到它才換下一批 tile，避免覆寫 `pe_ab_buffer`。
+握手機制：`pe_compute_done` = 16 row 的 `done` 全到齊、再延遲 drain margin(等 buffer 累加完成)，controller 等到它才換下一批 tile，避免覆寫 `pe_ab_buffer`。
 
 ---
 
@@ -72,7 +77,7 @@ pe_array.sv                            top
 | Local buf | `N_BANK_LBUF` / `LOCAL_BUF_DEPTH` / `LOCAL_BUF_AW` | 4 / 512 / 9 | 每 row psum buffer |
 
 > dataflow MODE(Dense/TrIP)編碼**不在**此檔：它在 controller 的 `ASIC.svh`，PE array 只收
-> 整合邊界算好的 1-bit `mode`(1 = TrIP)。Packet / AXI / GLB 參數也都在 `rtl/pe` 之外。
+> 整合邊界算好的 1-bit `mode`(1 = TrIP)，Packet / AXI / GLB 參數也都在 `rtl/pe` 之外。
 
 ---
 
@@ -132,6 +137,8 @@ pe_array.sv                            top
 | `out_bitmask` / `out_nz` / `out_len` | out | 16 / [16][8] / 5 | 組好的壓縮 fiber |
 | `out_side` / `out_idx` / `out_valid` | out | 1 / 4 / 1 | A=0 B=1 / phase 內序號 / 1 拍 strobe |
 
+> ![pe_entry_fsm](pics/pe_entry_fsm.png)
+
 ### pe/pe_ab_buffer.sv — 共享 A/B fiber buffer
 
 - 接收 `pe_entry` 每 cycle 輸出的 fiber，並依 side 寫進 A 或 B buffer 的對應 idx 位置。
@@ -151,9 +158,12 @@ pe_array.sv                            top
 
 - 本模組負責執行單一 A 列與 16 欄 B 行之 bitmask 交集運算，硬體採用分批處理機制，將「A 列之 bitmask」與「至多 4 欄之 B bitmask」合併為單一批次，輸入至 mfiu 運算單元。
 - 模組會依據 mfiu 回傳之 b_utilization 狀態來更新行指標 (col_ptr)，當處理至包含最後一欄 B 的批次時，模組將觸發 a_last 訊號，指示 mfiu 結束該列之處理狀態。
-- 此外，當系統處於稠密運算模式 (mode=0, StandardIP) 時，將觸發 Bypass 機制略過 mfiu 。在 mode=1下，每個批次將於單一週期內輸出 metadata 至 Crossbar，其中包含該批次之起始欄位索引 (grp_base)。
+- 此外，當系統處於稠密運算模式 (mode=0, StandardIP) 時，將觸發 Bypass 機制略過 mfiu 。
+- 在 mode=1 下，每個批次將於單一週期內輸出 metadata 至 Crossbar，其中包含該批次之起始欄位索引 (grp_base)。
 
-> 如果 mfiu 直接跟 crossbar 說這批的第 0 欄跟第 2 欄有交集，但 crossbar 不知道是 16col 中的哪些欄！例：grp_base = 8，那這批的 4 欄就代表實際上的第 8, 9, 10, 11 欄。grp_ncol 表示這批有幾欄有效值
+備註：
+1. 如果 mfiu 直接跟 crossbar 說這批的第 0 欄跟第 2 欄有交集，但 crossbar 會不知道是 16col 中實際的哪些欄
+2. 例：grp_base = 8，那這批的 4 欄就代表實際上的第 8, 9, 10, 11 欄。grp_ncol 表示這批有幾欄有效值
 
 | 訊號 | 方向 | 寬度 | 說明 |
 |------|------|------|------|
@@ -164,6 +174,8 @@ pe_array.sv                            top
 | `out_effectual` | out | 5 | 本批有效交集數(0..16) |
 | `out_a_meta` / `out_b_meta` | out | [16][4] / [16][6] | 各 lane 的 A index / {B 欄號, B index} |
 | `out_grp_base` / `out_grp_ncol` | out | 4 / 3 | 本批起始真實欄 / 實際欄數(1..4) |
+
+> ![buffer2mfiu_fsm](pics/buffer2mfiu_fsm.png)
 
 ### mfiu/mfiu.sv — multi-fiber bitmask 交集核心
 
@@ -185,9 +197,9 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 | `a_meta_data` / `b_meta_data` | out | [16][4] / [16][6] | 壓縮 A index / {B 欄號[5:4], B index[3:0]} |
 | `b_utilization` / `meta_valid` | out | 2 / 1 | 實際打包欄數編碼 / meta 有效 |
 
+> ![mfiu_fsm](pics/mfiu_fsm.png)
 
 ### pe/pe_row_tail.sv — row 尾段(mac + reduction + accumulate)
-
 本模組負責接收來自 Crossbar 的資訊，並完成乘積累加等尾段處理：
 
 - S6 (MAC)： 執行 16 組之平行乘法運算。
@@ -241,8 +253,8 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 
 ### pe/sram_128x32_1r1w.sv — SRAM wrapper
 - 128 words × 32-bit 1R1W SRAM，讀寫獨立，讀延遲 1 拍。
-- 當定義 USE_SRAM_MACRO 時：系統將實例化 (Instantiate) 真實的 ADFP 記憶體巨集 (Memory Macro)，供實體設計階段使用。
-- 未定義時：系統將合成行為級之暫存器陣列 (Behavioral register array)，以支援 RTL 模擬與早期邏輯合成 (Early logic synthesis) 驗證。
+- 當定義 USE_SRAM_MACRO 時：系統將實例化真實的 ADFP 記憶體巨集 (Memory Macro)，供實體設計階段使用。
+- 未定義時：系統將合成行為級之暫存器陣列，以支援 RTL 模擬與早期邏輯合成驗證。
 - 兩種介面時序一致，作為 `local_buffer_row` 的 bank(每 row 4 顆)。
 
 | 訊號 | 方向 | 寬度 | 說明 |
@@ -275,7 +287,7 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 ### dist/reduction_tree_radix16.sv — 分段加總樹
 本模組負責將 1-16 個 partial product 依據 cut_after 訊號劃分為多個連續區段 (Sub-trees)，並平行計算各區段的總和。
 - 當 cut_after[i] = 1 時，代表 lane i 與 i+1 之間為區段邊界；若全為 0，則將整列 16 個輸入視為單一區段加總。
-- 採用 Multi-tap 輸出設計。當 subtree_valid[p] = 1，表示位置 p 為某個區段的末端，對應的 subtree_sums[p] 即為該區段之加總結果。
+- 採用 Multi-tap 輸出設計，當 subtree_valid[p] = 1，表示位置 p 為某個區段的末端，對應的 subtree_sums[p] 即為該區段之加總結果。
 - 輸入的 partial product 會先進行 Sign-extension 擴展至 INT32 後再進行加總，整個模組的運算 Latency 為 1 個 Cycle。
 
 | 訊號 | 方向 | 寬度 | 說明 |
@@ -290,7 +302,22 @@ MFIU 的 FSM(IDLE→LOAD_A→WAIT_B→CAL→OUT):
 - 這段程式碼的核心邏輯 val[lvl][i] = b[lvl-1][i] ? ... 。
 - 一般加總樹無法處理動態切斷 (cut_after)，而這裡引入了邊界標記 b，在樹狀折疊的過程中，只要當前計算路徑發現了「段界」，加法器就會被 Bypass 掉，這保證了資料絕對不會跨段污染。
 
-＊用例子比較好想：
+論文在 tree 的實作提及有參考 Flexagon MRN 架構，但未詳述如何使用，而且 Flexagon MRN 過於複雜，且因為我們並未實作 TrGT / TrGS，不需要用到 merge 模式，但仍需要動態切斷的功能，因此我們實作上參考了論文並使用 Kogge-Stone Segmented Scan 方式，以下補充 Flexagon:
+- Flexagon’s merge-reduction network  (MRN)
+    - 原方法: merge and reduce multiple partial sum clusters in a parallel and non-blocking
+    - 論文: enhance it with a banked local buffer
+- 樹節點的元件: adder, comparator, muxes
+    - Adder: reduction(TrIP / Dense IP)
+    - comparator: merge(TrGT / TrGS)
+    - mux: mode/input/boundary
+- 模式
+    - reduction: val_out = val_left + val_right
+    - merge: val_out = min(val_left, val_right)
+- Ref: 
+
+> ![tree](pics/tree.png)
+
+＊例子：
 假設 MFIU 打包了 4 欄 B：Col 19, Col 20, Col 25, Col 30。
 算出來的交集數量分別是：2 個, 1 個, 3 個, 1 個。
 
