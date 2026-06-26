@@ -3,11 +3,12 @@
 // Top module : pe_array   (Trapezoid-Lite 16x16 sparse-GEMM PE)
 // Language   : SystemVerilog-2012. trapezoid_pkg must elaborate first.
 //
-// SRAM: by default sram_128x32_1r1w elaborates as a behavioral reg array
-//   (large area, fine for a first synthesis pass). Define USE_SRAM_MACRO and
-//   add the ADFP macro lib to bind the real 1R1W 128x32 macro instead.
+// SRAM:
+//   default             : behavioral reg array for RTL simulation.
+//   USE_SRAM_BLACKBOX   : keep SRAM as blackbox for quick Yosys area sanity.
+//   USE_SRAM_MACRO      : bind the real ADFP 1R1W 128x32 ASIC macro.
 //
-// Self-contained: no external `include and no macros besides USE_SRAM_MACRO.
+// Self-contained: no external `include.
 // (This is the bare compute engine; the SoC EPU_wrapper / AXI-S6 shell is separate.)
 
 rtl/trapezoid_pkg.sv

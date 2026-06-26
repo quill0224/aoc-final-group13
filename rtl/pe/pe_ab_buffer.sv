@@ -23,14 +23,24 @@ module pe_ab_buffer (
 
     output logic              tile_ready,
 
-    // Read arrays
-    output logic [15:0]       a_bm  [0:15],
-    output logic [15:0][7:0]  a_nz  [0:15],
-    output logic [4:0]        a_len [0:15],
-    output logic [15:0]       b_bm  [0:15],
-    output logic [15:0][7:0]  b_nz  [0:15],
-    output logic [4:0]        b_len [0:15]
+    // Flattened read arrays. Index mapping:
+    //   bm_flat [idx*16 +: 16]
+    //   nz_flat [(idx*16+nz_idx)*8 +: 8]
+    //   len_flat[idx*5 +: 5]
+    output logic [16*16-1:0]       a_bm_flat,
+    output logic [16*16*8-1:0]     a_nz_flat,
+    output logic [16*5-1:0]        a_len_flat,
+    output logic [16*16-1:0]       b_bm_flat,
+    output logic [16*16*8-1:0]     b_nz_flat,
+    output logic [16*5-1:0]        b_len_flat
 );
+
+    logic [15:0]      a_bm  [0:15];
+    logic [15:0][7:0] a_nz  [0:15];
+    logic [4:0]       a_len [0:15];
+    logic [15:0]      b_bm  [0:15];
+    logic [15:0][7:0] b_nz  [0:15];
+    logic [4:0]       b_len [0:15];
 
     integer i;
     always_ff @(posedge clk or negedge rst_n) begin
@@ -54,5 +64,19 @@ module pe_ab_buffer (
 
     // B entry 15 completes the ordered tile transfer.
     assign tile_ready = in_valid && in_side && (in_idx == 4'd15);
+
+    genvar gi, gj;
+    generate
+        for (gi = 0; gi < 16; gi = gi + 1) begin : g_flat_fiber
+            assign a_bm_flat[gi*16 +: 16] = a_bm[gi];
+            assign b_bm_flat[gi*16 +: 16] = b_bm[gi];
+            assign a_len_flat[gi*5 +: 5]  = a_len[gi];
+            assign b_len_flat[gi*5 +: 5]  = b_len[gi];
+            for (gj = 0; gj < 16; gj = gj + 1) begin : g_flat_nz
+                assign a_nz_flat[(gi*16 + gj)*8 +: 8] = a_nz[gi][gj];
+                assign b_nz_flat[(gi*16 + gj)*8 +: 8] = b_nz[gi][gj];
+            end
+        end
+    endgenerate
 
 endmodule

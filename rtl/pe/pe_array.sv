@@ -77,10 +77,12 @@ module pe_array
     // =====================================================================
     // Shared A/B tile buffer
     // =====================================================================
-    logic [15:0]      buf_a_bm [0:15];
-    logic [15:0][7:0] buf_a_nz [0:15];
-    logic [15:0]      buf_b_bm [0:15];
-    logic [15:0][7:0] buf_b_nz [0:15];
+    logic [16*16-1:0]   buf_a_bm_flat;
+    logic [16*16*8-1:0] buf_a_nz_flat;
+    logic [16*5-1:0]    buf_a_len_flat;
+    logic [16*16-1:0]   buf_b_bm_flat;
+    logic [16*16*8-1:0] buf_b_nz_flat;
+    logic [16*5-1:0]    buf_b_len_flat;
     logic             tile_ready;
 
     pe_ab_buffer u_buf (
@@ -88,8 +90,8 @@ module pe_array
         .in_bitmask(ent_bm), .in_nz(ent_nz), .in_len(ent_len),
         .in_side(ent_side), .in_idx(ent_idx), .in_valid(ent_valid),
         .tile_ready(tile_ready),
-        .a_bm(buf_a_bm), .a_nz(buf_a_nz), .a_len(),
-        .b_bm(buf_b_bm), .b_nz(buf_b_nz), .b_len()
+        .a_bm_flat(buf_a_bm_flat), .a_nz_flat(buf_a_nz_flat), .a_len_flat(buf_a_len_flat),
+        .b_bm_flat(buf_b_bm_flat), .b_nz_flat(buf_b_nz_flat), .b_len_flat(buf_b_len_flat)
     );
 
     // Start all rows when the ordered tile transfer completes.
@@ -107,8 +109,10 @@ module pe_array
             pe_row u_row (
                 .clk(clk), .rst_n(rst_n),
                 .mode(mode), .start(start), .done(done_row[gr]),
-                .a_bm_row(buf_a_bm[gr]), .b_bm(buf_b_bm),
-                .a_nz_row(buf_a_nz[gr]), .b_nz(buf_b_nz),
+                .a_bm_row(buf_a_bm_flat[gr*N_MUL_ROW +: N_MUL_ROW]),
+                .b_bm_flat(buf_b_bm_flat),
+                .a_nz_row_flat(buf_a_nz_flat[gr*16*8 +: 16*8]),
+                .b_nz_flat(buf_b_nz_flat),
                 .first_pass(first_pass), .cur_n_base(cur_n_base),
                 .dump_en(dump_en), .dump_addr(dump_addr),
                 .c_valid(cvld_row[gr]), .c_out(c_out[gr])
@@ -168,5 +172,7 @@ module pe_array
     assign dbg_ent_side    = ent_side;
     assign dbg_ent_idx     = ent_idx;
     assign dbg_ent_valid   = ent_valid;
+
+    wire _unused_flat_len = &{1'b0, buf_a_len_flat, buf_b_len_flat};
 
 endmodule
