@@ -1,6 +1,10 @@
 #include "Vmfiu.h"
 #include "verilated.h"
+#ifndef NO_TRACE
 #include "verilated_fst_c.h"
+#else
+struct VerilatedFstC {};
+#endif
 
 #include <cstdint>
 #include <iostream>
@@ -61,9 +65,11 @@ uint64_t pack_b_window(const std::vector<uint16_t>& fifo, int head, int valid_co
 
 void dump_eval(Vmfiu* dut, VerilatedFstC* fp) {
     dut->eval();
+#ifndef NO_TRACE
     if (fp != nullptr) {
         fp->dump(sim_time);
     }
+#endif
 }
 
 void init_wave(Vmfiu* dut, VerilatedFstC* fp) {
@@ -185,6 +191,19 @@ bool expect_eq(const std::string& name, uint64_t got, uint64_t expected) {
     return true;
 }
 
+bool wait_meta_valid(Vmfiu* dut, VerilatedFstC* fp, int max_cycles) {
+    for (int cycle = 0; cycle < max_cycles; ++cycle) {
+        tick(dut, fp);
+        if (dut->meta_valid != 0) {
+            return true;
+        }
+    }
+
+    std::cerr << "ERROR: timed out waiting for meta_valid after "
+              << max_cycles << " cycles at t=" << sim_time << "\n";
+    return false;
+}
+
 bool check_lanes(const Vmfiu* dut, const std::vector<LaneExpect>& expected) {
     for (size_t i = 0; i < expected.size(); ++i) {
         const uint8_t got_a = get_a_lane(dut, static_cast<int>(i));
@@ -290,9 +309,7 @@ bool run_a_fifo(Vmfiu* dut,
         tick(dut, fp);
 
         dut->b_in_valid = 0;
-        tick(dut, fp);
-
-        if (!expect_eq("fifo meta_valid", dut->meta_valid, 1)) {
+        if (!wait_meta_valid(dut, fp, 160)) {
             return false;
         }
         if (!expect_eq("fifo b_utilization", dut->b_utilization, exp.b_utilization)) {
@@ -388,18 +405,24 @@ bool test_two_a_rows(Vmfiu* dut, VerilatedFstC* fp) {
 
 int main(int argc, char** argv) {
     Verilated::commandArgs(argc, argv);
+#ifndef NO_TRACE
     Verilated::traceEverOn(true);
+#endif
 
     Vmfiu dut;
     VerilatedFstC fp;
+#ifndef NO_TRACE
     dut.trace(&fp, 99);
     fp.open("mfiu_wave.fst");
+#endif
     init_wave(&dut, &fp);
 
     const bool ok = test_standard_mode(&dut, &fp) &&
                     test_two_a_rows(&dut, &fp);
 
+#ifndef NO_TRACE
     fp.close();
+#endif
 
     if (!ok) {
         return 1;

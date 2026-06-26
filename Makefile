@@ -65,7 +65,7 @@ G13_VERILATOR := verilator
         run_SRAM run_GLB run_DMA run_CTRL run_MC run_INTEGRATION run_unit_all \
         tb_mac tb_reduction_tree tb_lbuf tb_mfiu_adapter tb_dist_net \
         tb_dist_net_trip tb_mfiu_mf_chain \
-        tb_pe_row_full tb_pe_array lint g13_clean
+        tb_pe_row_full tb_pe_array tb_mfiu_pe lint g13_clean
 all: help
 
 # =============================================================================
@@ -96,6 +96,7 @@ help:
 	@echo "  tb_dist_net_trip                 - dist_net_row_trip TrIP multi-fiber test"
 	@echo "  tb_mfiu_mf_chain                 - mfiu_adapter_mf to dist_net_row_trip chain test"
 	@echo "  tb_pe_array                      - pe_array end-to-end test, 16x16"
+	@echo "  tb_mfiu_pe                       - 4x4x16 row-local packed MFIU test"
 	@echo "  lint                             - Verilator lint, top = pe_row_full"
 	@echo ""
 	@echo "Clean targets:"
@@ -326,6 +327,18 @@ tb_pe_array: $(G13_PKG) \
 	vvp tb_pe_array.vvp
 
 # -----------------------------------------------------------------------------
+# row-local packed MFIU unit test
+# 4 A rows x 4 B columns x K=16, producing packed vectors for 16 PE rows.
+# -----------------------------------------------------------------------------
+tb_mfiu_pe: $(G13_PKG) $(G13_RTL_DIR)/mfiu/mfiu_pe16x16.sv $(G13_TB_DIR)/tb_mfiu_pe16x16.sv
+	$(G13_IVERILOG) -g2012 -o tb_mfiu_pe.vvp \
+		-I$(G13_RTL_DIR) \
+		$(G13_PKG) \
+		$(G13_RTL_DIR)/mfiu/mfiu_pe16x16.sv \
+		$(G13_TB_DIR)/tb_mfiu_pe16x16.sv
+	vvp tb_mfiu_pe.vvp
+
+# -----------------------------------------------------------------------------
 # Group 13 RTL lint
 # -----------------------------------------------------------------------------
 lint:
@@ -356,11 +369,12 @@ clean:
 .PHONY: sim_mfiu
 sim_mfiu: $(G13_PKG) $(G13_RTL_DIR)/mfiu/mfiu.sv tb/tb_mfiu.cpp
 	@mkdir -p build
-	$(G13_VERILATOR) -Wall -Wno-UNUSEDPARAM --trace-fst --cc --exe --build -sv \
+	$(G13_VERILATOR) -Wall -Wno-UNUSEDPARAM --cc --exe --build -sv \
 		-I$(G13_RTL_DIR) \
 		$(G13_PKG) \
 		$(G13_RTL_DIR)/mfiu/mfiu.sv \
 		tb/tb_mfiu.cpp \
 		--top-module mfiu \
-		--Mdir build/mfiu_verilator
+		--Mdir build/mfiu_verilator \
+		-CFLAGS -DNO_TRACE
 	./build/mfiu_verilator/Vmfiu
