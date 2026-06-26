@@ -1,0 +1,10 @@
+LAYOUT SYSTEM GDS
+LAYOUT PATH "../../outputs/CHIP.gds"
+LAYOUT PRIMARY "CHIP"
+
+DRC RESULTS DATABASE "output/BEOL.db"
+DRC SUMMARY REPORT "output/BEOL.sum"
+
+DRC ICSTATION YES
+include ./scr/Dummy_BEOL_CalibreYE
+

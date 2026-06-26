@@ -1,0 +1,1288 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay max
+        -max_paths 1
+        -sort_by group
+Design : CHIP
+Version: T-2022.03
+Date   : Fri Jun 26 04:26:59 2026
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: ss0p72vm40c   Library: N16ADFP_StdCellss0p72vm40c
+Wire Load Model Mode: segmented
+
+  Startpoint: u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_bitmask_q_reg_1_
+              (rising edge-triggered flip-flop clocked by axi_clk)
+  Endpoint: u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_meta_data_reg_0__2_
+            (rising edge-triggered flip-flop clocked by axi_clk)
+  Path Group: axi_clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_14
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  mfiu_4             ZeroWireload          N16ADFP_StdCellss0p72vm40c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock axi_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_bitmask_q_reg_1_/CP (DFCNQD1BWP20P90)
+                                                          0.00       0.50 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_bitmask_q_reg_1_/Q (DFCNQD1BWP20P90)
+                                                          0.11       0.61 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2055/ZN (INR2D1BWP16P90)
+                                                          0.02       0.63 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2056/ZN (CKND2D4BWP16P90)
+                                                          0.03       0.66 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2058/ZN (ND2D1BWP16P90)
+                                                          0.05       0.71 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2068/ZN (XNR2D1BWP20P90)
+                                                          0.07       0.78 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2072/ZN (MAOI222D1BWP16P90)
+                                                          0.03       0.81 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2074/Z (XOR2D1BWP20P90)
+                                                          0.04       0.86 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U470/ZN (INVD1BWP20P90)
+                                                          0.01       0.87 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U465/ZN (OAI22D1BWP20P90)
+                                                          0.02       0.89 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2076/ZN (ND2D1BWP16P90)
+                                                          0.02       0.91 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U458/ZN (NR2D1BWP20P90)
+                                                          0.02       0.92 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U12/Z (AO21D1BWP16P90)
+                                                          0.02       0.95 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U168/ZN (INVD4BWP16P90)
+                                                          0.02       0.97 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U10/ZN (ND2D1BWP16P90)
+                                                          0.02       0.99 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U446/ZN (NR2D1BWP20P90)
+                                                          0.01       1.01 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2079/ZN (INR2D1BWP16P90)
+                                                          0.05       1.05 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2085/ZN (AOI21D1BWP16P90)
+                                                          0.06       1.12 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2094/CO (FA1D1BWP16P90)
+                                                          0.07       1.18 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2089/ZN (INVD1BWP16P90)
+                                                          0.02       1.20 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2096/ZN (IND2D1BWP16P90)
+                                                          0.02       1.22 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2097/ZN (OAI21D1BWP16P90)
+                                                          0.02       1.24 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2098/ZN (AOI21D1BWP16P90)
+                                                          0.02       1.25 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2099/ZN (OAI21D1BWP16P90)
+                                                          0.01       1.27 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2100/ZN (NR2D1BWP16P90)
+                                                          0.05       1.31 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2116/CO (FA1D1BWP16P90)
+                                                          0.06       1.37 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U739/ZN (INVD1BWP20P90)
+                                                          0.01       1.39 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2117/ZN (IND2D1BWP20P90)
+                                                          0.01       1.40 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2119/ZN (INR2D1BWP16P90)
+                                                          0.02       1.42 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2120/ZN (IND2D1BWP20P90)
+                                                          0.02       1.44 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U629/ZN (INVD1BWP20P90)
+                                                          0.01       1.45 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1122/ZN (ND2D1BWP20P90)
+                                                          0.01       1.46 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1120/ZN (OAI21D1BWP20P90)
+                                                          0.02       1.48 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U738/ZN (INR2D1BWP16P90)
+                                                          0.03       1.52 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U719/CO (FA1D2BWP20P90)
+                                                          0.06       1.57 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U833/ZN (INVD1BWP20P90)
+                                                          0.01       1.59 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U832/ZN (IND2D1BWP16P90)
+                                                          0.02       1.60 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2147/ZN (ND2D1BWP16P90)
+                                                          0.01       1.62 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2148/ZN (INR2D1BWP20P90)
+                                                          0.01       1.63 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1229/ZN (INVD1BWP20P90)
+                                                          0.01       1.64 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U827/Z (OA21D1BWP20P90)
+                                                          0.02       1.66 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U826/ZN (INR2D1BWP16P90)
+                                                          0.05       1.71 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1203/ZN (ND2D1BWP20P90)
+                                                          0.02       1.73 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1202/ZN (OAI21D1BWP20P90)
+                                                          0.02       1.76 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2163/ZN (INR2D2BWP16P90)
+                                                          0.02       1.78 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2185/CO (FA1D1BWP16P90)
+                                                          0.04       1.82 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2190/ZN (ND2D1BWP16P90)
+                                                          0.01       1.83 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2191/ZN (OAI21D1BWP16P90)
+                                                          0.02       1.85 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1555/ZN (AOI211D1BWP20P90)
+                                                          0.02       1.88 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2192/Z (OA21D1BWP16P90)
+                                                          0.03       1.91 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2193/ZN (OAI31D4BWP16P90)
+                                                          0.02       1.93 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2205/ZN (OAI31D1BWP16P90)
+                                                          0.02       1.95 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2206/ZN (XNR2D1BWP20P90)
+                                                          0.03       1.99 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U162/ZN (OAI21D2BWP16P90)
+                                                          0.09       2.07 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U351/ZN (ND2D1BWP16P90)
+                                                          0.04       2.11 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U683/ZN (NR2D1BWP16P90)
+                                                          0.03       2.14 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U157/ZN (ND2D1BWP20P90)
+                                                          0.02       2.16 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U156/Z (XOR2D1BWP20P90)
+                                                          0.03       2.19 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U155/ZN (NR2D2BWP20P90)
+                                                          0.04       2.23 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U149/ZN (AOI21D1BWP20P90)
+                                                          0.03       2.26 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U146/Z (XOR2D1BWP20P90)
+                                                          0.03       2.29 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2211/ZN (NR2D1BWP16P90)
+                                                          0.05       2.34 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U139/ZN (AOI21D1BWP20P90)
+                                                          0.03       2.38 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U133/Z (XOR2D1BWP20P90)
+                                                          0.03       2.40 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2213/ZN (NR2D1BWP16P90)
+                                                          0.05       2.45 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U121/ZN (AOI21D1BWP20P90)
+                                                          0.03       2.49 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U119/Z (XOR2D1BWP20P90)
+                                                          0.03       2.51 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2214/ZN (NR2D1BWP16P90)
+                                                          0.05       2.56 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U111/ZN (AOI21D1BWP20P90)
+                                                          0.03       2.60 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U105/Z (XOR2D1BWP20P90)
+                                                          0.03       2.63 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2216/ZN (NR2D1BWP16P90)
+                                                          0.06       2.68 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2217/ZN (AOI21D1BWP16P90)
+                                                          0.03       2.72 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2218/Z (XOR2D1BWP16P90)
+                                                          0.03       2.74 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2219/ZN (NR2D1BWP16P90)
+                                                          0.06       2.80 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2221/ZN (AOI21D1BWP16P90)
+                                                          0.03       2.83 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2222/Z (XOR2D1BWP16P90)
+                                                          0.03       2.86 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2223/ZN (NR2D1BWP16P90)
+                                                          0.06       2.91 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2225/ZN (AOI21D1BWP16P90)
+                                                          0.03       2.95 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2226/Z (XOR2D1BWP16P90)
+                                                          0.03       2.97 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2227/ZN (NR2D1BWP16P90)
+                                                          0.06       3.03 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2229/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.06 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2230/Z (XOR2D1BWP16P90)
+                                                          0.03       3.09 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2231/ZN (NR2D1BWP16P90)
+                                                          0.06       3.14 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2233/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.18 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2234/Z (XOR2D1BWP16P90)
+                                                          0.03       3.20 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2235/ZN (NR2D1BWP16P90)
+                                                          0.06       3.26 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2238/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.29 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2239/Z (XOR2D1BWP16P90)
+                                                          0.03       3.32 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2240/ZN (NR2D1BWP16P90)
+                                                          0.06       3.37 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2243/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.41 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2244/Z (XOR2D1BWP16P90)
+                                                          0.03       3.43 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2245/ZN (NR2D1BWP16P90)
+                                                          0.05       3.48 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2249/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.52 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2250/Z (XOR2D1BWP16P90)
+                                                          0.03       3.54 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2251/ZN (INR2D1BWP16P90)
+                                                          0.04       3.59 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2258/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.62 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2259/Z (XOR2D1BWP16P90)
+                                                          0.02       3.64 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2260/ZN (INR2D1BWP16P90)
+                                                          0.04       3.68 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2267/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.70 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2268/Z (XOR2D1BWP16P90)
+                                                          0.02       3.73 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2269/ZN (NR2D1BWP16P90)
+                                                          0.04       3.77 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2279/ZN (AOI21D1BWP16P90)
+                                                          0.03       3.79 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2280/Z (XOR2D1BWP16P90)
+                                                          0.03       3.82 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U299/ZN (INVD1BWP20P90LVT)
+                                                          0.01       3.83 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U533/ZN (AOI21D1BWP16P90LVT)
+                                                          0.07       3.90 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2282/ZN (ND2D1BWP16P90)
+                                                          0.04       3.94 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2283/ZN (NR2D1BWP16P90)
+                                                          0.03       3.97 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2287/ZN (ND2D1BWP16P90)
+                                                          0.02       3.99 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2288/Z (XOR2D1BWP16P90)
+                                                          0.03       4.02 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2289/ZN (INVD1BWP20P90)
+                                                          0.01       4.02 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2290/ZN (INR2D2BWP16P90)
+                                                          0.04       4.06 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2293/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.09 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2294/Z (XOR2D1BWP16P90)
+                                                          0.02       4.11 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2295/ZN (INVD1BWP20P90)
+                                                          0.01       4.12 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2296/ZN (INR2D4BWP16P90)
+                                                          0.03       4.15 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2299/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.17 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2300/Z (XOR2D1BWP16P90)
+                                                          0.02       4.19 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2301/ZN (INVD1BWP20P90)
+                                                          0.01       4.20 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2302/ZN (INR2D4BWP16P90)
+                                                          0.03       4.23 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2306/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.25 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2307/Z (XOR2D1BWP16P90)
+                                                          0.02       4.28 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2308/ZN (INVD1BWP20P90)
+                                                          0.01       4.29 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2309/ZN (INR2D4BWP16P90)
+                                                          0.03       4.32 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2320/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.34 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2321/Z (XOR2D1BWP16P90)
+                                                          0.02       4.36 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2322/ZN (INVD1BWP20P90)
+                                                          0.01       4.37 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2323/ZN (INR2D4BWP16P90)
+                                                          0.03       4.40 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2334/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.42 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2335/Z (XOR2D1BWP16P90)
+                                                          0.02       4.44 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2336/ZN (INVD1BWP20P90)
+                                                          0.01       4.46 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2337/ZN (INR2D4BWP16P90)
+                                                          0.03       4.49 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2349/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.51 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2350/Z (XOR2D1BWP16P90)
+                                                          0.02       4.53 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2351/ZN (INVD1BWP20P90)
+                                                          0.01       4.54 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2352/ZN (INR2D4BWP16P90)
+                                                          0.03       4.57 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2364/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.59 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2365/Z (XOR2D1BWP16P90)
+                                                          0.02       4.61 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2366/ZN (INVD1BWP20P90)
+                                                          0.01       4.62 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2367/ZN (INR2D4BWP16P90)
+                                                          0.03       4.65 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2378/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.67 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2379/Z (XOR2D1BWP16P90)
+                                                          0.02       4.70 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2380/ZN (INVD1BWP20P90)
+                                                          0.01       4.71 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2381/ZN (INR2D4BWP16P90)
+                                                          0.03       4.74 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2391/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.76 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2392/Z (XOR2D1BWP16P90)
+                                                          0.02       4.78 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2393/ZN (INVD1BWP20P90)
+                                                          0.01       4.79 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2394/ZN (INR2D4BWP16P90)
+                                                          0.03       4.82 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2404/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.84 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2405/Z (XOR2D1BWP16P90)
+                                                          0.02       4.86 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2406/ZN (INVD1BWP20P90)
+                                                          0.01       4.87 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2407/ZN (INR2D4BWP16P90)
+                                                          0.03       4.91 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2418/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.93 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2419/Z (XOR2D1BWP16P90)
+                                                          0.02       4.95 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2420/ZN (INVD1BWP20P90)
+                                                          0.01       4.96 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2421/ZN (INR2D4BWP16P90)
+                                                          0.03       4.99 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2433/ZN (AOI21D1BWP16P90)
+                                                          0.02       5.01 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2434/Z (XOR2D1BWP16P90)
+                                                          0.02       5.03 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2435/ZN (INVD1BWP20P90)
+                                                          0.01       5.04 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U7/ZN (INR2D2BWP20P90LVT)
+                                                          0.03       5.06 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2455/ZN (ND2D1BWP16P90)
+                                                          0.02       5.08 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2456/ZN (INVD1BWP16P90)
+                                                          0.01       5.10 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2457/ZN (AOI21D1BWP16P90)
+                                                          0.01       5.11 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2458/ZN (OAI21D1BWP16P90)
+                                                          0.02       5.13 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2459/ZN (INVD1BWP16P90)
+                                                          0.01       5.14 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2460/ZN (OAI21D1BWP16P90)
+                                                          0.01       5.15 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2461/ZN (AOI21D1BWP16P90)
+                                                          0.01       5.16 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2462/Z (XOR2D1BWP16P90)
+                                                          0.02       5.18 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U2463/ZN (INVD1BWP20P90)
+                                                          0.01       5.19 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U5/ZN (INR2D2BWP16P90LVT)
+                                                          0.03       5.23 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U4/ZN (ND2D2BWP16P90LVT)
+                                                          0.02       5.25 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U4949/ZN (INVD1BWP16P90)
+                                                          0.03       5.27 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U3/ZN (CKND2D1BWP16P90)
+                                                          0.03       5.31 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U1006/ZN (INVD1BWP20P90)
+                                                          0.03       5.34 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U188/ZN (AOI22D1BWP20P90)
+                                                          0.02       5.36 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U9909/ZN (OAI211D1BWP16P90)
+                                                          0.02       5.37 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/U9910/Z (AO21D1BWP16P90)
+                                                          0.02       5.39 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_meta_data_reg_0__2_/D (DFCNQD1BWP20P90)
+                                                          0.00       5.39 r
+  data arrival time                                                  5.39
+
+  clock axi_clk (rise edge)                               5.00       5.00
+  clock network delay (ideal)                             0.50       5.50
+  clock uncertainty                                      -0.10       5.40
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_11__u_row/u_seq/u_mfiu/a_meta_data_reg_0__2_/CP (DFCNQD1BWP20P90)
+                                                          0.00       5.40 r
+  library setup time                                     -0.01       5.39
+  data required time                                                 5.39
+  --------------------------------------------------------------------------
+  data required time                                                 5.39
+  data arrival time                                                 -5.39
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.00
+
+
+  Startpoint: u_TOP/CPU_wrapper/CPU/reg2/E_op_reg_0_
+              (rising edge-triggered flip-flop clocked by cpu_clk)
+  Endpoint: u_TOP/CPU_wrapper/CPU/reg3/alu_out_reg_10_
+            (rising edge-triggered flip-flop clocked by cpu_clk)
+  Path Group: cpu_clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  SNPS_CLOCK_GATE_HIGH_DM_tag_array_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DM_tag_array_wrapper_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_tag_array_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_tag_array_wrapper_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CSR_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CSR_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CSR_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CSR_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CSR_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_12
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_13
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_14
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_15
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_16
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_17
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_18
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_19
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_20
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_21
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_22
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_23
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_24
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_25
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_26
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_27
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_28
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_29
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_30
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_31
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_f_file_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_12
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_13
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_14
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_15
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_16
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_17
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_18
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_19
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_20
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_21
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_22
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_23
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_24
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_25
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_26
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_27
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_28
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_29
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_30
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_31
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_file_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_reg_jb_pc
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_PC_reg
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_12
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_13
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_14
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_15
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_16
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_17
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_18
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_19
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_20
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_21
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_22
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DM_cache_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DM_cache_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DM_cache_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DM_tag_array_wrapper
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DM_data_array_wrapper
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_cache_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_cache_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_cache_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_IM_cache_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  IM_tag_array_wrapper
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  IM_data_array_wrapper
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg4               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg3               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  CSR                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg2               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg_f_file         ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg_file           ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg1               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  branch_predictor   ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  reg_jb_pc          ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  PC_reg             ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  WDT                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_12
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_13
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_14
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_15
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_16
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_17
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_8_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_8_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_wrapper_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_wrapper_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_wrapper_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DMA_wrapper_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DMA                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_0
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_18
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_21
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_22
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_23
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_24
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_2
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_4
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_5
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_6
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_7
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_8
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_9
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_10
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_11
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DM_cache           ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  IM_cache           ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  CPU                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  ONE_CDC            ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  WDT_wrapper        ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_7      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_16_1     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_8      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_16_2     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_9      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_10     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_11     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_12     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DMA_wrapper        ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_13     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_16_3     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_14     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_4_0      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_15     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SRAM_wrapper_0     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_16     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_16_4     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_17     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_4_1      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_18     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SRAM_wrapper_1     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_20     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_21     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_22     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_4_3      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_23     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_4_4      ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_1_24     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  CPU_wrapper        ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  CHIP               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  top                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  Forward            ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  mux9               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  JB_Unit            ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  mux3               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  mux5               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  alu                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock cpu_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/CPU_wrapper/CPU/reg2/E_op_reg_0_/CP (DFCNQD2BWP16P90)
+                                                          0.00       0.50 r
+  u_TOP/CPU_wrapper/CPU/reg2/E_op_reg_0_/Q (DFCNQD2BWP16P90)
+                                                          0.09       0.59 r
+  u_TOP/CPU_wrapper/CPU/reg2/E_op[0] (reg2)               0.00       0.59 r
+  u_TOP/CPU_wrapper/CPU/Forward/E_op[0] (Forward)         0.00       0.59 r
+  u_TOP/CPU_wrapper/CPU/Forward/U62/ZN (IINR3D1BWP16P90)
+                                                          0.03       0.62 r
+  u_TOP/CPU_wrapper/CPU/Forward/U10/ZN (ND2D1BWP16P90)
+                                                          0.02       0.64 f
+  u_TOP/CPU_wrapper/CPU/Forward/U98/ZN (INR2D2BWP16P90)
+                                                          0.02       0.65 r
+  u_TOP/CPU_wrapper/CPU/Forward/U99/ZN (IND2D1BWP20P90)
+                                                          0.02       0.67 f
+  u_TOP/CPU_wrapper/CPU/Forward/U100/ZN (INR2D1BWP20P90)
+                                                          0.02       0.69 r
+  u_TOP/CPU_wrapper/CPU/Forward/U146/ZN (NR3D1BWP16P90)
+                                                          0.01       0.70 f
+  u_TOP/CPU_wrapper/CPU/Forward/U59/Z (OR4D1BWP16P90)     0.03       0.73 f
+  u_TOP/CPU_wrapper/CPU/Forward/U157/ZN (OAI21D1BWP16P90)
+                                                          0.02       0.75 r
+  u_TOP/CPU_wrapper/CPU/Forward/E_rs1_data_sel[0] (Forward)
+                                                          0.00       0.75 r
+  u_TOP/CPU_wrapper/CPU/mux3/E_rs1_data_sel[0] (mux3)     0.00       0.75 r
+  u_TOP/CPU_wrapper/CPU/mux3/U87/ZN (NR2D1BWP16P90)       0.02       0.77 f
+  u_TOP/CPU_wrapper/CPU/mux3/U84/ZN (CKND2BWP16P90)       0.01       0.78 r
+  u_TOP/CPU_wrapper/CPU/mux3/U88/ZN (CKND2BWP16P90)       0.02       0.80 f
+  u_TOP/CPU_wrapper/CPU/mux3/U91/ZN (AOI22D1BWP16P90)     0.02       0.82 r
+  u_TOP/CPU_wrapper/CPU/mux3/U92/ZN (ND2D1BWP20P90)       0.03       0.85 f
+  u_TOP/CPU_wrapper/CPU/mux3/mux3_out[2] (mux3)           0.00       0.85 f
+  u_TOP/CPU_wrapper/CPU/mux5/mux5_i0[2] (mux5)            0.00       0.85 f
+  u_TOP/CPU_wrapper/CPU/mux5/U32/Z (MUX2D1BWP16P90)       0.03       0.88 f
+  u_TOP/CPU_wrapper/CPU/mux5/mux5_out[2] (mux5)           0.00       0.88 f
+  u_TOP/CPU_wrapper/CPU/alu/s1[2] (alu)                   0.00       0.88 f
+  u_TOP/CPU_wrapper/CPU/alu/U21991/ZN (INVD1BWP16P90)     0.08       0.95 r
+  u_TOP/CPU_wrapper/CPU/alu/U19787/Z (AN3D4BWP20P90LVT)
+                                                          0.03       0.99 r
+  u_TOP/CPU_wrapper/CPU/alu/U22400/Z (AN4D4BWP16P90)      0.03       1.02 r
+  u_TOP/CPU_wrapper/CPU/alu/U22522/Z (AN4D4BWP16P90)      0.03       1.05 r
+  u_TOP/CPU_wrapper/CPU/alu/U22546/ZN (ND4D1BWP16P90)     0.04       1.09 f
+  u_TOP/CPU_wrapper/CPU/alu/U1765/ZN (INR4D1BWP16P90)     0.05       1.14 r
+  u_TOP/CPU_wrapper/CPU/alu/U1760/ZN (IND4D1BWP16P90)     0.05       1.19 f
+  u_TOP/CPU_wrapper/CPU/alu/U18939/ZN (INR4D1BWP16P90)
+                                                          0.04       1.23 r
+  u_TOP/CPU_wrapper/CPU/alu/U21229/Z (AN3D1BWP16P90)      0.04       1.27 r
+  u_TOP/CPU_wrapper/CPU/alu/U22550/Z (XOR2D1BWP20P90)     0.03       1.30 f
+  u_TOP/CPU_wrapper/CPU/alu/U21217/Z (AO21D1BWP16P90)     0.02       1.32 f
+  u_TOP/CPU_wrapper/CPU/alu/U18761/ZN (OAI21D1BWP20P90)
+                                                          0.02       1.34 r
+  u_TOP/CPU_wrapper/CPU/alu/U18721/ZN (INR2D1BWP20P90)
+                                                          0.01       1.35 f
+  u_TOP/CPU_wrapper/CPU/alu/U24795/ZN (OAI21D1BWP16P90)
+                                                          0.01       1.37 r
+  u_TOP/CPU_wrapper/CPU/alu/U24796/ZN (NR2D1BWP16P90)     0.02       1.38 f
+  u_TOP/CPU_wrapper/CPU/alu/U18517/ZN (INVD1BWP20P90)     0.01       1.39 r
+  u_TOP/CPU_wrapper/CPU/alu/U24797/ZN (NR2D1BWP16P90)     0.01       1.40 f
+  u_TOP/CPU_wrapper/CPU/alu/U24798/Z (OR2D1BWP16P90)      0.02       1.42 f
+  u_TOP/CPU_wrapper/CPU/alu/U18476/ZN (INR2D2BWP20P90)
+                                                          0.01       1.44 r
+  u_TOP/CPU_wrapper/CPU/alu/U18457/ZN (INVD1BWP16P90)     0.01       1.45 f
+  u_TOP/CPU_wrapper/CPU/alu/U18456/ZN (AOI21D1BWP20P90)
+                                                          0.01       1.46 r
+  u_TOP/CPU_wrapper/CPU/alu/U18425/ZN (AOAI211D1BWP20P90)
+                                                          0.02       1.48 f
+  u_TOP/CPU_wrapper/CPU/alu/U1640/Z (MUX2D1BWP16P90)      0.04       1.52 f
+  u_TOP/CPU_wrapper/CPU/alu/U18389/ZN (CKND2BWP16P90)     0.01       1.53 r
+  u_TOP/CPU_wrapper/CPU/alu/U18386/ZN (AOI21D1BWP20P90)
+                                                          0.01       1.55 f
+  u_TOP/CPU_wrapper/CPU/alu/U24802/ZN (NR2D1BWP16P90)     0.02       1.56 r
+  u_TOP/CPU_wrapper/CPU/alu/U1630/ZN (INVD1BWP16P90)      0.02       1.58 f
+  u_TOP/CPU_wrapper/CPU/alu/U24812/ZN (AOI22D1BWP16P90)
+                                                          0.02       1.61 r
+  u_TOP/CPU_wrapper/CPU/alu/U24814/ZN (INVD1BWP16P90)     0.01       1.62 f
+  u_TOP/CPU_wrapper/CPU/alu/U24815/ZN (OAI22D1BWP16P90)
+                                                          0.02       1.63 r
+  u_TOP/CPU_wrapper/CPU/alu/U18294/ZN (MAOI222D1BWP16P90)
+                                                          0.03       1.66 f
+  u_TOP/CPU_wrapper/CPU/alu/U24817/ZN (OAI21D4BWP16P90)
+                                                          0.02       1.69 r
+  u_TOP/CPU_wrapper/CPU/alu/U217/Z (MUX2D2BWP16P90)       0.04       1.73 f
+  u_TOP/CPU_wrapper/CPU/alu/U24829/ZN (NR2D1BWP16P90)     0.02       1.74 r
+  u_TOP/CPU_wrapper/CPU/alu/U24830/Z (XOR2D1BWP16P90)     0.02       1.77 f
+  u_TOP/CPU_wrapper/CPU/alu/U24833/ZN (OAI21D1BWP16P90)
+                                                          0.03       1.80 r
+  u_TOP/CPU_wrapper/CPU/alu/U24853/ZN (NR2D2BWP16P90)     0.02       1.82 f
+  u_TOP/CPU_wrapper/CPU/alu/U24855/ZN (NR2D1BWP16P90)     0.02       1.83 r
+  u_TOP/CPU_wrapper/CPU/alu/U18029/ZN (AOI21D1BWP16P90)
+                                                          0.02       1.85 f
+  u_TOP/CPU_wrapper/CPU/alu/U24863/ZN (OAI21D1BWP16P90)
+                                                          0.02       1.87 r
+  u_TOP/CPU_wrapper/CPU/alu/U17987/ZN (ND2D2BWP16P90)     0.02       1.89 f
+  u_TOP/CPU_wrapper/CPU/alu/U205/ZN (NR2D2BWP20P90LVT)
+                                                          0.02       1.91 r
+  u_TOP/CPU_wrapper/CPU/alu/U24870/ZN (AOI21D2BWP16P90)
+                                                          0.02       1.93 f
+  u_TOP/CPU_wrapper/CPU/alu/U24872/ZN (CKND2BWP16P90)     0.01       1.95 r
+  u_TOP/CPU_wrapper/CPU/alu/U24873/ZN (INR2D1BWP16P90)
+                                                          0.01       1.96 f
+  u_TOP/CPU_wrapper/CPU/alu/U24883/ZN (AOI22D1BWP16P90)
+                                                          0.02       1.98 r
+  u_TOP/CPU_wrapper/CPU/alu/U200/ZN (ND2D1BWP16P90)       0.03       2.01 f
+  u_TOP/CPU_wrapper/CPU/alu/U17704/ZN (ND2D1BWP20P90)     0.02       2.03 r
+  u_TOP/CPU_wrapper/CPU/alu/U17616/ZN (INVD1BWP20P90)     0.01       2.04 f
+  u_TOP/CPU_wrapper/CPU/alu/U1521/ZN (AOI21D1BWP20P90)
+                                                          0.01       2.05 r
+  u_TOP/CPU_wrapper/CPU/alu/U24916/ZN (OAI21D1BWP16P90)
+                                                          0.01       2.07 f
+  u_TOP/CPU_wrapper/CPU/alu/U192/ZN (AOI21D1BWP16P90)     0.03       2.10 r
+  u_TOP/CPU_wrapper/CPU/alu/U24923/ZN (OAI21D1BWP16P90)
+                                                          0.02       2.11 f
+  u_TOP/CPU_wrapper/CPU/alu/U24990/ZN (ND2D1BWP16P90)     0.01       2.13 r
+  u_TOP/CPU_wrapper/CPU/alu/U24991/ZN (NR2D1BWP16P90)     0.01       2.13 f
+  u_TOP/CPU_wrapper/CPU/alu/U187/ZN (AOI31D1BWP20P90LVT)
+                                                          0.02       2.16 r
+  u_TOP/CPU_wrapper/CPU/alu/U24997/ZN (INVD1BWP16P90)     0.02       2.17 f
+  u_TOP/CPU_wrapper/CPU/alu/U1497/ZN (NR2D2BWP16P90)      0.02       2.20 r
+  u_TOP/CPU_wrapper/CPU/alu/U24998/ZN (AOI22D1BWP16P90)
+                                                          0.02       2.22 f
+  u_TOP/CPU_wrapper/CPU/alu/U24999/ZN (ND2D1BWP16P90)     0.02       2.24 r
+  u_TOP/CPU_wrapper/CPU/alu/U21975/Z (OR2D1BWP16P90)      0.02       2.26 r
+  u_TOP/CPU_wrapper/CPU/alu/U16967/ZN (ND2D1BWP20P90)     0.02       2.28 f
+  u_TOP/CPU_wrapper/CPU/alu/U25008/ZN (NR2D1BWP16P90)     0.01       2.29 r
+  u_TOP/CPU_wrapper/CPU/alu/U25016/ZN (AOI21D1BWP16P90)
+                                                          0.03       2.32 f
+  u_TOP/CPU_wrapper/CPU/alu/U25028/ZN (OAI21D1BWP16P90)
+                                                          0.02       2.34 r
+  u_TOP/CPU_wrapper/CPU/alu/U21649/ZN (ND2D2BWP16P90)     0.02       2.37 f
+  u_TOP/CPU_wrapper/CPU/alu/U25035/ZN (INR2D1BWP16P90)
+                                                          0.02       2.38 r
+  u_TOP/CPU_wrapper/CPU/alu/U25036/ZN (AOI21D2BWP16P90)
+                                                          0.02       2.40 f
+  u_TOP/CPU_wrapper/CPU/alu/U19933/ZN (INVD1BWP16P90)     0.02       2.41 r
+  u_TOP/CPU_wrapper/CPU/alu/U163/ZN (NR2D1BWP16P90)       0.02       2.44 f
+  u_TOP/CPU_wrapper/CPU/alu/U25044/ZN (AOI22D1BWP16P90)
+                                                          0.02       2.46 r
+  u_TOP/CPU_wrapper/CPU/alu/U25045/ZN (ND2D1BWP16P90)     0.03       2.49 f
+  u_TOP/CPU_wrapper/CPU/alu/U25046/Z (OR2D1BWP16P90)      0.03       2.52 f
+  u_TOP/CPU_wrapper/CPU/alu/U25090/ZN (AOI21D1BWP16P90)
+                                                          0.02       2.54 r
+  u_TOP/CPU_wrapper/CPU/alu/U25094/ZN (OAI21D1BWP16P90)
+                                                          0.03       2.57 f
+  u_TOP/CPU_wrapper/CPU/alu/U25097/ZN (AOI21D1BWP16P90)
+                                                          0.02       2.59 r
+  u_TOP/CPU_wrapper/CPU/alu/U158/ZN (OAI21D1BWP16P90)     0.02       2.61 f
+  u_TOP/CPU_wrapper/CPU/alu/U25098/ZN (ND2D2BWP16P90)     0.02       2.62 r
+  u_TOP/CPU_wrapper/CPU/alu/U25122/ZN (INR2D4BWP16P90)
+                                                          0.01       2.63 f
+  u_TOP/CPU_wrapper/CPU/alu/U15736/ZN (NR2D2BWP16P90)     0.02       2.65 r
+  u_TOP/CPU_wrapper/CPU/alu/U15734/ZN (CKND2BWP20P90)     0.01       2.67 f
+  u_TOP/CPU_wrapper/CPU/alu/U15656/ZN (NR2D2BWP16P90)     0.03       2.69 r
+  u_TOP/CPU_wrapper/CPU/alu/U15607/ZN (INVD1BWP20P90)     0.02       2.71 f
+  u_TOP/CPU_wrapper/CPU/alu/U15577/ZN (OAI22D1BWP20P90)
+                                                          0.02       2.73 r
+  u_TOP/CPU_wrapper/CPU/alu/U25127/Z (OR2D1BWP16P90)      0.02       2.75 r
+  u_TOP/CPU_wrapper/CPU/alu/U15324/ZN (AOI31D2BWP16P90)
+                                                          0.03       2.78 f
+  u_TOP/CPU_wrapper/CPU/alu/U15118/ZN (ND2D1BWP16P90)     0.02       2.80 r
+  u_TOP/CPU_wrapper/CPU/alu/U25131/ZN (OAI21D1BWP16P90)
+                                                          0.02       2.82 f
+  u_TOP/CPU_wrapper/CPU/alu/U25132/ZN (AOI21D1BWP16P90)
+                                                          0.02       2.84 r
+  u_TOP/CPU_wrapper/CPU/alu/U149/ZN (OAI21D1BWP20P90LVT)
+                                                          0.03       2.87 f
+  u_TOP/CPU_wrapper/CPU/alu/U25139/Z (AO21D1BWP16P90)     0.03       2.89 f
+  u_TOP/CPU_wrapper/CPU/alu/U25158/ZN (AOAI211D2BWP16P90)
+                                                          0.02       2.91 r
+  u_TOP/CPU_wrapper/CPU/alu/U14623/ZN (INVD1BWP20P90)     0.02       2.93 f
+  u_TOP/CPU_wrapper/CPU/alu/U21951/ZN (NR2D1BWP16P90)     0.04       2.97 r
+  u_TOP/CPU_wrapper/CPU/alu/U25160/Z (AO21D1BWP16P90)     0.03       3.01 r
+  u_TOP/CPU_wrapper/CPU/alu/U25163/Z (OA21D1BWP16P90)     0.03       3.04 r
+  u_TOP/CPU_wrapper/CPU/alu/U14202/ZN (ND2D1BWP20P90)     0.02       3.06 f
+  u_TOP/CPU_wrapper/CPU/alu/U25172/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.08 r
+  u_TOP/CPU_wrapper/CPU/alu/U13949/ZN (AOI21D1BWP20P90)
+                                                          0.01       3.09 f
+  u_TOP/CPU_wrapper/CPU/alu/U20056/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.11 r
+  u_TOP/CPU_wrapper/CPU/alu/U21383/ZN (AOI21D1BWP16P90)
+                                                          0.01       3.12 f
+  u_TOP/CPU_wrapper/CPU/alu/U25216/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.14 r
+  u_TOP/CPU_wrapper/CPU/alu/U25217/ZN (ND2D2BWP16P90)     0.02       3.16 f
+  u_TOP/CPU_wrapper/CPU/alu/U25230/ZN (INR2D4BWP16P90)
+                                                          0.03       3.19 r
+  u_TOP/CPU_wrapper/CPU/alu/U25231/ZN (AOI21D2BWP16P90)
+                                                          0.02       3.21 f
+  u_TOP/CPU_wrapper/CPU/alu/U25233/ZN (CKND2BWP16P90)     0.01       3.22 r
+  u_TOP/CPU_wrapper/CPU/alu/U25234/ZN (NR2D2BWP16P90)     0.02       3.24 f
+  u_TOP/CPU_wrapper/CPU/alu/U13357/ZN (INVD1BWP20P90)     0.01       3.26 r
+  u_TOP/CPU_wrapper/CPU/alu/U13308/ZN (OAI22D1BWP20P90)
+                                                          0.02       3.28 f
+  u_TOP/CPU_wrapper/CPU/alu/U13114/ZN (IND2D1BWP16P90)
+                                                          0.02       3.30 f
+  u_TOP/CPU_wrapper/CPU/alu/U13007/ZN (AOI31D2BWP16P90)
+                                                          0.02       3.32 r
+  u_TOP/CPU_wrapper/CPU/alu/U25296/ZN (NR2D1BWP16P90)     0.01       3.34 f
+  u_TOP/CPU_wrapper/CPU/alu/U25297/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.36 r
+  u_TOP/CPU_wrapper/CPU/alu/U25305/ZN (AOI21D1BWP16P90)
+                                                          0.02       3.37 f
+  u_TOP/CPU_wrapper/CPU/alu/U25311/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.39 r
+  u_TOP/CPU_wrapper/CPU/alu/U25313/Z (AO21D1BWP16P90)     0.02       3.41 r
+  u_TOP/CPU_wrapper/CPU/alu/U25314/ZN (ND2D2BWP16P90)     0.02       3.43 f
+  u_TOP/CPU_wrapper/CPU/alu/U12365/ZN (ND2D1BWP16P90)     0.02       3.45 r
+  u_TOP/CPU_wrapper/CPU/alu/U25327/ZN (AOAI211D1BWP16P90)
+                                                          0.03       3.48 f
+  u_TOP/CPU_wrapper/CPU/alu/U122/Z (OR2D1BWP16P90)        0.03       3.51 f
+  u_TOP/CPU_wrapper/CPU/alu/U121/ZN (CKND2BWP16P90)       0.02       3.53 r
+  u_TOP/CPU_wrapper/CPU/alu/U25342/ZN (AOI22D1BWP16P90)
+                                                          0.02       3.55 f
+  u_TOP/CPU_wrapper/CPU/alu/U25343/ZN (XNR2D1BWP20P90)
+                                                          0.05       3.60 r
+  u_TOP/CPU_wrapper/CPU/alu/U11744/ZN (CKND2BWP20P90)     0.02       3.62 f
+  u_TOP/CPU_wrapper/CPU/alu/U25344/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.63 r
+  u_TOP/CPU_wrapper/CPU/alu/U25346/ZN (AOI21D1BWP16P90)
+                                                          0.02       3.65 f
+  u_TOP/CPU_wrapper/CPU/alu/U25383/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.67 r
+  u_TOP/CPU_wrapper/CPU/alu/U108/ZN (AOI21D1BWP20P90LVT)
+                                                          0.02       3.69 f
+  u_TOP/CPU_wrapper/CPU/alu/U25435/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.71 r
+  u_TOP/CPU_wrapper/CPU/alu/U106/ZN (ND2D2BWP16P90)       0.02       3.74 f
+  u_TOP/CPU_wrapper/CPU/alu/U105/ZN (INR2D2BWP16P90LVT)
+                                                          0.03       3.77 r
+  u_TOP/CPU_wrapper/CPU/alu/U25457/ZN (AOI21D4BWP16P90)
+                                                          0.02       3.78 f
+  u_TOP/CPU_wrapper/CPU/alu/U25458/ZN (NR2D2BWP16P90)     0.04       3.82 r
+  u_TOP/CPU_wrapper/CPU/alu/U25547/ZN (AOI22D1BWP16P90)
+                                                          0.02       3.84 f
+  u_TOP/CPU_wrapper/CPU/alu/U25551/ZN (ND2D1BWP16P90)     0.02       3.87 r
+  u_TOP/CPU_wrapper/CPU/alu/U25593/ZN (ND2D1BWP16P90)     0.02       3.89 f
+  u_TOP/CPU_wrapper/CPU/alu/U25594/ZN (INVD1BWP20P90)     0.02       3.91 r
+  u_TOP/CPU_wrapper/CPU/alu/U25596/ZN (AOI21D1BWP16P90)
+                                                          0.02       3.92 f
+  u_TOP/CPU_wrapper/CPU/alu/U25599/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.94 r
+  u_TOP/CPU_wrapper/CPU/alu/U25600/ZN (AOI21D1BWP16P90)
+                                                          0.01       3.95 f
+  u_TOP/CPU_wrapper/CPU/alu/U9683/ZN (OAI21D1BWP16P90)
+                                                          0.02       3.97 r
+  u_TOP/CPU_wrapper/CPU/alu/U829/ZN (IAOI21D1BWP16P90)
+                                                          0.02       3.98 f
+  u_TOP/CPU_wrapper/CPU/alu/U25630/ZN (INR2D2BWP16P90)
+                                                          0.02       4.00 r
+  u_TOP/CPU_wrapper/CPU/alu/U25650/ZN (INVD1BWP16P90)     0.02       4.02 f
+  u_TOP/CPU_wrapper/CPU/alu/U25651/Z (AO21D1BWP16P90)     0.03       4.05 f
+  u_TOP/CPU_wrapper/CPU/alu/U25652/ZN (ND2D2BWP16P90)     0.01       4.06 r
+  u_TOP/CPU_wrapper/CPU/alu/U71/Z (OR2D1BWP16P90)         0.02       4.08 r
+  u_TOP/CPU_wrapper/CPU/alu/U8860/ZN (INVD4BWP20P90)      0.02       4.11 f
+  u_TOP/CPU_wrapper/CPU/alu/U25787/ZN (AOI22D1BWP16P90)
+                                                          0.02       4.12 r
+  u_TOP/CPU_wrapper/CPU/alu/U25789/ZN (ND2D1BWP16P90)     0.03       4.15 f
+  u_TOP/CPU_wrapper/CPU/alu/U25847/ZN (ND2D1BWP16P90)     0.02       4.17 r
+  u_TOP/CPU_wrapper/CPU/alu/U772/ZN (INVD1BWP20P90)       0.02       4.19 f
+  u_TOP/CPU_wrapper/CPU/alu/U25849/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.21 r
+  u_TOP/CPU_wrapper/CPU/alu/U25851/ZN (OAI21D1BWP16P90)
+                                                          0.02       4.23 f
+  u_TOP/CPU_wrapper/CPU/alu/U25852/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.24 r
+  u_TOP/CPU_wrapper/CPU/alu/U25856/ZN (OAI21D1BWP16P90)
+                                                          0.02       4.26 f
+  u_TOP/CPU_wrapper/CPU/alu/U25857/Z (AO21D1BWP16P90)     0.03       4.28 f
+  u_TOP/CPU_wrapper/CPU/alu/U7968/ZN (IND2D2BWP16P90)     0.01       4.30 r
+  u_TOP/CPU_wrapper/CPU/alu/U25858/Z (AO21D1BWP16P90)     0.02       4.32 r
+  u_TOP/CPU_wrapper/CPU/alu/U21986/ZN (ND2D1BWP16P90)     0.02       4.34 f
+  u_TOP/CPU_wrapper/CPU/alu/U53/Z (OR2D1BWP16P90)         0.03       4.37 f
+  u_TOP/CPU_wrapper/CPU/alu/U7277/ZN (INVD4BWP20P90)      0.02       4.40 r
+  u_TOP/CPU_wrapper/CPU/alu/U25884/ZN (AOI22D1BWP16P90)
+                                                          0.02       4.42 f
+  u_TOP/CPU_wrapper/CPU/alu/U25885/Z (XOR2D1BWP20P90)     0.05       4.46 r
+  u_TOP/CPU_wrapper/CPU/alu/U303/ZN (INVD1BWP16P90)       0.02       4.48 f
+  u_TOP/CPU_wrapper/CPU/alu/U25887/ZN (OAI21D1BWP16P90)
+                                                          0.02       4.50 r
+  u_TOP/CPU_wrapper/CPU/alu/U25890/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.52 f
+  u_TOP/CPU_wrapper/CPU/alu/U25923/ZN (OAI21D1BWP16P90)
+                                                          0.03       4.55 r
+  u_TOP/CPU_wrapper/CPU/alu/U25972/ZN (AOI21D4BWP16P90)
+                                                          0.02       4.57 f
+  u_TOP/CPU_wrapper/CPU/alu/U649/ZN (OAI21D1BWP16P90)     0.02       4.59 r
+  u_TOP/CPU_wrapper/CPU/alu/U25994/ZN (ND2D2BWP16P90)     0.02       4.61 f
+  u_TOP/CPU_wrapper/CPU/alu/U43/ZN (NR2D1BWP16P90)        0.02       4.63 r
+  u_TOP/CPU_wrapper/CPU/alu/U609/ZN (AOI31D2BWP16P90)     0.02       4.65 f
+  u_TOP/CPU_wrapper/CPU/alu/U26023/ZN (CKND2BWP16P90)     0.02       4.66 r
+  u_TOP/CPU_wrapper/CPU/alu/U26028/ZN (NR2D1BWP16P90)     0.03       4.69 f
+  u_TOP/CPU_wrapper/CPU/alu/U26029/ZN (CKND2BWP16P90)     0.01       4.71 r
+  u_TOP/CPU_wrapper/CPU/alu/U26036/ZN (CKND2BWP16P90)     0.02       4.72 f
+  u_TOP/CPU_wrapper/CPU/alu/U26194/ZN (AOI22D1BWP16P90)
+                                                          0.02       4.74 r
+  u_TOP/CPU_wrapper/CPU/alu/U26196/ZN (ND2D1BWP16P90)     0.03       4.77 f
+  u_TOP/CPU_wrapper/CPU/alu/U26197/ZN (NR2D1BWP16P90)     0.02       4.79 r
+  u_TOP/CPU_wrapper/CPU/alu/U26241/ZN (OAI21D1BWP16P90)
+                                                          0.03       4.82 f
+  u_TOP/CPU_wrapper/CPU/alu/U26242/ZN (AOI21D1BWP16P90)
+                                                          0.03       4.85 r
+  u_TOP/CPU_wrapper/CPU/alu/U26246/ZN (OAI21D2BWP16P90)
+                                                          0.02       4.87 f
+  u_TOP/CPU_wrapper/CPU/alu/U26250/ZN (AOI21D1BWP16P90)
+                                                          0.02       4.89 r
+  u_TOP/CPU_wrapper/CPU/alu/U26251/ZN (OAI21D2BWP16P90)
+                                                          0.01       4.90 f
+  u_TOP/CPU_wrapper/CPU/alu/U26252/ZN (ND2D2BWP16P90)     0.01       4.91 r
+  u_TOP/CPU_wrapper/CPU/alu/U21283/ZN (INR2D1BWP16P90)
+                                                          0.01       4.93 f
+  u_TOP/CPU_wrapper/CPU/alu/U29/ZN (AOI31D1BWP16P90LVT)
+                                                          0.02       4.94 r
+  u_TOP/CPU_wrapper/CPU/alu/U26346/ZN (INVD1BWP16P90)     0.02       4.96 f
+  u_TOP/CPU_wrapper/CPU/alu/U25/ZN (CKNR2D2BWP20P90LVT)
+                                                          0.05       5.01 r
+  u_TOP/CPU_wrapper/CPU/alu/U26353/ZN (AOI211D1BWP16P90)
+                                                          0.03       5.04 f
+  u_TOP/CPU_wrapper/CPU/alu/U19/ZN (AOI31D1BWP16P90)      0.03       5.07 r
+  u_TOP/CPU_wrapper/CPU/alu/U26693/ZN (NR2D1BWP20P90)     0.02       5.09 f
+  u_TOP/CPU_wrapper/CPU/alu/U26694/ZN (NR2D1BWP20P90)     0.02       5.10 r
+  u_TOP/CPU_wrapper/CPU/alu/U26698/ZN (AOI21D1BWP16P90)
+                                                          0.01       5.12 f
+  u_TOP/CPU_wrapper/CPU/alu/U26703/ZN (OAI21D1BWP16P90)
+                                                          0.01       5.13 r
+  u_TOP/CPU_wrapper/CPU/alu/U26724/ZN (AOI21D1BWP16P90)
+                                                          0.01       5.14 f
+  u_TOP/CPU_wrapper/CPU/alu/U26762/Z (OA21D1BWP16P90)     0.02       5.16 f
+  u_TOP/CPU_wrapper/CPU/alu/U26763/ZN (NR2D1BWP16P90)     0.01       5.17 r
+  u_TOP/CPU_wrapper/CPU/alu/U26764/ZN (AOI31D1BWP16P90)
+                                                          0.01       5.18 f
+  u_TOP/CPU_wrapper/CPU/alu/U5/Z (XOR2D1BWP16P90)         0.03       5.22 r
+  u_TOP/CPU_wrapper/CPU/alu/U26765/ZN (CKND2D4BWP16P90)
+                                                          0.03       5.25 f
+  u_TOP/CPU_wrapper/CPU/alu/U2431/ZN (CKNR2D2BWP20P90LVT)
+                                                          0.02       5.27 r
+  u_TOP/CPU_wrapper/CPU/alu/U35822/ZN (ND2D1BWP16P90)     0.02       5.29 f
+  u_TOP/CPU_wrapper/CPU/alu/U35824/Z (XOR2D1BWP16P90)     0.03       5.31 r
+  u_TOP/CPU_wrapper/CPU/alu/U2199/ZN (ND2D1BWP20P90)      0.01       5.32 f
+  u_TOP/CPU_wrapper/CPU/alu/U35868/ZN (ND4D1BWP16P90)     0.02       5.34 r
+  u_TOP/CPU_wrapper/CPU/alu/U35869/ZN (AOAI211D1BWP16P90)
+                                                          0.01       5.35 f
+  u_TOP/CPU_wrapper/CPU/alu/U35872/ZN (OAI211D1BWP16P90)
+                                                          0.01       5.36 r
+  u_TOP/CPU_wrapper/CPU/alu/alu_result[10] (alu)          0.00       5.36 r
+  u_TOP/CPU_wrapper/CPU/mux9/alu_out[10] (mux9)           0.00       5.36 r
+  u_TOP/CPU_wrapper/CPU/mux9/U27/ZN (IOA21D1BWP20P90)     0.03       5.39 r
+  u_TOP/CPU_wrapper/CPU/mux9/mux9_out[10] (mux9)          0.00       5.39 r
+  u_TOP/CPU_wrapper/CPU/reg3/alu_result[10] (reg3)        0.00       5.39 r
+  u_TOP/CPU_wrapper/CPU/reg3/alu_out_reg_10_/D (DFCNQD1BWP16P90)
+                                                          0.00       5.39 r
+  data arrival time                                                  5.39
+
+  clock cpu_clk (rise edge)                               5.00       5.00
+  clock network delay (ideal)                             0.50       5.50
+  clock uncertainty                                      -0.10       5.40
+  u_TOP/CPU_wrapper/CPU/reg3/alu_out_reg_10_/CP (DFCNQD1BWP16P90)
+                                                          0.00       5.40 r
+  library setup time                                     -0.01       5.39
+  data required time                                                 5.39
+  --------------------------------------------------------------------------
+  data required time                                                 5.39
+  data arrival time                                                 -5.39
+  --------------------------------------------------------------------------
+  slack (MET)                                                        0.00
+
+
+  Startpoint: DRAM_valid (input port clocked by dram_clk)
+  Endpoint: u_TOP/u_DRAM_wrapper/DRAM_Control/clk_gate_ADDR_reg_reg_31_/latch
+            (gating element for clock dram_clk)
+  Path Group: dram_clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  DRAM_FSM           ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  DRAM_wrapper       ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  CHIP               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  top                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  async_CDC_16_0     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  SNPS_CLOCK_GATE_HIGH_DRAM_FSM_3
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock dram_clk (rise edge)                              0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  input external delay                                    3.00       3.50 r
+  DRAM_valid (in)                                         0.00       3.50 r
+  u_TOP/DRAM_valid (top)                                  0.00       3.50 r
+  u_TOP/u_DRAM_wrapper/VALID (DRAM_wrapper)               0.00       3.50 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/VALID (DRAM_FSM)      0.00       3.50 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U19/ZN (ND2D1BWP20P90)
+                                                          0.10       3.60 f
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U18/ZN (INVD1BWP20P90)
+                                                          0.13       3.73 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U17/ZN (ND2D1BWP20P90)
+                                                          0.06       3.80 f
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U16/ZN (NR2D1BWP20P90)
+                                                          0.09       3.89 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U200/ZN (INVD1BWP20P90)
+                                                          0.04       3.93 f
+  u_TOP/u_DRAM_wrapper/DRAM_Control/U206/ZN (ND3D1BWP20P90)
+                                                          0.02       3.94 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/clk_gate_ADDR_reg_reg_31_/EN (SNPS_CLOCK_GATE_HIGH_DRAM_FSM_3)
+                                                          0.00       3.94 r
+  u_TOP/u_DRAM_wrapper/DRAM_Control/clk_gate_ADDR_reg_reg_31_/latch/E (CKLNQD1BWP20P90)
+                                                          0.00       3.94 r
+  data arrival time                                                  3.94
+
+  clock dram_clk (rise edge)                              5.00       5.00
+  clock network delay (ideal)                             0.50       5.50
+  clock uncertainty                                      -0.10       5.40
+  u_TOP/u_DRAM_wrapper/DRAM_Control/clk_gate_ADDR_reg_reg_31_/latch/CP (CKLNQD1BWP20P90)
+                                                          0.00       5.40 r
+  clock gating setup time                                -0.03       5.37
+  data required time                                                 5.37
+  --------------------------------------------------------------------------
+  data required time                                                 5.37
+  data arrival time                                                 -3.94
+  --------------------------------------------------------------------------
+  slack (MET)                                                        1.43
+
+
+  Startpoint: u_TOP/WDT1/WDT/count_reg_1_
+              (rising edge-triggered flip-flop clocked by rom_clk)
+  Endpoint: u_TOP/WDT1/WDT/count_reg_31_
+            (rising edge-triggered flip-flop clocked by rom_clk)
+  Path Group: rom_clk
+  Path Type: max
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  SNPS_CLOCK_GATE_HIGH_WDT
+                     ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  WDT                ZeroWireload          N16ADFP_StdCellss0p72vm40c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock rom_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/WDT1/WDT/count_reg_1_/CP (DFCNQD1BWP20P90)        0.00       0.50 r
+  u_TOP/WDT1/WDT/count_reg_1_/Q (DFCNQD1BWP20P90)         0.10       0.60 r
+  u_TOP/WDT1/WDT/U109/ZN (ND3D1BWP20P90)                  0.03       0.63 f
+  u_TOP/WDT1/WDT/U110/ZN (NR3D1BWP20P90)                  0.04       0.67 r
+  u_TOP/WDT1/WDT/U111/ZN (ND2D1BWP20P90)                  0.02       0.69 f
+  u_TOP/WDT1/WDT/U112/ZN (NR2D1BWP20P90)                  0.02       0.71 r
+  u_TOP/WDT1/WDT/U113/ZN (ND2D1BWP20P90)                  0.02       0.73 f
+  u_TOP/WDT1/WDT/U115/ZN (NR2D1BWP20P90)                  0.02       0.75 r
+  u_TOP/WDT1/WDT/U116/ZN (ND2D1BWP20P90)                  0.02       0.77 f
+  u_TOP/WDT1/WDT/U117/ZN (NR2D1BWP20P90)                  0.02       0.79 r
+  u_TOP/WDT1/WDT/U118/ZN (ND2D1BWP20P90)                  0.02       0.81 f
+  u_TOP/WDT1/WDT/U119/ZN (NR2D1BWP20P90)                  0.02       0.83 r
+  u_TOP/WDT1/WDT/U120/ZN (ND2D1BWP20P90)                  0.02       0.85 f
+  u_TOP/WDT1/WDT/U121/ZN (NR2D1BWP20P90)                  0.02       0.87 r
+  u_TOP/WDT1/WDT/U131/ZN (ND2D1BWP20P90)                  0.02       0.89 f
+  u_TOP/WDT1/WDT/U132/ZN (NR2D1BWP20P90)                  0.02       0.91 r
+  u_TOP/WDT1/WDT/U133/ZN (ND2D1BWP20P90)                  0.02       0.93 f
+  u_TOP/WDT1/WDT/U134/ZN (NR2D1BWP20P90)                  0.02       0.95 r
+  u_TOP/WDT1/WDT/U135/ZN (ND2D1BWP20P90)                  0.02       0.97 f
+  u_TOP/WDT1/WDT/U136/ZN (NR2D1BWP20P90)                  0.02       0.99 r
+  u_TOP/WDT1/WDT/U140/ZN (ND2D1BWP20P90)                  0.02       1.01 f
+  u_TOP/WDT1/WDT/U141/ZN (NR2D1BWP20P90)                  0.02       1.03 r
+  u_TOP/WDT1/WDT/U160/ZN (ND2D1BWP20P90)                  0.02       1.05 f
+  u_TOP/WDT1/WDT/U161/ZN (NR2D1BWP20P90)                  0.02       1.07 r
+  u_TOP/WDT1/WDT/U165/ZN (ND2D1BWP20P90)                  0.02       1.09 f
+  u_TOP/WDT1/WDT/U166/ZN (NR2D1BWP20P90)                  0.02       1.11 r
+  u_TOP/WDT1/WDT/U207/ZN (ND3D1BWP20P90)                  0.03       1.14 f
+  u_TOP/WDT1/WDT/U210/Z (OR3D1BWP20P90)                   0.04       1.18 f
+  u_TOP/WDT1/WDT/U212/ZN (OAI22D1BWP20P90)                0.02       1.20 r
+  u_TOP/WDT1/WDT/count_reg_31_/D (DFCNQD1BWP20P90)        0.00       1.20 r
+  data arrival time                                                  1.20
+
+  clock rom_clk (rise edge)                              50.10      50.10
+  clock network delay (ideal)                             0.50      50.60
+  clock uncertainty                                      -0.10      50.50
+  u_TOP/WDT1/WDT/count_reg_31_/CP (DFCNQD1BWP20P90)       0.00      50.50 r
+  library setup time                                     -0.01      50.49
+  data required time                                                50.49
+  --------------------------------------------------------------------------
+  data required time                                                50.49
+  data arrival time                                                 -1.20
+  --------------------------------------------------------------------------
+  slack (MET)                                                       49.29
+
+
+1

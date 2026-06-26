@@ -1,0 +1,58 @@
+[12/17 00:14:54      0s] 
+[12/17 00:14:54      0s] Cadence Innovus(TM) Implementation System.
+[12/17 00:14:54      0s] Copyright 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+[12/17 00:14:54      0s] 
+[12/17 00:14:54      0s] Version:	v21.19-s058_1, built Thu Apr 4 09:59:17 PDT 2024
+[12/17 00:14:54      0s] Options:	-stylus 
+[12/17 00:14:54      0s] Date:		Wed Dec 17 00:14:54 2025
+[12/17 00:14:54      0s] Host:		superdome2 (x86_64 w/Linux 3.10.0-1160.el7.x86_64) (24cores*192cpus*Intel(R) Xeon(R) Gold 6348H CPU @ 2.30GHz 33792KB)
+[12/17 00:14:54      0s] OS:		Red Hat Enterprise Linux Server 7.9 (Maipo)
+[12/17 00:14:54      0s] 
+[12/17 00:14:54      0s] License:
+[12/17 00:14:54      0s] 		[00:14:54.481147] Configured Lic search path (21.01-s002): 5280@vlsicad8:1717@lstn:1717@lstc:1717@lshc:5280@lstn:5280@lstc:5280@lshc:26585@lstn:26585@lstc:26585@lshc:
+[12/17 00:14:54      0s] 
+[12/17 00:14:54      0s] 		invs	Innovus Implementation System	21.1	checkout succeeded
+[12/17 00:14:54      0s] 		8 CPU jobs allowed with the current license(s). Use set_multi_cpu_usage to set your required CPU count.
+[12/17 00:15:18     14s] 
+[12/17 00:15:18     14s] 
+[12/17 00:15:29     22s] Reset Parastics called with the command setExtractRCMode -reset[12/17 00:15:31     24s] **WARN: (IMPOPT-801):	Genus executable not found in PATH. Install Genus, add the path to the genus executable in the PATH variable and rerun Innovus.
+@(#)CDS: Innovus v21.19-s058_1 (64bit) 04/04/2024 09:59 (Linux 3.10.0-693.el7.x86_64)
+[12/17 00:15:33     26s] @(#)CDS: NanoRoute 21.19-s058_1 NR231113-0413/21_19-UB (database version 18.20.605) {superthreading v2.17}
+[12/17 00:15:33     26s] @(#)CDS: AAE 21.19-s004 (64bit) 04/04/2024 (Linux 3.10.0-693.el7.x86_64)
+[12/17 00:15:33     26s] @(#)CDS: CTE 21.19-s010_1 () Mar 27 2024 01:55:37 ( )
+[12/17 00:15:33     26s] @(#)CDS: SYNTECH 21.19-s002_1 () Sep  6 2023 22:17:00 ( )
+[12/17 00:15:33     26s] @(#)CDS: CPE v21.19-s026
+[12/17 00:15:33     26s] @(#)CDS: IQuantus/TQuantus 21.1.1-s966 (64bit) Wed Mar 8 10:22:20 PST 2023 (Linux 3.10.0-693.el7.x86_64)
+[12/17 00:15:33     26s] @(#)CDS: OA 22.60-p087 Thu Feb  9 09:35:26 2023
+[12/17 00:15:33     26s] @(#)CDS: SGN 20.10-d001 (01-Jun-2020) (64 bit executable, Qt5.9.0)
+[12/17 00:15:33     26s] @(#)CDS: RCDB 11.15.0
+[12/17 00:15:33     26s] @(#)CDS: STYLUS 21.12-s019_1 (12/20/2022 05:13 PST)
+[12/17 00:15:33     26s] @(#)CDS: SystemPlanner-21.18-10439 (21.18) (2023-03-01 15:40:03+0800)
+[12/17 00:15:33     26s] Create and set the environment variable TMPDIR to /tmp/innovus_temp_117290_superdome2_avsd2564_TXjLgE.
+
+[12/17 00:15:33     26s] Create and set the environment variable TMPDIR to /tmp/innovus_temp_117290_superdome2_avsd2564_TXjLgE.
+[12/17 00:15:33     26s] 
+[12/17 00:15:33     26s] Change the soft stacksize limit to 0.2%RAM (2063 mbytes). Set global soft_stack_size_limit to change the value.
+[12/17 00:15:37     29s] 
+[12/17 00:15:37     29s] **INFO:  MMMC transition support version v31-84 
+[12/17 00:15:37     29s] 
+[12/17 00:15:42     35s] @innovus 1> source -quiet lab_script/design_import.tcl
+[12/17 00:15:58     36s] couldn't read file "lab_script/design_import.tcl": no such file or directory
+couldn't read file "lab_script/design_import.tcl": no such file or directory
+[12/17 00:15:58     36s] @innovus 2> source -quiet design_import.tcl
+User script design_import.tcl
+[12/17 00:16:45     40s] **ERROR: (TCLCMD-1146):	Mmmc file 'file_preparation/design/mmmc.view.stylus' not found.
+[12/17 00:16:45     40s] 1
+[12/17 00:16:45     40s] 1
+[12/17 00:16:45     40s] @innovus 3> exit
+
+[12/17 00:17:03     42s] 
+[12/17 00:17:03     42s] *** Memory Usage v#1 (Current mem = 997.480M, initial mem = 487.129M) ***
+[12/17 00:17:03     42s] 
+[12/17 00:17:03     42s] *** Summary of all messages that are not suppressed in this session:
+[12/17 00:17:03     42s] Severity  ID               Count  Summary                                  
+[12/17 00:17:03     42s] WARNING   IMPOPT-801           1  Genus executable not found in PATH%s. In...
+[12/17 00:17:03     42s] ERROR     TCLCMD-1146          1  %s '%s' not found.                       
+[12/17 00:17:03     42s] *** Message Summary: 1 warning(s), 1 error(s)
+[12/17 00:17:03     42s] 
+[12/17 00:17:03     42s] --- Ending "Innovus" (totcpu=0:00:42.3, real=0:02:09, mem=997.5M) ---

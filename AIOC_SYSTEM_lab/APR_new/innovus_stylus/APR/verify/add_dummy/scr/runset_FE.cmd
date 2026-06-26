@@ -1,0 +1,10 @@
+LAYOUT SYSTEM GDS
+LAYOUT PATH "../../outputs/CHIP.gds"
+LAYOUT PRIMARY "CHIP"
+
+DRC RESULTS DATABASE "output/FEOL.db"
+DRC SUMMARY REPORT "output/FEOL.sum"
+
+DRC ICSTATION YES
+include ./scr/Dummy_FEOL_CalibreYE
+

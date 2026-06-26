@@ -13,6 +13,7 @@
 `include "data_array/data_array_rtl.sv"
 `include "tag_array/tag_array_rtl.sv"
 `include "SRAM/SRAM_rtl.sv"
+`include "SRAM/TS6N16ADFPCLLLVTA128X32M4FWSHOD.v"
 `timescale 1ns/10ps
 `include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v"
 `include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/N16ADFP_StdIO.v"
@@ -20,11 +21,12 @@
 `include "../APR_new/innovus_stylus/APR/outputs/CHIP_pr.v"
 // `include "../pr/CHIP_pr.v"
 `include "SRAM/SRAM_rtl.sv"
+`include "SRAM/TS6N16ADFPCLLLVTA128X32M4FWSHOD.v"
 `include "data_array/data_array_rtl.sv"
 `include "tag_array/tag_array_rtl.sv"
 `timescale 1ns/10ps
 `include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v"
-`include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/N16ADFP_StdIO.v"																						  
+`include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/N16ADFP_StdIO.v"
 `else
 //`include "top.sv"
 `include "CHIP.v"

@@ -1,0 +1,7 @@
+.INCLUDE /nas0/proc/virtual/ADFP/work/Executable_Package/2025_AVSD_APR_file/spi/N16ADFP_StdCell_100b.spi
+.INCLUDE /nas0/proc/virtual/ADFP/work/Executable_Package/2025_AVSD_APR_file/spi/N16ADFP_StdIO.spi 
+.INCLUDE /nas0/proc/virtual/ADFP/work/Executable_Package/AVSD_cell_lib/SRAM/N16ADFP_SRAM_100a.spi
+.INCLUDE /nas0/proc/virtual/ADFP/work/Executable_Package/2025_AVSD_APR_file/spi/N16ADFP_tag_array_100a.spi
+.INCLUDE /nas0/proc/virtual/ADFP/work/Executable_Package/2025_AVSD_APR_file/spi/N16ADFP_data_array_100a.spi
+.INCLUDE CHIP.spi
+

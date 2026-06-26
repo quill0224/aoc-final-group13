@@ -1,0 +1,1156 @@
+ 
+****************************************
+Report : timing
+        -path full
+        -delay min
+        -max_paths 1
+        -sort_by group
+Design : CHIP
+Version: T-2022.03
+Date   : Fri Jun 26 04:26:59 2026
+****************************************
+
+ # A fanout number of 1000 was used for high fanout net computations.
+
+Operating Conditions: ff0p88v125c   Library: N16ADFP_StdCellff0p88v125c
+Wire Load Model Mode: segmented
+
+  Startpoint: u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/s1_sum_reg_0__0_
+              (rising edge-triggered flip-flop clocked by axi_clk)
+  Endpoint: u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/g_bank_0__u_bank/u_macro
+            (rising edge-triggered flip-flop clocked by axi_clk)
+  Path Group: axi_clk
+  Path Type: min
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  sram_128x32_1r1w_0 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_1 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_2 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_3 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_4 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_5 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_6 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_7 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_8 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_9 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_18
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_19
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_20
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_21
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_22
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_23
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_24
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_25
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_26
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_27
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_18
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_19
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_20
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_28
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_29
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_30
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_31
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_21
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_22
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_23
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_32
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_33
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_34
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_35
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_24
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_25
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_26
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_36
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_37
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_38
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_39
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_27
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_28
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_29
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_40
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_41
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_42
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_43
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_30
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_31
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_32
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_44
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_45
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_46
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_47
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_33
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_34
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_35
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_48
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_49
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_50
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_51
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_36
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_37
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_38
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_52
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_53
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_54
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_55
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_39
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_40
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_41
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_56
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_57
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_58
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_59
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_42
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_43
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_44
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_60
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_61
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_62
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  sram_128x32_1r1w_63
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_45
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_46
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_mfiu_0_47
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_0 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_0         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_1         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_2         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_3         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_4         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_5         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_6         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_7         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_8         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_9         ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_10        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_11        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_12        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_13        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_14        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_15        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_0             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_1 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_16        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_17        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_18        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_19        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_20        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_21        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_22        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_23        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_24        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_25        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_26        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_27        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_28        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_29        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_30        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_31        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_1             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_2 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_32        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_33        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_34        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_35        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_36        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_37        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_38        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_39        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_40        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_41        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_42        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_43        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_44        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_45        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_46        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_47        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_2             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_3 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_48        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_49        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_50        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_51        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_52        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_53        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_54        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_55        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_56        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_57        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_58        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_59        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_60        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_61        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_62        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_63        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_3             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_4 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_64        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_65        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_66        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_67        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_68        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_69        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_70        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_71        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_72        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_73        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_74        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_75        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_76        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_77        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_78        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_79        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_4             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_5 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_80        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_81        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_82        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_83        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_84        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_85        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_86        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_87        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_88        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_89        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_90        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_91        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_92        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_93        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_94        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_95        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_5             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_6 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_96        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_97        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_98        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_99        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_100       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_101       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_102       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_103       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_104       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_105       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_106       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_107       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_108       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_109       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_110       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_111       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_6             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_7 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_112       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_113       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_114       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_115       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_116       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_117       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_118       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_119       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_120       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_121       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_122       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_123       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_124       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_125       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_126       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_127       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_7             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_8 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_128       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_129       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_130       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_131       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_132       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_133       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_134       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_135       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_136       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_137       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_138       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_139       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_140       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_141       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_142       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_143       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_8             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_9 ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_144       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_145       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_146       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_147       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_148       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_149       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_150       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_151       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_152       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_153       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_154       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_155       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_156       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_157       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_158       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_159       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_18
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_19
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_9             ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_160       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_161       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_162       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_163       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_164       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_165       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_166       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_167       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_168       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_169       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_170       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_171       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_172       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_173       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_174       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_175       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_20
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_21
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_10            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_176       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_177       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_178       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_179       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_180       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_181       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_182       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_183       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_184       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_185       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_186       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_187       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_188       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_189       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_190       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_191       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_22
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_23
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_11            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_192       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_193       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_194       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_195       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_196       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_197       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_198       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_199       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_200       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_201       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_202       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_203       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_204       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_205       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_206       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_207       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_24
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_25
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_12            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_208       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_209       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_210       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_211       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_212       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_213       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_214       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_215       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_216       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_217       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_218       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_219       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_220       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_221       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_222       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_223       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_26
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_27
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_13            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_224       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_225       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_226       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_227       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_228       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_229       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_230       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_231       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_232       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_233       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_234       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_235       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_236       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_237       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_238       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_239       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_28
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_29
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_14            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  local_buffer_row_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  reduction_tree_radix16_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_240       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_241       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_242       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_243       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_244       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_245       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_246       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_247       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_248       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_249       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_250       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_251       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_252       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_253       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_254       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mac_unit_255       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_30
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_mfiu_seq_0_31
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  mfiu_15            ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_0      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_0      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_1      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_1      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_2      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_2      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_3      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_3      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_4      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_4      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_5      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_5      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_6      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_6      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_7      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_7      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_8      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_8      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_9      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_9      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_10     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_10     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_11     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_11     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_12     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_12     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_13     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_13     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_14     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_14     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_tail_15     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_mfiu_seq_15     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_18
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_19
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_20
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_21
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_22
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_23
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_24
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_25
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_26
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_27
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_28
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_29
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_30
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_31
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_ab_buffer_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_pe_entry_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_0           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_1           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_2           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_3           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_4           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_5           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_6           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_7           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_8           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_9           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_10          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_11          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_12          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_13          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_14          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_row_15          ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_ab_buffer       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_entry           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_2_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_0_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_EPU_wrapper_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  pe_array           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_5_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_2_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_1_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_2_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_5_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_2_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_2_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_15_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_19
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_20
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_21
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_22
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_23
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_24
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_25
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_26
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_27
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_28
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_29
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_30
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_31
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_32
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_33
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_34
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_16_3_35
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_2_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_6
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_15_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_12
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_1_15_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_4
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_5
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_7
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_9
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_10
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_3_11
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_0      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_1      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_2      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_16_0     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_3      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  EPU_wrapper        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_4      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_5      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_6      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_7      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_16_1     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_8      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_16_2     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_9      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_10     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_11     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_12     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_13     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_16_3     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_14     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_0      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_15     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_16     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_16_4     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_17     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_1      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_18     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_2      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_19     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  AXI                ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_20     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_21     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_22     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_3      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_23     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_4      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_24     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  CHIP               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  top                ZeroWireload          N16ADFP_StdCellff0p88v125c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock axi_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/s1_sum_reg_0__0_/CP (DFCNQD1BWP20P90)
+                                                          0.00 #     0.50 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/s1_sum_reg_0__0_/Q (DFCNQD1BWP20P90)
+                                                          0.05       0.55 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/U175/ZN (INVD1BWP20P90)
+                                                          0.01       0.56 r
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/U177/ZN (AOI211D1BWP20P90)
+                                                          0.01       0.57 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/g_bank_0__u_bank/wdata[0] (sram_128x32_1r1w_63)
+                                                          0.00       0.57 f
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/g_bank_0__u_bank/u_macro/D[0] (TS6N16ADFPCLLLVTA128X32M4FWSHOD)
+                                                          0.00       0.57 f
+  data arrival time                                                  0.57
+
+  clock axi_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  clock uncertainty                                       0.10       0.60
+  u_TOP/u_EPU_wrapper/u_pe_array/g_row_0__u_row/u_tail/u_buf/g_bank_0__u_bank/u_macro/CLKW (TS6N16ADFPCLLLVTA128X32M4FWSHOD)
+                                                          0.00       0.60 r
+  library hold time                                       0.15       0.75
+  data required time                                                 0.75
+  --------------------------------------------------------------------------
+  data required time                                                 0.75
+  data arrival time                                                 -0.57
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                  -0.17
+
+
+  Startpoint: u_TOP/CPU_wrapper/IM_cache_data_pack_reg_127_
+              (rising edge-triggered flip-flop clocked by cpu_clk)
+  Endpoint: u_TOP/CPU_wrapper/IM_cache/DA/i_data_array1_2
+            (rising edge-triggered flip-flop clocked by cpu_clk)
+  Path Group: cpu_clk
+  Path Type: min
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  SNPS_CLOCK_GATE_HIGH_CPU_wrapper_8
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  CPU_wrapper        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  IM_cache           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  IM_data_array_wrapper
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock cpu_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/CPU_wrapper/IM_cache_data_pack_reg_127_/CP (DFCNQD1BWP16P90)
+                                                          0.00       0.50 r
+  u_TOP/CPU_wrapper/IM_cache_data_pack_reg_127_/Q (DFCNQD1BWP16P90)
+                                                          0.05       0.55 r
+  u_TOP/CPU_wrapper/IM_cache/I_out[127] (IM_cache)        0.00       0.55 r
+  u_TOP/CPU_wrapper/IM_cache/U182/ZN (INR2D1BWP20P90)     0.02       0.56 r
+  u_TOP/CPU_wrapper/IM_cache/DA/DI[127] (IM_data_array_wrapper)
+                                                          0.00       0.56 r
+  u_TOP/CPU_wrapper/IM_cache/DA/i_data_array1_2/D[63] (TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array)
+                                                          0.00       0.56 r
+  data arrival time                                                  0.56
+
+  clock cpu_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  clock uncertainty                                       0.10       0.60
+  u_TOP/CPU_wrapper/IM_cache/DA/i_data_array1_2/CLK (TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array)
+                                                          0.00       0.60 r
+  library hold time                                       0.15       0.75
+  data required time                                                 0.75
+  --------------------------------------------------------------------------
+  data required time                                                 0.75
+  data arrival time                                                 -0.56
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                  -0.18
+
+
+  Startpoint: DRAM_Q[0] (input port clocked by dram_clk)
+  Endpoint: u_TOP/u_DRAM_wrapper/DRAM_Control/RDATA_reg_reg_0_
+            (rising edge-triggered flip-flop clocked by dram_clk)
+  Path Group: dram_clk
+  Path Type: min
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  DRAM_FSM           ZeroWireload          N16ADFP_StdCellff0p88v125c
+  DRAM_wrapper       ZeroWireload          N16ADFP_StdCellff0p88v125c
+  CHIP               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  top                ZeroWireload          N16ADFP_StdCellff0p88v125c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock dram_clk (rise edge)                              0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  input external delay                                    0.00       0.50 f
+  DRAM_Q[0] (in)                                          0.00       0.50 f
+  u_TOP/DRAM_Q[0] (top)                                   0.00       0.50 f
+  u_TOP/u_DRAM_wrapper/Q[0] (DRAM_wrapper)                0.00       0.50 f
+  u_TOP/u_DRAM_wrapper/DRAM_Control/Q[0] (DRAM_FSM)       0.00       0.50 f
+  u_TOP/u_DRAM_wrapper/DRAM_Control/RDATA_reg_reg_0_/D (DFCNQD1BWP20P90)
+                                                          0.00       0.50 f
+  data arrival time                                                  0.50
+
+  clock dram_clk (rise edge)                              0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  clock uncertainty                                       0.10       0.60
+  u_TOP/u_DRAM_wrapper/DRAM_Control/RDATA_reg_reg_0_/CP (DFCNQD1BWP20P90)
+                                                          0.00       0.60 r
+  library hold time                                       0.02       0.62
+  data required time                                                 0.62
+  --------------------------------------------------------------------------
+  data required time                                                 0.62
+  data arrival time                                                 -0.50
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                  -0.12
+
+
+  Startpoint: u_TOP/WDT1/WDT/q1_reg
+              (rising edge-triggered flip-flop clocked by rom_clk)
+  Endpoint: u_TOP/WDT1/WDT/q2_reg
+            (rising edge-triggered flip-flop clocked by rom_clk)
+  Path Group: rom_clk
+  Path Type: min
+
+  Des/Clust/Port     Wire Load Model       Library
+  ------------------------------------------------
+  SNPS_CLOCK_GATE_HIGH_WDT
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_WDT_wrapper_1
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_WDT_wrapper_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_WDT_wrapper_0
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  WDT                ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_13
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_14
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_15
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_16
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_async_CDC_4_0_17
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_ROM_wrapper_2
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  SNPS_CLOCK_GATE_HIGH_ROM_wrapper_3
+                     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_4      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_5      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_6      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  WDT_wrapper        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_4_2      ZeroWireload          N16ADFP_StdCellff0p88v125c
+  async_CDC_1_19     ZeroWireload          N16ADFP_StdCellff0p88v125c
+  ROM_wrapper        ZeroWireload          N16ADFP_StdCellff0p88v125c
+  CHIP               ZeroWireload          N16ADFP_StdCellss0p72vm40c
+  top                ZeroWireload          N16ADFP_StdCellff0p88v125c
+
+  Point                                                   Incr       Path
+  --------------------------------------------------------------------------
+  clock rom_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  u_TOP/WDT1/WDT/q1_reg/CP (DFCNQD1BWP20P90)              0.00       0.50 r
+  u_TOP/WDT1/WDT/q1_reg/Q (DFCNQD1BWP20P90)               0.05       0.55 f
+  u_TOP/WDT1/WDT/q2_reg/D (DFCNQD1BWP20P90)               0.00       0.55 f
+  data arrival time                                                  0.55
+
+  clock rom_clk (rise edge)                               0.00       0.00
+  clock network delay (ideal)                             0.50       0.50
+  clock uncertainty                                       0.10       0.60
+  u_TOP/WDT1/WDT/q2_reg/CP (DFCNQD1BWP20P90)              0.00       0.60 r
+  library hold time                                       0.02       0.62
+  data required time                                                 0.62
+  --------------------------------------------------------------------------
+  data required time                                                 0.62
+  data arrival time                                                 -0.55
+  --------------------------------------------------------------------------
+  slack (VIOLATED)                                                  -0.07
+
+
+1

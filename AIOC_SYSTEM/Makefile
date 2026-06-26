@@ -7,8 +7,8 @@ inc_dir := ./include
 sim_dir := ./sim
 vip_dir := $(PWD)/vip
 bld_dir := ./build
-lib_dir := /usr/cad/CBDK/CBDK018_UMC_Faraday_v1.0/orig_lib/fsa0m_a/2009Q2v2.0/GENERIC_CORE/FrontEnd/verilog
-lib_dir_io := /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/
+lib_dir := /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG
+lib_dir_io := /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG
 
 export VCS_HOME := $(shell dirname $(shell dirname $(shell which vcs)))
 FSDB_DEF :=
@@ -50,10 +50,9 @@ vip_b: clean | $(bld_dir)
 TA_run: 
   
 # RTL simulation
-rtl_all: rtl0 rtl1 rtl2 rtl3
+rtl_all: rtl0 rtl1 rtl2 rtl3 rtl4
 
 rtl0: | clean $(bld_dir)
-	make -C $(sim_dir)/prog0/; \
 	cd $(bld_dir); \
 	vcs -R -sverilog $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -debug_region+cell +memcbk \
 	+incdir+$(root_dir)/$(src_dir)+$(root_dir)/$(src_dir)/AXI+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
@@ -64,7 +63,6 @@ rtl0: | clean $(bld_dir)
 	+notimingcheck
 
 rtl1: | clean $(bld_dir)
-	make -C $(sim_dir)/prog1/; \
 	cd $(bld_dir); \
 	vcs -R -sverilog $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -debug_region+cell +memcbk \
 	+incdir+$(root_dir)/$(src_dir)+$(root_dir)/$(src_dir)/AXI+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
@@ -75,7 +73,6 @@ rtl1: | clean $(bld_dir)
 	+notimingcheck
 
 rtl2: | clean $(bld_dir)
-	make -C $(sim_dir)/prog2/; \
 	cd $(bld_dir); \
 	vcs -R -sverilog $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -debug_region+cell +memcbk \
 	+incdir+$(root_dir)/$(src_dir)+$(root_dir)/$(src_dir)/AXI+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
@@ -86,7 +83,6 @@ rtl2: | clean $(bld_dir)
 	+notimingcheck
 
 rtl3: | clean $(bld_dir)
-	make -C $(sim_dir)/prog3/; \
 	cd $(bld_dir); \
 	vcs -R -sverilog $(root_dir)/$(sim_dir)/top_tb_WDT.sv -debug_access+all -full64 -debug_region+cell +memcbk \
 	+incdir+$(root_dir)/$(src_dir)+$(root_dir)/$(src_dir)/AXI+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
@@ -96,16 +92,25 @@ rtl3: | clean $(bld_dir)
 	+rdcycle=1 \
 	+notimingcheck
 
+rtl4: | clean $(bld_dir)
+	cd $(bld_dir); \
+	vcs -R -sverilog $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -debug_region+cell +memcbk \
+	+incdir+$(root_dir)/$(src_dir)+$(root_dir)/$(src_dir)/AXI+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
+	-f $(root_dir)/$(src_dir)/rtl_sim.f \
+	+define+prog4$(FSDB_DEF) \
+	+prog_path=$(root_dir)/$(sim_dir)/prog4 \
+	+rdcycle=1 \
+	+notimingcheck
+
 # hough and love simulation targets removed (EPU modules removed)
 
 # Post-Synthesis simulation
-syn_all: syn0 syn1 syn2 syn3
+syn_all: syn0 syn1 syn2 syn3 syn4
 
 
 syn0: | clean $(bld_dir)
-	make -C $(sim_dir)/prog0/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(syn_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+SYN+prog0$(FSDB_DEF) \
 	+no_notifier \
@@ -114,9 +119,8 @@ syn0: | clean $(bld_dir)
 
 
 syn1: | clean $(bld_dir)
-	make -C $(sim_dir)/prog1/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(syn_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+SYN+prog1$(FSDB_DEF) \
 	+no_notifier \
@@ -124,9 +128,8 @@ syn1: | clean $(bld_dir)
   +rdcycle=1
 
 syn2: | clean $(bld_dir)
-	make -C $(sim_dir)/prog2/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(syn_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+SYN+prog2$(FSDB_DEF) \
 	+no_notifier \
@@ -137,22 +140,29 @@ syn2: | clean $(bld_dir)
 
 
 syn3: | clean $(bld_dir)
-	make -C $(sim_dir)/prog3/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb_WDT.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb_WDT.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(syn_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+SYN+prog3$(FSDB_DEF) \
 	+no_notifier \
 	+prog_path=$(root_dir)/$(sim_dir)/prog3 \
 
+syn4: | clean $(bld_dir)
+	cd $(bld_dir); \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	+incdir+$(root_dir)/$(syn_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
+	+define+SYN+prog4$(FSDB_DEF) \
+	+no_notifier \
+	+prog_path=$(root_dir)/$(sim_dir)/prog4 \
+  +rdcycle=1
+
 
 # Post-Layout simulation
-pr_all: pr0 pr1 pr2 pr3
+pr_all: pr0 pr1 pr2 pr3 pr4
 
 pr0: | clean $(bld_dir)
-	make -C $(sim_dir)/prog0/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(pr_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+PR+prog0$(FSDB_DEF) \
 	+no_notifier \
@@ -160,9 +170,8 @@ pr0: | clean $(bld_dir)
 	+prog_path=$(root_dir)/$(sim_dir)/prog0 \
 
 pr1: | clean $(bld_dir)
-	make -C $(sim_dir)/prog1/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(pr_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+PR+prog1$(FSDB_DEF) \
 	+no_notifier \
@@ -170,9 +179,8 @@ pr1: | clean $(bld_dir)
 	+prog_path=$(root_dir)/$(sim_dir)/prog1 \
 
 pr2: | clean $(bld_dir)
-	make -C $(sim_dir)/prog2/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(pr_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+PR+prog2$(FSDB_DEF) \
 	+no_notifier \
@@ -180,14 +188,22 @@ pr2: | clean $(bld_dir)
 	+prog_path=$(root_dir)/$(sim_dir)/prog2 \
 
 pr3: | clean $(bld_dir)
-	make -C $(sim_dir)/prog3/; \
 	cd $(bld_dir); \
-	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v /usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb_WDT.sv -debug_access+all -full64 -diag=sdf:verbose \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb_WDT.sv -debug_access+all -full64 -diag=sdf:verbose \
 	+incdir+$(root_dir)/$(pr_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
 	+define+PR+prog3$(FSDB_DEF) \
 	+no_notifier \
 	+maxdelays \
 	+prog_path=$(root_dir)/$(sim_dir)/prog3 \
+
+pr4: | clean $(bld_dir)
+	cd $(bld_dir); \
+	vcs -R -sverilog +neg_tchk -negdelay +nospecify +notimingcheck +delay_mode_zero -v $(lib_dir)/N16ADFP_StdCell.v  $(root_dir)/$(sim_dir)/top_tb.sv -debug_access+all -full64 -diag=sdf:verbose \
+	+incdir+$(root_dir)/$(pr_dir)+$(root_dir)/$(inc_dir)+$(root_dir)/$(sim_dir) \
+	+define+PR+prog4$(FSDB_DEF) \
+	+no_notifier \
+	+maxdelays \
+	+prog_path=$(root_dir)/$(sim_dir)/prog4 \
 
 
 # Utilities
@@ -247,15 +263,9 @@ tar: check
 
 
 clean_pr:
-# 	rm -rf ./pr/icc2_ADFP_tsri/run; \
-# 	mkdir ./pr/icc2_ADFP_tsri/run;
-# 	rm -rf ./APR_new/innovus_stylus/APR/dbs; \
-# 	mkdir ./APR_new/innovus_stylus/APR/dbs;
-	
+	rm -rf ./APR_new/innovus_stylus/APR/dbs/*
+	rm -f ./APR_new/innovus_stylus/APR/innovus.log* ./APR_new/innovus_stylus/APR/innovus.logv* ./APR_new/innovus_stylus/APR/innovus.cmd* ./APR_new/innovus_stylus/APR/filenames.log
+
 clean:
 	rm -rf $(bld_dir); \
 	rm -rf $(sim_dir)/prog*/result*.txt; \
-	make -C $(sim_dir)/prog0/ clean; \
-	make -C $(sim_dir)/prog1/ clean; \
-	make -C $(sim_dir)/prog2/ clean; \
-	make -C $(sim_dir)/prog3/ clean; \

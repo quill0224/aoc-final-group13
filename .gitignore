@@ -109,4 +109,6 @@ tb/testbench/dla/results/
 tb/testbench/dla/dram_test_A.hex
 tb/testbench/dla/dram_test_B.hex
 tb/testbench/dla/dram_test.hex
-tb/testbench/dla/dram.hex
+tb/testbench/dla/dram.hex*.sdf
+CHIP_syn.v
+*.sdf

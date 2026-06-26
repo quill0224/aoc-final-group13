@@ -1,0 +1,63 @@
+catch { setDesignMode -bottomRoutingLayer M2 }
+catch { setDesignMode -congEffort high }
+catch { setDesignMode -earlyClockFlow true }
+catch { setDesignMode -process 16 }
+catch { setDesignMode -topRoutingLayer M9 }
+catch { setAnalysisMode -analysisType onChipVariation }
+catch { setAnalysisMode -cppr both }
+catch { setOptMode -exp2DCongestionAwareBufferingInDrv1 true }
+catch { setOptMode -expExtremeCongestionAwareBuffering true }
+catch { setPathGroupOptions reg2reg -effortLevel high -weight 2 }
+catch { setPathGroupOptions reg2reg -late -slackAdjustment -0 }
+catch { setPathGroupOptions reg2out -late -slackAdjustment -0 }
+catch { setPathGroupOptions reg2cgate -effortLevel high -weight 1 }
+catch { setPathGroupOptions reg2cgate -late -slackAdjustment -0 }
+catch { setPathGroupOptions in2reg -late -slackAdjustment -0 }
+catch { setPathGroupOptions in2out -late -slackAdjustment -0 }
+catch { setExtractRCMode  -engine preRoute -total_c_th 0 -relative_c_th 1 -coupling_c_th 0.1 -defViaCap true }
+catch {setNanoRouteMode -quiet -extractThirdPartyCompatible false}
+
+catch { setPlaceMode -place_detail_check_cut_spacing true }
+catch { setPlaceMode -place_detail_check_route true }
+catch { setPlaceMode -place_detail_honor_inst_pad true }
+catch { setPlaceMode -place_detail_no_filler_without_implant true }
+catch { setPlaceMode -place_detail_use_no_diffusion_one_site_filler true }
+catch { setPlaceMode -place_global_align_macro true }
+catch { setIlmMode -keepHighFanoutPorts true -keepLoopBack false -keepInstInSdc false -keepFlatten true }
+catch { setDelayCalMode -engine aae }
+catch { setAddRingMode -avoid_short false }
+catch { setAddRingMode -extend_over_row false }
+catch { setAddRingMode -ignore_rows false }
+catch { setAddRingMode -orthogonal_only true }
+catch { setAddRingMode -ring_target default }
+catch { setAddRingMode -skip_crossing_trunks none }
+catch { setAddRingMode -skip_via_on_pin standardcell }
+catch { setAddRingMode -skip_via_on_wire_shape noshape }
+catch { setAddRingMode -stacked_via_bottom_layer 4 }
+catch { setAddRingMode -stacked_via_top_layer 7 }
+catch { setAddRingMode -via_using_exact_crossover_size true }
+catch { setFlipChipMode -connectPowerCellToBump true }
+catch { setFlipChipMode -layerChangeBotLayer AP }
+catch { setFlipChipMode -layerChangeTopLayer AP }
+catch { setFlipChipMode -multipleConnection default }
+catch { setFlipChipMode -prevent_via_under_bump false }
+catch { setFlipChipMode -route_style 45DegreeRoute }
+catch { setFlipChipMode -routeWidth 12 }
+catch { setImportMode -discardFloatingVNets false }
+catch { setImportMode -keepEmptyModule true }
+catch { setTieHiLoMode -cell {{TIEHBWP20P90 TIELBWP20P90}} }
+catch { setTieHiLoMode -maxDistance 100 }
+catch { setTieHiLoMode -maxFanout 10 }
+catch { setFPlanMode -cellsForExtraSites {} }
+catch { setFPlanMode -defaultTechSite core }
+catch { setFPlanMode -extraSites {} }
+catch { setFPlanMode -maxIoHeight false }
+catch { setFPlanMode -place_check_ignore_fixed_cell_list {} }
+catch { setFPlanMode -powerRailLayer {} }
+catch { setFPlanMode -snapBlockGrid finfetManufacturing }
+catch { setFPlanMode -snapConstraintGrid finfetInst }
+catch { setFPlanMode -snapCoreGrid finfetPlacement }
+catch { setFPlanMode -snapDieGrid finfetPlacement }
+catch { setFPlanMode -snapIoGrid finfetManufacturing }
+catch { setFPlanMode -snapPlaceBlockageGrid inst }
+catch { setFinishFPlanMode -activeObj {core macro macroHalo softblkg} }

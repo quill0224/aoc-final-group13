@@ -15,6 +15,7 @@
 `include "data_array/data_array_rtl.sv"
 `include "tag_array/tag_array_rtl.sv"
 `include "SRAM/SRAM_rtl.sv"
+`include "SRAM/TS6N16ADFPCLLLVTA128X32M4FWSHOD.v"
 `timescale 1ns/10ps
 `include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/VERILOG/N16ADFP_StdCell.v"
 `include "/usr/cad/CBDK/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/VERILOG/N16ADFP_StdIO.v"
@@ -22,6 +23,7 @@
 `include "../APR_new/innovus_stylus/APR/outputs/CHIP_pr.v"
 // `include "../pr/CHIP_pr.v"
 `include "SRAM/SRAM_rtl.sv"
+`include "SRAM/TS6N16ADFPCLLLVTA128X32M4FWSHOD.v"
 `include "data_array/data_array_rtl.sv"
 `include "tag_array/tag_array_rtl.sv"
 `timescale 1ns/10ps
@@ -353,6 +355,83 @@ end
       // $display("        AXI     : %10f %10f", `AXI_CYCLE,  (1000.0/`AXI_CYCLE));
     end
   endtask
-  
+
+`ifndef SYN
+`ifndef PR
+  // =========================================================================
+  // DEBUG MONITOR FOR CPU PC AND EPU AXI S6 TRANSACTIONS
+  // =========================================================================
+  always @(posedge cpu_clk) begin
+    if (cpu_rst) begin
+      // do nothing during reset
+    end else begin
+      static int pc_cnt = 0;
+      pc_cnt++;
+      if (pc_cnt >= 100000) begin
+        $display("[DEBUG CPU] Time=%0t PC=%h", $time, chip.u_TOP.CPU_wrapper.CPU.pc_out);
+        pc_cnt = 0;
+      end
+    end
+  end
+
+  always @(posedge axi_clk) begin
+    if (!axi_rst) begin
+      // Monitor writes to S6 (EPU)
+      if (chip.u_TOP.AWVALID_S6 && chip.u_TOP.AWREADY_S6) begin
+        $display("[DEBUG EPU WRITE ADDR] Time=%0t AWADDR=%h AWID=%d", $time, chip.u_TOP.AWADDR_S6, chip.u_TOP.AWID_S6);
+      end
+      if (chip.u_TOP.WVALID_S6 && chip.u_TOP.WREADY_S6) begin
+        $display("[DEBUG EPU WRITE DATA] Time=%0t WDATA=%h WSTRB=%b WLAST=%b", $time, chip.u_TOP.WDATA_S6, chip.u_TOP.WSTRB_S6, chip.u_TOP.WLAST_S6);
+      end
+      if (chip.u_TOP.BVALID_S6 && chip.u_TOP.BREADY_S6) begin
+        $display("[DEBUG EPU WRITE RESP] Time=%0t BRESP=%b BID=%d", $time, chip.u_TOP.BRESP_S6, chip.u_TOP.BID_S6);
+      end
+
+      // Monitor reads from S6 (EPU)
+      if (chip.u_TOP.ARVALID_S6 && chip.u_TOP.ARREADY_S6) begin
+        $display("[DEBUG EPU READ ADDR] Time=%0t ARADDR=%h ARID=%d", $time, chip.u_TOP.ARADDR_S6, chip.u_TOP.ARID_S6);
+      end
+      if (chip.u_TOP.RVALID_S6 && chip.u_TOP.RREADY_S6) begin
+        $display("[DEBUG EPU READ DATA] Time=%0t RDATA=%h RRESP=%b RLAST=%b RID=%d", $time, chip.u_TOP.RDATA_S6, chip.u_TOP.RRESP_S6, chip.u_TOP.RLAST_S6, chip.u_TOP.RID_S6);
+      end
+    end
+  end
+
+  // Monitor internal EPU state transitions
+  always @(posedge axi_clk) begin
+    if (!axi_rst) begin
+      static logic last_compute_done = 1'b0;
+      static logic last_c_valid = 1'b0;
+      static logic last_tile_done = 1'b0;
+
+      if (chip.u_TOP.u_EPU_wrapper.pe_compute_done && !last_compute_done) begin
+        $display("[DEBUG EPU STATE] Time=%0t pe_compute_done went HIGH!", $time);
+      end
+      if (chip.u_TOP.u_EPU_wrapper.c_valid && !last_c_valid) begin
+        $display("[DEBUG EPU STATE] Time=%0t c_valid pulsed!", $time);
+      end
+      if (chip.u_TOP.u_EPU_wrapper.pe_tile_done && !last_tile_done) begin
+        $display("[DEBUG EPU STATE] Time=%0t pe_tile_done pulsed!", $time);
+      end
+
+      last_compute_done <= chip.u_TOP.u_EPU_wrapper.pe_compute_done;
+      last_c_valid      <= chip.u_TOP.u_EPU_wrapper.c_valid;
+      last_tile_done    <= chip.u_TOP.u_EPU_wrapper.pe_tile_done;
+    end
+  end
+
+  // Monitor DM_cache state during DATA_RENEW
+  always @(posedge cpu_clk) begin
+    if (chip.u_TOP.CPU_wrapper.DM_cache.state == 3'd7) begin
+      $display("[DEBUG CACHE RENEW] Time=%0t addr=%h non_cacheable=%b data=%h core_out=%h", 
+               $time, 
+               chip.u_TOP.CPU_wrapper.DM_cache.core_addr,
+               chip.u_TOP.CPU_wrapper.DM_cache.is_non_cacheable,
+               chip.u_TOP.CPU_wrapper.DM_cache.data,
+               chip.u_TOP.CPU_wrapper.DM_cache.core_out);
+    end
+  end
+`endif
+`endif
 
 endmodule

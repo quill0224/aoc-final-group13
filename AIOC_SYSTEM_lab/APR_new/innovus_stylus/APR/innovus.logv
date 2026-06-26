@@ -1,0 +1,361 @@
+[06/26 17:43:47      0s] 
+[06/26 17:43:47      0s] Cadence Innovus(TM) Implementation System.
+[06/26 17:43:47      0s] Copyright 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+[06/26 17:43:47      0s] 
+[06/26 17:43:47      0s] Version:	v21.19-s058_1, built Thu Apr 4 09:59:17 PDT 2024
+[06/26 17:43:47      0s] Options:	-stylus 
+[06/26 17:43:47      0s] Date:		Fri Jun 26 17:43:47 2026
+[06/26 17:43:47      0s] Host:		node3 (x86_64 w/Linux 4.18.0-553.6.1.el8.x86_64) (16cores*64cpus*Intel(R) Xeon(R) Gold 6326 CPU @ 2.90GHz 24576KB)
+[06/26 17:43:47      0s] OS:		CentOS Stream 8
+[06/26 17:43:47      0s] 
+[06/26 17:43:47      0s] License:
+[06/26 17:43:47      0s] 		[17:43:47.106455] Configured Lic search path (21.01-s002): 5280@lstn:26585@lstn:1717@lstn:1900@lshc:5280@lshc:26585@lshc:1717@lshc
+[06/26 17:43:47      0s] 
+[06/26 17:43:47      0s] 		invs	Innovus Implementation System	21.1	checkout succeeded
+[06/26 17:43:47      0s] 		8 CPU jobs allowed with the current license(s). Use set_multi_cpu_usage to set your required CPU count.
+[06/26 17:43:54      6s] 
+[06/26 17:43:54      6s] 
+[06/26 17:43:58      9s] Reset Parastics called with the command setExtractRCMode -reset[06/26 17:43:59     10s] **WARN: (IMPOPT-801):	Genus executable not found in PATH. Install Genus, add the path to the genus executable in the PATH variable and rerun Innovus.
+@(#)CDS: Innovus v21.19-s058_1 (64bit) 04/04/2024 09:59 (Linux 3.10.0-693.el7.x86_64)
+[06/26 17:43:59     11s] @(#)CDS: NanoRoute 21.19-s058_1 NR231113-0413/21_19-UB (database version 18.20.605) {superthreading v2.17}
+[06/26 17:43:59     11s] @(#)CDS: AAE 21.19-s004 (64bit) 04/04/2024 (Linux 3.10.0-693.el7.x86_64)
+[06/26 17:43:59     11s] @(#)CDS: CTE 21.19-s010_1 () Mar 27 2024 01:55:37 ( )
+[06/26 17:43:59     11s] @(#)CDS: SYNTECH 21.19-s002_1 () Sep  6 2023 22:17:00 ( )
+[06/26 17:43:59     11s] @(#)CDS: CPE v21.19-s026
+[06/26 17:43:59     11s] @(#)CDS: IQuantus/TQuantus 21.1.1-s966 (64bit) Wed Mar 8 10:22:20 PST 2023 (Linux 3.10.0-693.el7.x86_64)
+[06/26 17:43:59     11s] @(#)CDS: OA 22.60-p087 Thu Feb  9 09:35:26 2023
+[06/26 17:43:59     11s] @(#)CDS: SGN 20.10-d001 (01-Jun-2020) (64 bit executable, Qt5.9.0)
+[06/26 17:43:59     11s] @(#)CDS: RCDB 11.15.0
+[06/26 17:43:59     11s] @(#)CDS: STYLUS 21.12-s019_1 (12/20/2022 05:13 PST)
+[06/26 17:43:59     11s] @(#)CDS: SystemPlanner-21.18-10439 (21.18) (2023-03-01 15:40:03+0800)
+[06/26 17:43:59     11s] Create and set the environment variable TMPDIR to /tmp/innovus_temp_3364106_node3_113_Lichtck03_AXLLFt.
+
+[06/26 17:43:59     11s] Create and set the environment variable TMPDIR to /tmp/innovus_temp_3364106_node3_113_Lichtck03_AXLLFt.
+[06/26 17:43:59     11s] 
+[06/26 17:43:59     11s] The soft stacksize limit is either up to the hard limit or larger than 0.2% of RAM. No change is needed.
+[06/26 17:44:01     12s] 
+[06/26 17:44:01     12s] **INFO:  MMMC transition support version v31-84 
+[06/26 17:44:01     12s] 
+[06/26 17:44:04     15s] @innovus 1> source lab_script/runset.tcl
+
+[06/26 17:44:09     15s] #@ Begin verbose source (pre): source lab_script/runset.tcl
+[06/26 17:44:09     15s] @file 1: # Top File
+[06/26 17:44:09     15s] @file 2: # 2025.06.19 Thu. Rowan Lin
+[06/26 17:44:09     15s] @file 3:
+[06/26 17:44:09     15s] @file 4: #===============================================================================================================================================================================#
+[06/26 17:44:09     15s] @file 5:
+[06/26 17:44:09     15s] @file 6: # Step 1: initialize design
+[06/26 17:44:09     15s] @file 7:
+[06/26 17:44:09     15s] @file 8: source -quiet lab_script/design_import.tcl
+[06/26 17:44:09     15s] User script lab_script/design_import.tcl
+[06/26 17:44:09     15s] #@ Begin verbose source file_preparation/design/mmmc.view.stylus (pre)
+[06/26 17:44:09     15s] @@file 1: create_library_set -name lib_max_0p72vm40c\
+[06/26 17:44:09     15s]    -timing\
+[06/26 17:44:09     15s]     [list /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib \
+[06/26 17:44:09     15s]       /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/NLDM/N16ADFP_StdIOss0p72v1p62v125c.lib   \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ss0p72v0p72vm40c_100a.lib \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ss0p72v0p72vm40c_100a.lib \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ss0p72v0p72vm40c_100a.lib]
+[06/26 17:44:09     15s] @file 8:
+[06/26 17:44:09     15s] @@file 9: create_library_set -name lib_min_0p88v125c\
+[06/26 17:44:09     15s]    -timing\
+[06/26 17:44:09     15s]     [list /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib \
+[06/26 17:44:09     15s]       /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/NLDM/N16ADFP_StdIOff0p88v1p98vm40c.lib \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ff0p88v0p88v125c_100a.lib \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ff0p88v0p88v125c_100a.lib \
+[06/26 17:44:09     15s]       /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ff0p88v0p88v125c_100a.lib] \
+[06/26 17:44:09     15s] 
+[06/26 17:44:09     15s] @@file 17: create_timing_condition -name TC_max_0p72vm40c\
+[06/26 17:44:09     15s]    -library_sets [list lib_max_0p72vm40c]
+[06/26 17:44:09     15s] @@file 19: create_timing_condition -name TC_min_0p88v125c\
+[06/26 17:44:09     15s]    -library_sets [list lib_min_0p88v125c]
+[06/26 17:44:09     15s] @file 21:
+[06/26 17:44:09     15s] @@file 22: create_rc_corner -name RC_best\
+[06/26 17:44:09     15s]    -pre_route_res 1\
+[06/26 17:44:09     15s]    -post_route_res 1\
+[06/26 17:44:09     15s]    -pre_route_cap 1\
+[06/26 17:44:09     15s]    -post_route_cap 1\
+[06/26 17:44:09     15s]    -post_route_cross_cap 1\
+[06/26 17:44:09     15s]    -pre_route_clock_res 0\
+[06/26 17:44:09     15s]    -pre_route_clock_cap 0\
+[06/26 17:44:09     15s]    -temperature -40\
+[06/26 17:44:09     15s]    -qrc_tech /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/Tech/RC/N16ADFP_QRC/best/qrcTechFile
+[06/26 17:44:09     15s] @@file 32: create_rc_corner -name RC_worst\
+[06/26 17:44:09     15s]    -pre_route_res 1\
+[06/26 17:44:09     15s]    -post_route_res 1\
+[06/26 17:44:09     15s]    -pre_route_cap 1\
+[06/26 17:44:09     15s]    -post_route_cap 1\
+[06/26 17:44:09     15s]    -post_route_cross_cap 1\
+[06/26 17:44:09     15s]    -pre_route_clock_res 0\
+[06/26 17:44:09     15s]    -pre_route_clock_cap 0\
+[06/26 17:44:09     15s]    -temperature 125\
+[06/26 17:44:09     15s]    -qrc_tech /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/Tech/RC/N16ADFP_QRC/worst/qrcTechFile
+[06/26 17:44:09     15s] @file 42:
+[06/26 17:44:09     15s] @@file 43: create_delay_corner -name DC_min_0p88v125c_rcb\
+[06/26 17:44:09     15s]    -timing_condition {TC_min_0p88v125c}\
+[06/26 17:44:09     15s]    -rc_corner RC_best
+[06/26 17:44:09     15s] @@file 46: create_delay_corner -name DC_max_0p72vm40c_rcw\
+[06/26 17:44:09     15s]    -timing_condition {TC_max_0p72vm40c}\
+[06/26 17:44:09     15s]    -rc_corner RC_worst
+[06/26 17:44:09     15s] @file 49:
+[06/26 17:44:09     15s] @@file 50: create_constraint_mode -name CM_func\
+[06/26 17:44:09     15s]    -sdc_files\
+[06/26 17:44:09     15s]     [list file_preparation/design/CHIP_func.sdc]
+[06/26 17:44:09     15s] @file 53:
+[06/26 17:44:09     15s] @@file 54: create_analysis_view -name AV_func_max_0p72vm40c_rcw -constraint_mode CM_func -delay_corner DC_max_0p72vm40c_rcw
+[06/26 17:44:09     15s] @@file 55: create_analysis_view -name AV_func_min_0p88v125c_rcb -constraint_mode CM_func -delay_corner DC_min_0p88v125c_rcb
+[06/26 17:44:09     15s] @@file 56: set_analysis_view -setup [list AV_func_max_0p72vm40c_rcw] -hold [list AV_func_min_0p88v125c_rcb] -leakage AV_func_max_0p72vm40c_rcw -dynamic AV_func_max_0p72vm40c_rcw
+[06/26 17:44:09     15s] #@ End verbose source file_preparation/design/mmmc.view.stylus
+[06/26 17:44:09     15s] Reading lib_max_0p72vm40c timing library '/nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib' ...
+[06/26 17:44:10     16s] **WARN: (TECHLIB-1277):	The attribute 'max_capacitance' has been defined for internal pin 'INTERNAL'. 'max_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib, Line 792755)
+[06/26 17:44:10     16s] **WARN: (TECHLIB-1277):	The attribute 'min_capacitance' has been defined for internal pin 'INTERNAL'. 'min_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib, Line 792756)
+[06/26 17:44:10     16s] **WARN: (TECHLIB-1277):	The attribute 'max_capacitance' has been defined for internal pin 'INTERNAL'. 'max_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib, Line 793015)
+[06/26 17:44:10     16s] **WARN: (TECHLIB-1277):	The attribute 'min_capacitance' has been defined for internal pin 'INTERNAL'. 'min_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib, Line 793016)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90_VPP_VSS'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90_VPP_VBB'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90LVT_VPP_VSS'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90LVT_VPP_VBB'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP20P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90_VPP_VSS'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90_VPP_VBB'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90LVT_VPP_VSS'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90LVT_VPP_VBB'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'TAPCELLBWP16P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL8BWP20P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL8BWP20P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL8BWP16P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL8BWP16P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL64BWP20P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL64BWP20P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL64BWP16P90LVT'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] **WARN: (TECHLIB-302):	No function defined for cell 'FILL64BWP16P90'. The cell will only be used for analysis. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.lib)
+[06/26 17:44:12     18s] Message <TECHLIB-302> has exceeded the message display limit of '20'. Use 'set_message -no_limit -id list_of_msgIDs' to reset the message limit.
+[06/26 17:44:12     18s] Read 1480 cells in library 'N16ADFP_StdCellss0p72vm40c' 
+[06/26 17:44:12     18s] Reading lib_max_0p72vm40c timing library '/nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/NLDM/N16ADFP_StdIOss0p72v1p62v125c.lib' ...
+[06/26 17:44:12     18s] Read 13 cells in library 'N16ADFP_StdIOss0p72v1p62v125c' 
+[06/26 17:44:12     18s] Reading lib_max_0p72vm40c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ss0p72v0p72vm40c_100a.lib' ...
+[06/26 17:44:12     18s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ss0p72v0p72vm40c_100a.lib)
+[06/26 17:44:12     18s] Read 1 cells in library 'SRAM_ss0p72v0p72vm40c_100a' 
+[06/26 17:44:12     18s] Reading lib_max_0p72vm40c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ss0p72v0p72vm40c_100a.lib' ...
+[06/26 17:44:12     18s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_tag_array'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ss0p72v0p72vm40c_100a.lib)
+[06/26 17:44:12     18s] Read 1 cells in library 'tag_array_ss0p72v0p72vm40c' 
+[06/26 17:44:12     18s] Reading lib_max_0p72vm40c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ss0p72v0p72vm40c_100a.lib' ...
+[06/26 17:44:12     18s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ss0p72v0p72vm40c_100a.lib)
+[06/26 17:44:12     18s] Read 1 cells in library 'data_array_ss0p72v0p72vm40c' 
+[06/26 17:44:12     18s] Reading lib_min_0p88v125c timing library '/nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib' ...
+[06/26 17:44:13     19s] **WARN: (TECHLIB-1277):	The attribute 'max_capacitance' has been defined for internal pin 'INTERNAL'. 'max_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib, Line 792713)
+[06/26 17:44:13     19s] **WARN: (TECHLIB-1277):	The attribute 'min_capacitance' has been defined for internal pin 'INTERNAL'. 'min_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib, Line 792714)
+[06/26 17:44:13     19s] **WARN: (TECHLIB-1277):	The attribute 'max_capacitance' has been defined for internal pin 'INTERNAL'. 'max_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib, Line 792973)
+[06/26 17:44:13     19s] **WARN: (TECHLIB-1277):	The attribute 'min_capacitance' has been defined for internal pin 'INTERNAL'. 'min_capacitance' cannot be defined at this level and is being ignored. (File /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellff0p88v125c.lib, Line 792974)
+[06/26 17:44:15     21s] Read 1480 cells in library 'N16ADFP_StdCellff0p88v125c' 
+[06/26 17:44:15     21s] Reading lib_min_0p88v125c timing library '/nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/NLDM/N16ADFP_StdIOff0p88v1p98vm40c.lib' ...
+[06/26 17:44:15     21s] Read 13 cells in library 'N16ADFP_StdIOff0p88v1p98vm40c' 
+[06/26 17:44:15     21s] Reading lib_min_0p88v125c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ff0p88v0p88v125c_100a.lib' ...
+[06/26 17:44:15     21s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/SRAM/SRAM_ff0p88v0p88v125c_100a.lib)
+[06/26 17:44:15     21s] Read 1 cells in library 'SRAM_ff0p88v0p88v125c_100a' 
+[06/26 17:44:15     21s] Reading lib_min_0p88v125c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ff0p88v0p88v125c_100a.lib' ...
+[06/26 17:44:15     21s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_tag_array'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ff0p88v0p88v125c_100a.lib)
+[06/26 17:44:15     21s] Read 1 cells in library 'tag_array_ff0p88v0p88v125c' 
+[06/26 17:44:15     21s] Reading lib_min_0p88v125c timing library '/home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ff0p88v0p88v125c_100a.lib' ...
+[06/26 17:44:15     21s] **WARN: (TECHLIB-905):	Found a function attribute specified on pin 'PUDELAY' with 'interface_timing' attribute set to true on cell 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array'. As per the liberty standard, a function attribute should not be specified for a cell which has interface_timing attribute set to true. This function attribute will be ignored. (File /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ff0p88v0p88v125c_100a.lib)
+[06/26 17:44:15     21s] Read 1 cells in library 'data_array_ff0p88v0p88v125c' 
+[06/26 17:44:15     21s] Ending "PreSetAnalysisView" (total cpu=0:00:05.6, real=0:00:06.0, peak res=1309.9M, current mem=1050.5M)
+[06/26 17:44:15     21s] 
+[06/26 17:44:15     21s] Loading LEF file /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/Tech/APR/N16ADFP_APR_Innovus/N16ADFP_APR_Innovus_11M.10a.tlef ...
+[06/26 17:44:15     21s] 
+[06/26 17:44:15     21s] Loading LEF file /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/LEF/lef/N16ADFP_StdCell.lef ...
+[06/26 17:44:15     21s] Set DBUPerIGU to M1 pitch 180.
+[06/26 17:44:15     21s] [17:44:15.405827] Periodic Lic check successful
+[06/26 17:44:15     21s] [17:44:15.405842] Feature usage summary:
+[06/26 17:44:15     21s] [17:44:15.405842] Innovus_Impl_System
+[06/26 17:44:15     21s] [17:44:15.405843] Innovus_20nm_Opt
+[06/26 17:44:15     21s] 
+[06/26 17:44:15     21s] This command "read_physical -lef {
+[06/26 17:44:15     21s] /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/Tech/APR/N16ADFP_APR_Innovus/N16ADFP_APR_Innovus_11M.10a.tlef ..." required an extra checkout of license invs_20nm.
+[06/26 17:44:15     21s] Additional license(s) checked out: 1 'Innovus_20nm_Opt' license(s)
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdio/N16ADFP_StdIO/LEF/N16ADFP_StdIO.lef ...
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/bondpad/N16ADFP_BondPad/LEF/N16ADFP_BondPad.lef ...
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file file_preparation/design/N16ADFP_SRAM_100a.lef ...
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file file_preparation/design/TS1N16ADFPCLLLVTA512X45M4SWSHOD_custom.lef ...
+[06/26 17:44:16     21s] WARNING (LEFPARS-2007): NAMESCASESENSITIVE statement is obsolete in version 5.6 and later.
+[06/26 17:44:16     21s] The LEF parser will ignore this statement.
+[06/26 17:44:16     21s] To avoid this warning in the future, remove this statement from the LEF file with version 5.6 or later. See file file_preparation/design/TS1N16ADFPCLLLVTA512X45M4SWSHOD_custom.lef at line 2.
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file file_preparation/design/N16ADFP_tag_array_100a.lef ...
+[06/26 17:44:16     21s] WARNING (LEFPARS-2007): NAMESCASESENSITIVE statement is obsolete in version 5.6 and later.
+[06/26 17:44:16     21s] The LEF parser will ignore this statement.
+[06/26 17:44:16     21s] To avoid this warning in the future, remove this statement from the LEF file with version 5.6 or later. See file file_preparation/design/N16ADFP_tag_array_100a.lef at line 2.
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] Loading LEF file file_preparation/design/N16ADFP_data_array_100a.lef ...
+[06/26 17:44:16     21s] WARNING (LEFPARS-2007): NAMESCASESENSITIVE statement is obsolete in version 5.6 and later.
+[06/26 17:44:16     21s] The LEF parser will ignore this statement.
+[06/26 17:44:16     21s] To avoid this warning in the future, remove this statement from the LEF file with version 5.6 or later. See file file_preparation/design/N16ADFP_data_array_100a.lef at line 2.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'A[0]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'A[1]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'A[2]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'A[3]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'A[4]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[0]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[1]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[2]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[3]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[4]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[5]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[6]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[7]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[8]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[9]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[10]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[11]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[12]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[13]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-200):	Pin 'BWEB[14]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNAGATEAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-200' for more detail.
+[06/26 17:44:16     21s] **WARN: (EMS-27):	Message (IMPLF-200) has exceeded the current message display limit of 20.
+[06/26 17:44:16     21s] To increase the message display limit, refer to the product command reference manual.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'PUDELAY' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[0]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[1]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[2]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[3]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[4]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[5]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[6]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[7]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[8]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[9]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[10]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[11]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[12]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[13]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[14]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[15]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[16]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[17]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPLF-201):	Pin 'Q[18]' in macro 'TS1N16ADFPCLLLVTA128X64M4SWSHOD_data_array' has no ANTENNADIFFAREA value defined. The library data is incomplete and some process antenna rules will not be checked correctly.
+[06/26 17:44:16     21s] Type 'man IMPLF-201' for more detail.
+[06/26 17:44:16     21s] **WARN: (EMS-27):	Message (IMPLF-201) has exceeded the current message display limit of 20.
+[06/26 17:44:16     21s] To increase the message display limit, refer to the product command reference manual.
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] ##  Check design process and node:  
+[06/26 17:44:16     21s] ##  Both design process and tech node are not set.
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] #% Begin Load netlist data ... (date=06/26 17:44:16, mem=1062.2M)
+[06/26 17:44:16     21s] *** Begin netlist parsing (mem=1204.5M) ***
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[32]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[33]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[34]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[35]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[36]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[37]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[38]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[39]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[40]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[41]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[42]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[43]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'BWEB[44]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[32]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[33]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[34]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[35]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[36]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[37]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (IMPVL-159):	Pin 'D[38]' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' is defined in LEF but not in the timing library.
+[06/26 17:44:16     21s] Type 'man IMPVL-159' for more detail.
+[06/26 17:44:16     21s] **WARN: (EMS-27):	Message (IMPVL-159) has exceeded the current message display limit of 20.
+[06/26 17:44:16     21s] To increase the message display limit, refer to the product command reference manual.
+[06/26 17:44:16     21s] **ERROR: (IMPDB-2163):	Cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' has inconsistent pin definitions between timing library and LEF.  There are extra bus-bit pins defined in LEF, e.g., 'Q[44]'.  Fix the mismatch and reload the design.
+[06/26 17:44:16     21s] **ERROR: (IMPDB-2160):	Bus 'Q' of cell 'TS1N16ADFPCLLLVTA512X45M4SWSHOD' has different definitions between timing library ([31:0]) and LEF ([44:32]).  Fix the mismatch and reload the design.
+[06/26 17:44:16     21s] #% End Load netlist data ... (date=06/26 17:44:16, total cpu=0:00:00.0, real=0:00:00.0, peak res=1116.6M, current mem=1116.6M)
+[06/26 17:44:16     21s] **ERROR: (IMPVL-902):	Failed to read netlist file_preparation/design/CHIP_syn.v. See previous error messages for details.  Resolve the issues and reload the design.
+[06/26 17:44:16     21s] **ERROR: (IMPSE-110):	File 'lab_script/runset.tcl' line 8: errors out.
+[06/26 17:44:16     21s] #@ End verbose source lab_script/runset.tcl
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] 
+[06/26 17:44:16     21s] @innovus 2> 
+
+[06/26 17:48:54     55s] @innovus 2> exit
+
+[06/26 17:48:57     56s] 
+[06/26 17:48:57     56s] *** Memory Usage v#1 (Current mem = 1202.469M, initial mem = 476.996M) ***
+[06/26 17:48:57     56s] 
+[06/26 17:48:57     56s] *** Summary of all messages that are not suppressed in this session:
+[06/26 17:48:57     56s] Severity  ID               Count  Summary                                  
+[06/26 17:48:57     56s] WARNING   IMPLF-200         1840  Pin '%s' in macro '%s' has no ANTENNAGAT...
+[06/26 17:48:57     56s] WARNING   IMPLF-201          804  Pin '%s' in macro '%s' has no ANTENNADIF...
+[06/26 17:48:57     56s] ERROR     IMPSE-110            1  File '%s' line %s: %s.                   
+[06/26 17:48:57     56s] ERROR     IMPVL-902            1  Failed to read netlist %s. See previous ...
+[06/26 17:48:57     56s] WARNING   IMPVL-159           39  Pin '%s' of cell '%s' is defined in LEF ...
+[06/26 17:48:57     56s] ERROR     IMPDB-2163           1  Cell '%s' has inconsistent pin definitio...
+[06/26 17:48:57     56s] ERROR     IMPDB-2160           1  Bus '%s' of cell '%s' has different defi...
+[06/26 17:48:57     56s] WARNING   IMPOPT-801           1  Genus executable not found in PATH%s. In...
+[06/26 17:48:57     56s] WARNING   TECHLIB-302        294  No function defined for cell '%s'. The c...
+[06/26 17:48:57     56s] WARNING   TECHLIB-905          6  Found a function attribute specified on ...
+[06/26 17:48:57     56s] WARNING   TECHLIB-1277         8  The %s '%s' has been defined for %s %s '...
+[06/26 17:48:57     56s] *** Message Summary: 2992 warning(s), 4 error(s)
+[06/26 17:48:57     56s] 
+[06/26 17:48:57     56s] --- Ending "Innovus" (totcpu=0:00:56.2, real=0:05:10, mem=1202.5M) ---

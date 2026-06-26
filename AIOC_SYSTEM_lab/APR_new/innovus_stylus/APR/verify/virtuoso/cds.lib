@@ -1,0 +1,3 @@
+DEFINE basic $CDSHOME/tools/dfII/etc/cdslib/basic
+DEFINE analogLib $CDSHOME/tools/dfII/etc/cdslib/artist/analogLib
+INCLUDE ../../../../library/1_TSRI/PDK/iPDK_9mu_CDNS/cds.lib
