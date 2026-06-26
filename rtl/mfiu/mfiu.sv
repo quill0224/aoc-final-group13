@@ -29,18 +29,7 @@ module mfiu
     output logic [N_MUL_ROW-1:0][3:0]              a_meta_data,
     output logic [N_MUL_ROW-1:0][5:0]              b_meta_data,
     output logic [$clog2(N_B_FIBER)-1:0]           b_utilization,
-    output logic                                   meta_valid,
-
-    // Value gather inputs: mfiu fetches operand values during FILL_COL,
-    // eliminating the 16-simultaneous-lane gather mux in pe_mfiu_seq.
-    input  logic [N_MUL_ROW*8-1:0]                 a_nz_row_i,
-    input  logic [N_B_FIBER*N_MUL_ROW*8-1:0]       b_nz_batch_i,
-    input  logic [3:0]                              col_ptr_i,
-
-    output logic [N_MUL_ROW*8-1:0]                 a_lane_data_o,
-    output logic [N_MUL_ROW*8-1:0]                 b_lane_data_o,
-    output logic [N_MUL_ROW*4-1:0]                 lane_col_o,
-    output logic [N_MUL_ROW-1:0]                   lane_valid_o
+    output logic                                   meta_valid
 );
 
     typedef enum logic [2:0] {
@@ -74,26 +63,6 @@ module mfiu
     logic [COUNT_W-1:0]                  a_prefix_q;
     logic [COUNT_W-1:0]                  b_prefix_q;
 
-    // Lane data registers: filled one slot per FILL_COL hit, cleared in WAIT_B.
-    logic [7:0] a_lane_r     [N_MUL_ROW-1:0];
-    logic [7:0] b_lane_r     [N_MUL_ROW-1:0];
-    logic [3:0] lane_col_r   [N_MUL_ROW-1:0];
-    logic       lane_valid_r [N_MUL_ROW-1:0];
-
-    // 4-to-1 column slice (constant-width select), then 16-to-1 byte fetch.
-    logic [N_MUL_ROW*8-1:0] b_col_slice;
-    logic [7:0] a_fetch, b_fetch;
-    always_comb begin
-        case (col_idx_q[1:0])
-            2'd0: b_col_slice = b_nz_batch_i[0*N_MUL_ROW*8 +: N_MUL_ROW*8];
-            2'd1: b_col_slice = b_nz_batch_i[1*N_MUL_ROW*8 +: N_MUL_ROW*8];
-            2'd2: b_col_slice = b_nz_batch_i[2*N_MUL_ROW*8 +: N_MUL_ROW*8];
-            default: b_col_slice = b_nz_batch_i[3*N_MUL_ROW*8 +: N_MUL_ROW*8];
-        endcase
-    end
-    assign a_fetch = a_nz_row_i[a_prefix_q[3:0] * 8 +: 8];
-    assign b_fetch = b_col_slice[b_prefix_q[3:0] * 8 +: 8];
-
     wire current_hit = a_bitmask_q[k_idx_q] & b_bitmask_q[col_idx_q][k_idx_q];
     wire [COUNT_W-1:0] col_count_next = col_count_q + COUNT_W'(current_hit);
     wire [COUNT_W:0] candidate_plus_col =
@@ -126,12 +95,6 @@ module mfiu
             b_meta_data <= '0;
             b_utilization <= '0;
             meta_valid <= 1'b0;
-            for (int ri = 0; ri < N_MUL_ROW; ri = ri + 1) begin
-                a_lane_r[ri]     <= '0;
-                b_lane_r[ri]     <= '0;
-                lane_col_r[ri]   <= '0;
-                lane_valid_r[ri] <= 1'b0;
-            end
         end else begin
             meta_valid <= 1'b0;
 
@@ -167,8 +130,6 @@ module mfiu
                         b_utilization <= '0;
                         a_meta_data <= '0;
                         b_meta_data <= '0;
-                        for (int wi = 0; wi < N_MUL_ROW; wi = wi + 1)
-                            lane_valid_r[wi] <= 1'b0;
                         state_q <= COUNT_COL;
                     end
                 end
@@ -200,10 +161,6 @@ module mfiu
                         a_meta_data[lane_count_q] <= 4'(a_prefix_q);
                         b_meta_data[lane_count_q][5:4] <= 2'(col_idx_q);
                         b_meta_data[lane_count_q][3:0] <= 4'(b_prefix_q);
-                        a_lane_r[lane_count_q[3:0]]     <= a_fetch;
-                        b_lane_r[lane_count_q[3:0]]     <= b_fetch;
-                        lane_col_r[lane_count_q[3:0]]   <= col_ptr_i + {2'b0, col_idx_q[1:0]};
-                        lane_valid_r[lane_count_q[3:0]] <= 1'b1;
                         lane_count_q <= lane_count_q + COUNT_W'(1);
                     end
 
@@ -250,15 +207,5 @@ module mfiu
             endcase
         end
     end
-
-    genvar lo;
-    generate
-        for (lo = 0; lo < N_MUL_ROW; lo = lo + 1) begin : g_lane_out
-            assign a_lane_data_o[lo*8 +: 8] = a_lane_r[lo];
-            assign b_lane_data_o[lo*8 +: 8] = b_lane_r[lo];
-            assign lane_col_o[lo*4 +: 4]    = lane_col_r[lo];
-            assign lane_valid_o[lo]         = lane_valid_r[lo];
-        end
-    endgenerate
 
 endmodule
