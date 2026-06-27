@@ -1,0 +1,39 @@
+
+Cadence Innovus(TM) Implementation System.
+Copyright 2021 Cadence Design Systems, Inc. All rights reserved worldwide.
+
+Version:	v21.19-s058_1, built Thu Apr 4 09:59:17 PDT 2024
+Options:	-stylus 
+Date:		Wed Dec 17 00:14:54 2025
+Host:		superdome2 (x86_64 w/Linux 3.10.0-1160.el7.x86_64) (24cores*192cpus*Intel(R) Xeon(R) Gold 6348H CPU @ 2.30GHz 33792KB)
+OS:		Red Hat Enterprise Linux Server 7.9 (Maipo)
+
+License:
+		[00:14:54.481147] Configured Lic search path (21.01-s002): 5280@vlsicad8:1717@lstn:1717@lstc:1717@lshc:5280@lstn:5280@lstc:5280@lshc:26585@lstn:26585@lstc:26585@lshc:
+
+		invs	Innovus Implementation System	21.1	checkout succeeded
+		8 CPU jobs allowed with the current license(s). Use set_multi_cpu_usage to set your required CPU count.
+
+
+**WARN: (IMPOPT-801):	Genus executable not found in PATH. Install Genus, add the path to the genus executable in the PATH variable and rerun Innovus.
+Create and set the environment variable TMPDIR to /tmp/innovus_temp_117290_superdome2_avsd2564_TXjLgE.
+
+Change the soft stacksize limit to 0.2%RAM (2063 mbytes). Set global soft_stack_size_limit to change the value.
+
+**INFO:  MMMC transition support version v31-84 
+
+@innovus 1> source -quiet lab_script/design_import.tcl
+couldn't read file "lab_script/design_import.tcl": no such file or directory
+couldn't read file "lab_script/design_import.tcl": no such file or directory
+@innovus 2> source -quiet design_import.tcl
+User script design_import.tcl
+**ERROR: (TCLCMD-1146):	Mmmc file 'file_preparation/design/mmmc.view.stylus' not found.
+1
+1
+@innovus 3> exit
+
+
+*** Memory Usage v#1 (Current mem = 997.480M, initial mem = 487.129M) ***
+*** Message Summary: 1 warning(s), 1 error(s)
+
+--- Ending "Innovus" (totcpu=0:00:42.3, real=0:02:09, mem=997.5M) ---

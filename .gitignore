@@ -68,7 +68,6 @@ out/
 *.bin
 
 # --- Logs / temporary trace files ---
-*.log
 *.dump
 *.trace
 log/

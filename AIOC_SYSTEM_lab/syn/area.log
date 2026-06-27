@@ -1,0 +1,35 @@
+ 
+****************************************
+Report : area
+Design : CHIP
+Version: T-2022.03
+Date   : Fri Jun 26 04:25:52 2026
+****************************************
+
+Library(s) Used:
+
+    N16ADFP_StdCellss0p72vm40c (File: /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/stdcell/N16ADFP_StdCell/NLDM/N16ADFP_StdCellss0p72vm40c.db)
+    N16ADFP_SRAM_tt0p8v0p8v25c (File: /nas0/proc/virtual/ADFP/work/Executable_Package/Collaterals/IP/sram/N16ADFP_SRAM/NLDM/N16ADFP_SRAM_tt0p8v0p8v25c_100a.db)
+    tag_array_ff0p88v0p88v125c (File: /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/tag_array/tag_array_ff0p88v0p88v125c_100a.db)
+    data_array_ff0p88v0p88v125c (File: /home/113_Lichtck03/AIOC_SYSTEM_lab/sim/data_array/data_array_ff0p88v0p88v125c_100a.db)
+
+Number of ports:                       147269
+Number of nets:                       1070432
+Number of cells:                       903515
+Number of combinational cells:         863688
+Number of sequential cells:             37337
+Number of macros/black boxes:              76
+Number of buf/inv:                      85938
+Number of references:                       2
+
+Combinational area:             257355.852835
+Buf/Inv area:                    13630.654654
+Noncombinational area:           42454.887932
+Macro/Black Box area:           249374.310547
+Net Interconnect area:      undefined  (Wire load has zero net area)
+
+Total cell area:                549185.051313
+Total area:                 undefined
+
+Information: This design contains black box (unknown) components. (RPT-8)
+1
