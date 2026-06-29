@@ -3,11 +3,11 @@
 
 ---
 
-## 📊 1. 綜合與實體設計結果摘要 (Synthesis & APR Results)
+##  1. 綜合與實體設計結果摘要 (Synthesis & APR Results)
 
 本設計採用 **TSMC 16nm ADFP** 製程，包含一個主 CPU 核心、AXI 匯流排結構、以及用於神經網路運算加速的 **EPU (Edge Processing Unit) 運算陣列** 與 76 顆 SRAM 硬核（Hard Macros）。
 
-### 📐 1.1 面積分析 (Area Summary)
+###  1.1 面積分析 (Area Summary)
 
 | 項目 | 邏輯綜合階段 (Synthesis) | 實體設計階段 (Post-Route APR) | 增長比例 / 說明 |
 | :--- | :---: | :---: | :--- |
@@ -22,7 +22,7 @@
 
 ---
 
-### ⏱️ 1.2 時序分析 (Timing Summary)
+###  1.2 時序分析 (Timing Summary)
 
 * **時鐘頻率設定**：CPU 頻率 $1333\text{ MHz}$，EPU/AXI/DRAM 頻率 $200\text{ MHz}$（時鐘週期 $5.0\text{ ns}$）。
 
@@ -30,14 +30,14 @@
 | :--- | :---: | :---: | :--- |
 | **cpu_clk** | MET (0.00 ns) | MET (0.00 ns) | CPU 控制邏輯與定址計算暫存器 |
 | **axi_clk / epu_clk** | MET (0.00 ns) | MET (0.00 ns) | EPU PE 陣列內部 `u_seq/u_mfiu` 的掩碼與資料累加鏈 |
-| **reg2out (DRAM_D)** | - | -29.782 ns (VIOLATED) | ⚠️ **I/O 輸出瓶頸**：從 DRAM 控制器暫存器到晶片輸出的直接走線 |
+| **reg2out (DRAM_D)** | - | -29.782 ns (VIOLATED) |  **I/O 輸出瓶頸**：從 DRAM 控制器暫存器到晶片輸出的直接走線 |
 
 > **I/O Timing Violation 分析**：  
 > `reg2out` 出現 -29.78 ns 的巨大違規，經查其 Transition Time 高達 $59\text{ ns}$。這是因為 top-level 的 DRAM 輸出接腳在實體設計中**沒有連接實體 I/O Pad 緩衝器**，導致標準單元驅動了極大的模擬負載電容。這屬於 I/O 模擬約束與 Pad 缺失問題，晶片內部的 Register-to-Register (reg2reg) 時序實際已收斂。
 
 ---
 
-### ⚡ 1.3 功耗分析 (Power Summary)
+###  1.3 功耗分析 (Power Summary)
 
 * **運作電壓**：$0.72\text{ V}$ (ss0p72vm40c corner)
 * **晶片總功耗**：**$185.59\text{ mW}$**
@@ -54,7 +54,7 @@
 └────────────────────────────────────────────────────────┘
 ```
 
-#### 📊 功耗類別詳細數據：
+####  功耗類別詳細數據：
 * **切換功耗 (Switching Power)**：$113.59\text{ mW}$ ($61.2\%$) — 訊號充放電引起。
 * **內部功耗 (Internal Power)**：$71.86\text{ mW}$ ($38.7\%$) — 閘極內部短路電流。
 * **漏電功耗 (Leakage Power)**：$0.14\text{ mW}$ ($0.08\%$) — 靜態漏電流，得益於 16nm FinFET 優異的通道控制。
@@ -62,7 +62,7 @@
 
 ---
 
-### 🌳 1.4 時鐘樹合成與版圖分析 (CTS & Physical Layout)
+###  1.4 時鐘樹合成與版圖分析 (CTS & Physical Layout)
 
 1. **時鐘樹拓撲 (CTS Topology)**：
    * 採用 **H-Tree 結構** 進行全晶片時鐘平衡分發。時鐘源自左下角 Pad 輸入，主幹向中心延伸，在核心中央形成一環狀骨幹（Trunk），再向外圍標準單元輻射。
@@ -74,11 +74,11 @@
 
 ---
 
-## 💡 2. 下一代 EPU 及 SoC 架構改進建議 (Future Recommendations)
+##  2. 下一代 EPU 及 SoC 架構改進建議 (Future Recommendations)
 
 為了優化下一代晶片的**效能（PPA）**並達到 **DRC Clean**，建議從架構、電路與實體設計三個層面進行以下改進：
 
-### ⚙️ 2.1 EPU 核心架構改進 (EPU Micro-architecture)
+###  2.1 EPU 核心架構改進 (EPU Micro-architecture)
 
 #### 1. 深度流水線化 (Pipelining Critical Logic)
 * **現狀**：綜合報告顯示 EPU 的 `u_mfiu`（遮罩與特徵值計算單元）中存在一個長達 **90 個級聯邏輯閘** 的超長組合邏輯鏈。
@@ -94,7 +94,7 @@
 
 ---
 
-### 🎨 2.2 實體設計與 Floorplan 優化 (Physical Design & Floorplan)
+###  2.2 實體設計與 Floorplan 優化 (Physical Design & Floorplan)
 
 ```
 SRAM 擺放防線改進示意
@@ -117,26 +117,25 @@ SRAM 擺放防線改進示意
 
 ---
 
-### 🔌 2.3 系統級 (SoC) 與 I/O 優化
+###  2.3 系統級 (SoC) 與 I/O 優化
 
 #### 1. 補齊實體 I/O Pad 元件
 * **改進方案**：
   * 在 `CHIP.v` 頂層中，必須將所有晶片外部接腳（如 `DRAM_*`、`ROM_*`、系統信號）連接至實體的 **TSMC 16nm I/O Pad 單元**（如 `PAD` 系列的 Input/Output/Bi-directional buffers）。
   * I/O Pad 內建強大的驅動驅動器（Drivers）與 ESD 保護電路，能將輸出延遲從 $33\text{ ns}$ 降至 $2\text{ ns}$ 以內，使 `reg2out`時序完全收斂。
 
-#### 2. 時鐘閘極控制優化 (Clock Gating Optimization)
+#### 2. 時鐘閘極控制優化
 * **現狀**：時鐘樹本身的動態功耗在實體設計後有所上升。
 * **對策**：
   * 在邏輯綜合時調降時鐘閘極（Integrated Clock Gate, ICG）的扇出限制（Max Fanout），使時鐘樹分枝更早被關閉，進一步降低晶片在非滿載運算時的動態功耗。
 
 ---
 
-## 📝 3. 結論與成果遞交清單 (Deliverables)
+##  3. 結論
 
 本專案已成功完成從 RTL 至 GDS 的完整實體設計流程，所有核心功能在門級綜合模擬（SYN0-4）中均順利 PASS。實體版圖在時鐘樹、電源網格以及 Macro 擺放上均已就緒，雖留有實體 Via 間距引起的物理 DRC 違規，但不影響電路邏輯功能，已產出可用於 Tape-out 驗證的完整資料庫。
 
-**📂 遞交檔案路徑**：
-* 最終 Post-PR 網表：[CHIP_pr.v](./APR_new/innovus_stylus/APR/outputs/CHIP_pr.v)
+
 * 實體版圖 GDS 檔：[CHIP.gds](./APR_new/innovus_stylus/APR/outputs/CHIP.gds)
 * 時序延遲 SDF 檔：[CHIP_min.sdf](./APR_new/innovus_stylus/APR/outputs/CHIP_min.sdf)
 * 完整 APR 面積報告：[area_pr.rpt](./APR_new/innovus_stylus/APR/outputs/area_pr.rpt)
